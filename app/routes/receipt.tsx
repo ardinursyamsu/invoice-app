@@ -150,7 +150,7 @@ export default function Receipt() {
   });
 
   useEffect(() => {
-    console.log("test effect: ", data);
+    //console.log("test effect: ", data);
   }, [data, inputId]);
 
   // do something if category (customer/supplier) change

@@ -66,12 +66,15 @@ export default function Index() {
   const { assets, liabilities, income, expenses, equities, transactions } =
     useLoaderData<typeof loader>();
 
+  const netIncome =
+    totalAccount(transactions, income) - totalAccount(transactions, expenses);
   const suspense =
     totalAccount(transactions, assets) -
     (totalAccount(transactions, liabilities) +
-      totalAccount(transactions, equities));
+      totalAccount(transactions, equities) +
+      netIncome); // Net Income is part of retained earnings calculation
 
-  console.log("suspense", suspense);
+  //console.log("equities", equities);
   return (
     <Body>
       <div className="container">
@@ -109,7 +112,7 @@ export default function Index() {
               </div>
               {/* get all account under liabilities */}
               {liabilities.map((liability: any) => (
-                <div className="row mx-2 my-1">
+                <div key={liability.id} className="row mx-2 my-1">
                   <div className="col">{liability.name}</div>
                   <div className="col text-end">
                     {formatter.format(
@@ -125,16 +128,26 @@ export default function Index() {
                 <div className="row">
                   <div className="col">Equities</div>
                   <div className="col text-end mx-1">
-                    {formatter.format(totalAccount(transactions, equities) + suspense)}
+                    {formatter.format(
+                      totalAccount(transactions, equities) +
+                        suspense +
+                        netIncome /* Net income is part of retained-earnings calculation */
+                    )}
                   </div>
                 </div>
               </div>
               {/* get all account under equities */}
               {equities.map((equity: any) => (
-                <div className="row mx-2 my-1">
+                <div key={equity.id} className="row mx-2 my-1">
                   <div className="col">{equity.name}</div>
                   <div className="col text-end">
-                    {formatter.format(displaySummary(transactions, equity.id))}
+                    {equity.id == "retained-earnings"
+                      ? formatter.format(
+                          displaySummary(transactions, equity.id) + netIncome
+                        )
+                      : formatter.format(
+                          displaySummary(transactions, equity.id)
+                        )}
                   </div>
                 </div>
               ))}
@@ -166,7 +179,7 @@ export default function Index() {
               </div>
               {/* Every sales & expense goes here */}
               {income.map((earning: any) => (
-                <div className="row mx-2 my-1">
+                <div key={earning.id} className="row mx-2 my-1">
                   <div className="col">{earning.name}</div>
                   <div className="col text-end">
                     {formatter.format(displaySummary(transactions, earning.id))}
@@ -186,7 +199,7 @@ export default function Index() {
               </div>
               {/* Calculated Gross profit */}
               {expenses.map((expense: any) => (
-                <div className="row mx-2 my-1">
+                <div key={expense.id} className="row mx-2 my-1">
                   <div className="col">{expense.name}</div>
                   <div className="col text-end">
                     {formatter.format(displaySummary(transactions, expense.id))}
@@ -203,12 +216,7 @@ export default function Index() {
                   <b>Total Earnings</b>
                 </div>
                 <div className="col text-end">
-                  <b>
-                    {formatter.format(
-                      totalAccount(transactions, income) -
-                        totalAccount(transactions, expenses)
-                    )}
-                  </b>
+                  <b>{formatter.format(netIncome)}</b>
                 </div>
               </div>
             </div>
