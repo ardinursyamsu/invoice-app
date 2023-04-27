@@ -64,7 +64,11 @@ export const loader = async () => {
   const subAccounts = await getSubAccounts();
   const users = await getUsers();
 
-  const id = await getLastRefId();
+  var id = await getLastRefId();
+
+  // For the first time program running, transaction is containing nothing.
+  id = !!id ? id : { ref: 0 };
+
   invariant(typeof id === "object", "Data is not valid");
 
   const refId = id.ref + 1;
