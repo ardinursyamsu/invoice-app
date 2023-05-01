@@ -1,5 +1,6 @@
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
+import InventoryNavbar from "assets/layouts/inventory-navbar";
 import { formatter } from "assets/helper/helper";
 import Body from "assets/layouts/body";
 import { getSubAccountsByAccount } from "~/models/subaccount.server";
@@ -53,6 +54,7 @@ export default function Inventory() {
 
   return (
     <Body>
+      <InventoryNavbar />
       <div className="d-flex justify-content-center">
         <div className="self-align-center col-10">
           <table className="table table-bordered">

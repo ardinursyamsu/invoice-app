@@ -97,7 +97,8 @@ export default function Transaction() {
   // keeping track of individual transaction control data
   const [data, setData] = useState([{ id: 1, data: defaultData }]);
 
-  // callback function to update transaction control data if there any change
+  // callback function to update transaction control data if there any change. 
+  // is called by handleComponentDataChange
   const callback = (prevData: any, newData: any) => {
     const retData = prevData.map((prev: any) =>
       prev.id == newData.id ? newData : prev

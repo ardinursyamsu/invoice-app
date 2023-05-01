@@ -83,16 +83,16 @@ export async function getTransactionsByAccount(accountId: string) {
   return { account: accountId, type: accountType, amount: amount };
 }
 
-export async function getSubAccountNetAmount(subAccountId: string){
+export async function getSubAccountNetAmount(subAccountId: string) {
   let subAccount = await prisma.subAccount.findFirst({
-    where: { id: subAccountId }, include:{account: true}
+    where: { id: subAccountId },
+    include: { account: true },
   });
 
-  const accountType = subAccount?.account.type
+  const accountType = subAccount?.account.type;
 
   const accountId = subAccount?.account.id;
 
-  
   let credit = await prisma.transaction.aggregate({
     where: { subAccountId: subAccountId, type: "cr" },
     _sum: { amount: true },
@@ -127,7 +127,33 @@ export async function getSubAccountNetAmount(subAccountId: string){
     case "expense":
       amount = Number(credit._sum.amount) - Number(debit._sum.amount);
       break;
-  };
+  }
 
-  return ({ subAccountId, accountId, accountType, amount})
+  return { subAccountId, accountId, accountType, amount };
+}
+
+export async function getQuantityInventoryItem(subAccountId: string) {
+  let credit = await prisma.transaction.aggregate({
+    where: { subAccountId: subAccountId, type: "cr" },
+    _count: { amount: true },
+    _sum: { amount: true },
+  });
+
+  let debit = await prisma.transaction.aggregate({
+    where: { subAccountId: subAccountId, type: "db" },
+    _count: { amount: true },
+    _sum: { amount: true },
+  });
+
+  const qty_cr = !!credit._count.amount ? credit._count.amount : 0;
+  const qty_db = !!debit._count.amount ? debit._count.amount : 0;
+  const quantity = Number(qty_db) - Number(qty_cr);
+
+  const sum_cr = !!credit._sum.amount ? credit._sum.amount : 0;
+  const sum_db = !!debit._sum.amount ? debit._sum.amount : 0;
+  
+  let avgPrice = (Number(sum_db) - Number(sum_cr)) / quantity;
+  avgPrice = !!avgPrice && avgPrice || 0;
+
+  return { subAccountId, quantity, avgPrice };
 }

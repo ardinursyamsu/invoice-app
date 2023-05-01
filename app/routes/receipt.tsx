@@ -80,7 +80,7 @@ export const action = async ({ request }: ActionArgs) => {
     trxTime: trxTime,
     ref: ref,
     accountId: "cash",
-    subAccountId: "bank",
+    subAccountId: "cash-default",
     amount: new Decimal(cashAmount),
     type: "db",
     userId: user,

@@ -77,45 +77,12 @@ export default function Sidebar(props: any) {
                 </ul>
               </li>
               <li>
-                <a
-                  href="#submenu3"
-                  data-bs-toggle="collapse"
-                  className="nav-link px-0 align-middle"
-                >
+                <a href="/inventory" className="nav-link px-0 align-middle text-white">
                   <i className="fs-4 bi-grid"></i>{" "}
-                  <span className="ms-1 d-none d-sm-inline">Products</span>{" "}
+                  <span className="ms-1 d-none d-sm-inline">Inventory</span>
                 </a>
-                <ul
-                  className="collapse nav flex-column ms-1"
-                  id="submenu3"
-                  data-bs-parent="#menu"
-                >
-                  <li className="w-100">
-                    <a href="#" className="nav-link px-0">
-                      {" "}
-                      <span className="d-none d-sm-inline">Product</span> 1
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="nav-link px-0">
-                      {" "}
-                      <span className="d-none d-sm-inline">Product</span> 2
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="nav-link px-0">
-                      {" "}
-                      <span className="d-none d-sm-inline">Product</span> 3
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="nav-link px-0">
-                      {" "}
-                      <span className="d-none d-sm-inline">Product</span> 4
-                    </a>
-                  </li>
-                </ul>
               </li>
+              
               
               <li>
                 <a href="/user" className="nav-link px-0 align-middle text-white">

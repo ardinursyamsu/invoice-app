@@ -1,7 +1,6 @@
 ## Mandatory
-- Create payment page
-- Create receipt page (WIP)
 - Retained earnings is retained earnings + income since inception
+- Specified inventory source of payment. Cash/Account Payable
 
 # Receipt
 - What we've done to get money
@@ -31,3 +30,5 @@ if cash against assets, cash is credited, assets is credited in equal amount
 
 payment can't be against sales
 
+## IMPORTANT
+RefId and date should be able to be changed by user (transaction & Inventory)

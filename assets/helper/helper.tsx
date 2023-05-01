@@ -17,7 +17,10 @@ export const getCurrentDate = () => {
 
   const year = now.getFullYear().toString();
   const month = months[now.getMonth()];
-  const day = now.getDate().toString();
+  var day = now.getDate().toString();
+  if (day.length < 2) {
+    day = "0" + day;
+  }
   var hour = now.getHours().toString();
   if (hour.length < 2) {
     hour = "0" + hour;
@@ -31,4 +34,8 @@ export const getCurrentDate = () => {
   return date;
 };
 
-export const formatter = new Intl.NumberFormat("en-US", { style: "decimal" });
+export const formatter = new Intl.NumberFormat("en-US", {
+  style: "decimal",
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+});
