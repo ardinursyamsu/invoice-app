@@ -10,6 +10,7 @@ import { getAccountById, getAccounts } from "~/models/account.server";
 import { getSubAccounts } from "~/models/subaccount.server";
 import { createTransaction, getLastRefId } from "~/models/transaction.server";
 import { getUsers } from "~/models/user.server";
+import User from "./user";
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
@@ -98,6 +99,12 @@ export const loader = async () => {
 
   // For the first time program running, transaction is containing nothing.
   id = !!id ? id : { ref: 0 };
+
+  // check user
+  const userStatus = !!users[0]; // if user hasn't created yet, force user to create first
+  if (!userStatus){
+    return redirect ("/user");
+  }
 
   invariant(typeof id === "object", "Data is not valid");
 

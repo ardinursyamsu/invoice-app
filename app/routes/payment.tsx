@@ -96,6 +96,12 @@ export const loader = async () => {
 
   var id = await getLastRefId();
 
+  // check user
+  const userStatus = !!users[0]; // if user hasn't created yet, force user to create first
+  if (!userStatus){
+    return redirect ("/user");
+  }
+
   // For the first time program running, transaction is containing nothing.
   id = !!id ? id : { ref: 0 };
 

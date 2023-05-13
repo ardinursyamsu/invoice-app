@@ -3,6 +3,7 @@ CREATE TABLE "Transaction" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "trxTime" DATETIME NOT NULL,
     "ref" INTEGER NOT NULL,
+    "transaction" TEXT NOT NULL,
     "accountId" TEXT NOT NULL,
     "type" TEXT NOT NULL,
     "amount" DECIMAL NOT NULL,

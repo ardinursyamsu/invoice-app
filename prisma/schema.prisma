@@ -14,6 +14,7 @@ model Transaction {
   id           Int        @id @default(autoincrement())
   trxTime      DateTime
   ref          Int
+  transaction  String
   account      Account    @relation(fields: [accountId], references: [id])
   accountId    String
   type         String
