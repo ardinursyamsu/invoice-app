@@ -102,8 +102,8 @@ export const loader = async () => {
 
   // check user
   const userStatus = !!users[0]; // if user hasn't created yet, force user to create first
-  if (!userStatus){
-    return redirect ("/user");
+  if (!userStatus) {
+    return redirect("/user");
   }
 
   invariant(typeof id === "object", "Data is not valid");
