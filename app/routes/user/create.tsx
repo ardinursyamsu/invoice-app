@@ -1,5 +1,6 @@
 import { ActionArgs, redirect } from "@remix-run/node";
 import Body from "assets/layouts/body";
+import UserNavbar from "assets/layouts/user-navbar";
 import { useState } from "react";
 import invariant from "tiny-invariant";
 import { createUser } from "~/models/user.server";
@@ -18,7 +19,7 @@ export const action = async ({ request }: ActionArgs) => {
   return redirect("/user");
 };
 
-export default function User() {
+export default function CreateUser() {
   const [userId, setUserId] = useState("");
   const handleUserChange = (e: any) => {
     const userString = e.target.value;
@@ -30,6 +31,7 @@ export default function User() {
 
   return (
     <Body>
+      <UserNavbar />
       <div className="px-4 py-5 my-5 text-center">
         <div className="col-lg-8 mx-auto">
           <form className="card border-1 mb-3 shadow" method="post">

@@ -11,6 +11,8 @@ import { getSubAccounts } from "~/models/subaccount.server";
 import { createTransaction, getLastRefId } from "~/models/transaction.server";
 import { getUsers } from "~/models/user.server";
 
+const transactionSource = "pymt";
+
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
 
@@ -44,6 +46,7 @@ export const action = async ({ request }: ActionArgs) => {
       await createTransaction({
         trxTime: trxTime,
         ref: ref,
+        transaction: transactionSource,
         accountId: accountId,
         subAccountId: subAccount,
         amount: amount,
@@ -62,6 +65,7 @@ export const action = async ({ request }: ActionArgs) => {
       await createTransaction({
         trxTime: trxTime,
         ref: ref,
+        transaction: transactionSource,
         accountId: accountId,
         subAccountId: subAccount,
         amount: amount,
@@ -79,6 +83,7 @@ export const action = async ({ request }: ActionArgs) => {
   await createTransaction({
     trxTime: trxTime,
     ref: ref,
+    transaction: transactionSource,
     accountId: "cash",
     subAccountId: "cash-default",
     amount: new Decimal(cashAmount),
@@ -101,10 +106,9 @@ export const loader = async () => {
 
   // check user
   const userStatus = !!users[0]; // if user hasn't created yet, force user to create first
-  if (!userStatus){
-    return redirect ("/user");
+  if (!userStatus) {
+    return redirect("/user");
   }
-  
 
   invariant(typeof id === "object", "Data is not valid");
 

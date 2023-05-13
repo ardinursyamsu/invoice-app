@@ -12,6 +12,8 @@ import { createTransaction } from "~/models/transaction.server";
 import Body from "assets/layouts/body";
 import { getCurrentDate } from "assets/helper/helper";
 
+const transactionSource = "trxs";
+
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
 
@@ -27,6 +29,7 @@ export const action = async ({ request }: ActionArgs) => {
   invariant(typeof rawdata === "string", "Data must be string");
   const jsonData = JSON.parse(rawdata);
   const { data } = jsonData;
+  const transaction = transactionSource;
 
   // processing foreach data that send by transcation-control
   data.forEach(async (element: any) => {
@@ -48,6 +51,7 @@ export const action = async ({ request }: ActionArgs) => {
     await createTransaction({
       trxTime,
       ref,
+      transaction,
       accountId,
       subAccountId,
       amount,
@@ -68,8 +72,8 @@ export const loader = async () => {
 
   // check user
   const userStatus = !!users[0]; // if user hasn't created yet, force user to create first
-  if (!userStatus){
-    return redirect ("/user");
+  if (!userStatus) {
+    return redirect("/user");
   }
 
   // For the first time program running, transaction is containing nothing.
@@ -103,7 +107,7 @@ export default function Transaction() {
   // keeping track of individual transaction control data
   const [data, setData] = useState([{ id: 1, data: defaultData }]);
 
-  // callback function to update transaction control data if there any change. 
+  // callback function to update transaction control data if there any change.
   // is called by handleComponentDataChange
   const callback = (prevData: any, newData: any) => {
     const retData = prevData.map((prev: any) =>

@@ -1,81 +1,71 @@
 import { ActionArgs, redirect } from "@remix-run/node";
 import Body from "assets/layouts/body";
+import InventoryNavbar from "assets/layouts/inventory-navbar";
 import { useState } from "react";
 import invariant from "tiny-invariant";
-import { createUser } from "~/models/user.server";
+import { createSubAccount } from "~/models/subaccount.server";
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
   const id = formData.get("id");
   const name = formData.get("name");
-  const type = formData.get("type");
 
   invariant(typeof id === "string", "This should be a string");
   invariant(typeof name === "string", "This should be a string");
-  invariant(typeof type === "string", "This should be a string");
+  const accountId = "inventory";
 
-  await createUser({ id, name, type });
-  return redirect("/user");
+  await createSubAccount({ id, name, accountId });
+  return redirect("/inventory");
 };
 
-export default function User() {
-  const [userId, setUserId] = useState("");
-  const handleUserChange = (e: any) => {
-    const userString = e.target.value;
-    setUserId(userString.replaceAll(" ", "-").toLowerCase());
+export default function CreateInventory() {
+  const [inventoryId, setInventoryId] = useState("");
+  const handleInventoryChange = (e: any) => {
+    const inventoryString = e.target.value;
+    const inventoryFilter = inventoryString.replace(/[^a-z0-9 ]/gi, "");
+    setInventoryId(inventoryFilter.replaceAll(" ", "-").toLowerCase());
   };
-  const onUserIdChange = (e: any) => {
-    setUserId(e.target.value);
+
+  const onInventoryIdChange = (e: any) => {
+    setInventoryId(e.target.value);
   };
 
   return (
     <Body>
+      <InventoryNavbar />
       <div className="px-4 py-5 my-5 text-center">
         <div className="col-lg-8 mx-auto">
           <form className="card border-1 mb-3 shadow" method="post">
             <div className="card-header bg-dark text-white py-3">
-              <h4>Create User</h4>
+              <h4>Create Inventory</h4>
             </div>
             <div className="p-4">
               <div className="row mb-3">
-                <label className="col-sm-2 col-form-label text-start">
-                  User Name
+                <label className="col-sm-3 col-form-label text-start">
+                  Inventory Name
                 </label>
-                <div className="col-sm-10">
+                <div className="col-sm-9">
                   <input
                     className="form-control mb-2"
                     type="text"
                     name="name"
-                    onChange={handleUserChange}
+                    onChange={handleInventoryChange}
                   />
                 </div>
               </div>
 
               <div className="row mb-3">
-                <label className="col-sm-2 col-form-label text-start">
-                  User ID
+                <label className="col-sm-3 col-form-label text-start">
+                  Inventory ID
                 </label>
-                <div className="col-sm-10">
+                <div className="col-sm-9">
                   <input
                     className="form-control mb-2"
                     type="text"
                     name="id"
-                    value={userId}
-                    onChange={onUserIdChange}
+                    value={inventoryId}
+                    onChange={onInventoryIdChange}
                   />
-                </div>
-              </div>
-
-              <div className="row mb-3">
-                <label className="col-sm-2 col-form-label text-start">
-                  User Type
-                </label>
-                <div className="col-sm-10">
-                  <select className="form-select mb-2" name="type" id="type">
-                    <option value="Customer">Customer</option>
-                    <option value="Supplier">Supplier</option>
-                    <option value="other">Other</option>
-                  </select>
                 </div>
               </div>
               <div>

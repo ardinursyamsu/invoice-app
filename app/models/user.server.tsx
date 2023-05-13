@@ -8,3 +8,7 @@ export async function createUser(user: Pick<User, "id" | "name" | "type">) {
 export async function getUsers() {
   return prisma.user.findMany();
 }
+
+export async function getUserById(userId: string) {
+  return prisma.user.findFirst({ where: { id: userId } });
+}

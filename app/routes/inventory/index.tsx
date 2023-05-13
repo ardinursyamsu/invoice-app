@@ -1,16 +1,10 @@
 import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData } from "@remix-run/react";
 import InventoryNavbar from "assets/layouts/inventory-navbar";
 import { formatter } from "assets/helper/helper";
 import Body from "assets/layouts/body";
 import { getSubAccountsByAccount } from "~/models/subaccount.server";
 import { getQuantityInventoryItem } from "~/models/transaction.server";
-
-async function asyncForEach(array: any, callback: any) {
-  for (let index = 0; index < array.length; index++) {
-    await callback(array[index], index, array);
-  }
-}
 
 export const loader = async () => {
   /*
@@ -76,7 +70,7 @@ export default function Inventory() {
               {inventoryData.map((inventory: any, idx: any) => (
                 <tr key={idx + 1}>
                   <th scope="row">{idx + 1}</th>
-                  <td className="text-start">{inventory.name}</td>
+                  <td className="text-start"><Link to="">{inventory.name}</Link></td>
                   <td className="text-center">{inventory.quantity}</td>
                   <td className="text-end">
                     {formatter.format(inventory.price)}

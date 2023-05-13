@@ -12,6 +12,8 @@ import { getSubAccountsByAccount } from "~/models/subaccount.server";
 import { getUsers } from "~/models/user.server";
 import { Decimal } from "@prisma/client/runtime/library";
 
+const transactionSource = "invt";
+
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
 
@@ -43,6 +45,7 @@ export const action = async ({ request }: ActionArgs) => {
       const transactionData = {
         trxTime: trxTime,
         ref: ref,
+        transaction: transactionSource,
         accountId: "inventory",
         subAccountId: data.inventoryId,
         amount: data.price,
@@ -61,6 +64,7 @@ export const action = async ({ request }: ActionArgs) => {
       createTransaction({
         trxTime: trxTime,
         ref: ref,
+        transaction: transactionSource,
         accountId: "cash",
         subAccountId: "cash-default",
         amount: new Decimal(totalAmount),
@@ -72,6 +76,7 @@ export const action = async ({ request }: ActionArgs) => {
       createTransaction({
         trxTime: trxTime,
         ref: ref,
+        transaction: transactionSource,
         accountId: "account-payable",
         subAccountId: "account-payable-default",
         amount: new Decimal(totalAmount),
@@ -98,12 +103,17 @@ export const loader = async () => {
   var inventories = await getSubAccountsByAccount("inventory");
   inventories = inventories.filter((inventory) => inventory.name !== "default"); // remove the default subaccount
 
+  const inventoryStatus = !!inventories[0]; // check if inventory already exists in database
+  if (!inventoryStatus) { // if no inventory created, redirect user to create inventory
+    return redirect("/inventory/create");
+  }
+
   const users = await getUsers();
 
   return json({ refId, inventories, users });
 };
 /* -- Render in Client -- */
-export default function Procure() {
+export default function ProcureInventory() {
   const { refId, inventories, users } = useLoaderData<typeof loader>();
 
   const date = getCurrentDate();

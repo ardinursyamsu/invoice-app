@@ -1,4 +1,5 @@
 import { ActionArgs, json, redirect } from "@remix-run/node";
+import AccountNavbar from "assets/layouts/account-navbar";
 import Body from "assets/layouts/body";
 import { useState } from "react";
 import invariant from "tiny-invariant";
@@ -34,6 +35,7 @@ export default function Account() {
   };
   return (
     <Body>
+      <AccountNavbar />
       <div className="px-4 py-5 my-5 text-center">
         <div className="col-lg-8 mx-auto">
           <form className="card border-1 mb-3 shadow" method="post">

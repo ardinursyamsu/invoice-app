@@ -10,7 +10,8 @@ import { getAccountById, getAccounts } from "~/models/account.server";
 import { getSubAccounts } from "~/models/subaccount.server";
 import { createTransaction, getLastRefId } from "~/models/transaction.server";
 import { getUsers } from "~/models/user.server";
-import User from "./user";
+
+const transactionSource = "rcpt";
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
@@ -45,6 +46,7 @@ export const action = async ({ request }: ActionArgs) => {
       await createTransaction({
         trxTime: trxTime,
         ref: ref,
+        transaction: transactionSource,
         accountId: accountId,
         subAccountId: subAccount,
         amount: amount,
@@ -63,6 +65,7 @@ export const action = async ({ request }: ActionArgs) => {
       await createTransaction({
         trxTime: trxTime,
         ref: ref,
+        transaction: transactionSource,
         accountId: accountId,
         subAccountId: subAccount,
         amount: amount,
@@ -80,6 +83,7 @@ export const action = async ({ request }: ActionArgs) => {
   await createTransaction({
     trxTime: trxTime,
     ref: ref,
+    transaction: transactionSource,
     accountId: "cash",
     subAccountId: "cash-default",
     amount: new Decimal(cashAmount),

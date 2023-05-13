@@ -6,6 +6,7 @@ export async function createTransaction(
     Transaction,
     | "trxTime"
     | "ref"
+    | "transaction"
     | "accountId"
     | "subAccountId"
     | "amount"

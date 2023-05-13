@@ -1,40 +1,29 @@
-import { ActionArgs, redirect } from "@remix-run/node";
+import { json } from "@remix-run/node";
+import type { LoaderArgs } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
 import Body from "assets/layouts/body";
-import { useState } from "react";
-import invariant from "tiny-invariant";
-import { createUser } from "~/models/user.server";
+import UserNavbar from "assets/layouts/user-navbar";
+import { getUserById } from "~/models/user.server";
 
-export const action = async ({ request }: ActionArgs) => {
-  const formData = await request.formData();
-  const id = formData.get("id");
-  const name = formData.get("name");
-  const type = formData.get("type");
+export const loader = async ({ params }: LoaderArgs) => {
+  const userId = params.slug;
+  const userData = await getUserById((!!userId && userId) || "");
 
-  invariant(typeof id === "string", "This should be a string");
-  invariant(typeof name === "string", "This should be a string");
-  invariant(typeof type === "string", "This should be a string");
-
-  await createUser({ id, name, type });
-  return redirect("/user");
+  const defaultUser = { id: "nothing", name: "nothing", type: "other" };
+  const user = !!userData && userData || defaultUser;
+  return json({ user });
 };
 
-export default function User() {
-  const [userId, setUserId] = useState("");
-  const handleUserChange = (e: any) => {
-    const userString = e.target.value;
-    setUserId(userString.replaceAll(" ", "-").toLowerCase());
-  };
-  const onUserIdChange = (e: any) => {
-    setUserId(e.target.value);
-  };
-
+export default function DisplayUser() {
+  const { user } = useLoaderData<typeof loader>();
   return (
     <Body>
+      <UserNavbar />
       <div className="px-4 py-5 my-5 text-center">
         <div className="col-lg-8 mx-auto">
           <form className="card border-1 mb-3 shadow" method="post">
             <div className="card-header bg-dark text-white py-3">
-              <h4>Create User</h4>
+              <h4>Displaying {user.name}</h4>
             </div>
             <div className="p-4">
               <div className="row mb-3">
@@ -46,7 +35,7 @@ export default function User() {
                     className="form-control mb-2"
                     type="text"
                     name="name"
-                    onChange={handleUserChange}
+                    value={user.name}
                   />
                 </div>
               </div>
@@ -60,8 +49,7 @@ export default function User() {
                     className="form-control mb-2"
                     type="text"
                     name="id"
-                    value={userId}
-                    onChange={onUserIdChange}
+                    value={user.id}
                   />
                 </div>
               </div>
@@ -71,7 +59,7 @@ export default function User() {
                   User Type
                 </label>
                 <div className="col-sm-10">
-                  <select className="form-select mb-2" name="type" id="type">
+                  <select className="form-select mb-2" name="type" id="type" defaultValue={user.type}>
                     <option value="Customer">Customer</option>
                     <option value="Supplier">Supplier</option>
                     <option value="other">Other</option>
