@@ -1,7 +1,7 @@
 # Resetting the todo(s)
-1. To create sales (invoice)
-- consist of two pages: create sales, and display sales
-2. split transactions into 2 pages
+1. split transactions into 2 pages
 - create transactions
 - display list transactions
-3. Do the same for payment & receipt
+2. Do the same for payment & receipt
+3. Find out why expenses query result is negative
+4. Fix the display sales page

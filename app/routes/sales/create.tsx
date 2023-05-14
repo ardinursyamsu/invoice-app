@@ -8,11 +8,13 @@ import { useEffect, useState } from "react";
 import invariant from "tiny-invariant";
 import { getSubAccountsByAccount } from "~/models/subaccount.server";
 import {
+  createTransaction,
   getLastRefId,
   getQuantityInventoryItem,
 } from "~/models/transaction.server";
 import { getUserByType } from "~/models/user.server";
 import type { ActionArgs } from "@remix-run/node";
+import { Decimal } from "@prisma/client/runtime";
 
 const transactionSource = "sale";
 
@@ -43,8 +45,8 @@ export const action = async ({ request }: ActionArgs) => {
     const { id, data } = element;
 
     for (var i = 0; i < data.quantity; i++) {
-      // credit the inventory
-      const transactionInventoryData = {
+      createTransaction({
+        // credit each of the inventory
         trxTime: trxTime,
         ref: ref,
         transaction: transactionSource,
@@ -53,67 +55,62 @@ export const action = async ({ request }: ActionArgs) => {
         amount: data.avgPrice, // this should be the average
         type: "cr",
         userId: userId,
-      };
+      });
 
-      console.log("Credit the inventory: ", transactionInventoryData);
-      //createTransaction(transactionData);
       totalInventorySalesAmount += data.price; // data for credit sales & debit AR
       totalInventoryCOGSAmount += data.avgPrice; // data for debit cogs
     }
   });
 
-  const transactionCOGSData = {
+  createTransaction({
+    // debit the cost of good sold the same amount as inventories credited
     trxTime: trxTime,
     ref: ref,
     transaction: transactionSource,
     accountId: "cost-of-good-sold",
     subAccountId: "cost-of-good-sold-default",
-    amount: totalInventoryCOGSAmount,
+    amount: new Decimal(totalInventoryCOGSAmount),
     type: "db",
     userId: userId,
-  };
+  });
 
-  console.log("Debit the COGS: ", transactionCOGSData);
-
-  const transactionSalesData = {
+  createTransaction({
+    // credit the sales as amount willing be paid by customer
     trxTime: trxTime,
     ref: ref,
     transaction: transactionSource,
     accountId: "sales",
     subAccountId: "sales-default",
-    amount: totalInventorySalesAmount,
+    amount: new Decimal(totalInventorySalesAmount),
     type: "cr",
     userId: userId,
-  };
+  });
 
-  console.log("Credit the Sales: ", transactionSalesData);
-
-  const transactionARData = {
+  createTransaction({
+    // debit the AR as amount willing be paid by customer
     trxTime: trxTime,
     ref: ref,
     transaction: transactionSource,
     accountId: "account-receivable",
     subAccountId: "account-receivable-default",
-    amount: totalInventorySalesAmount,
+    amount: new Decimal(totalInventorySalesAmount),
     type: "db",
     userId: userId,
-  };
-  console.log("Debit the Account Receivables: ", transactionARData);
+  });
 
-  const transactionRetainedEarningData = {
+  createTransaction({
+    // Credit the retained earnings as difference between amount paid by customer and the cost
     trxTime: trxTime,
     ref: ref,
     transaction: transactionSource,
     accountId: "retained-earnings",
     subAccountId: "retained-earnings-default",
-    amount: totalInventorySalesAmount - totalInventoryCOGSAmount,
+    amount: new Decimal(totalInventorySalesAmount - totalInventoryCOGSAmount),
     type: "cr",
     userId: userId,
-  };
+  });
 
-  console.log("Debit the Retained Earning: ", transactionRetainedEarningData);
-
-  return redirect("/sales/create");
+  return redirect("/sales");
 };
 
 export const loader = async () => {
@@ -150,8 +147,6 @@ export const loader = async () => {
       qty: extendedInventory.quantity,
     });
   }
-
-  //console.log(inventories)
 
   return json({ customers, refId, inventories });
 };

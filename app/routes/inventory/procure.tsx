@@ -42,7 +42,8 @@ export const action = async ({ request }: ActionArgs) => {
     const { id, data } = element;
 
     for (var i = 0; i < data.quantity; i++) {
-      const transactionData = {
+      createTransaction({
+        // process debit for each inventory
         trxTime: trxTime,
         ref: ref,
         transaction: transactionSource,
@@ -51,16 +52,14 @@ export const action = async ({ request }: ActionArgs) => {
         amount: data.price,
         type: "db",
         userId: userId,
-      };
+      });
 
-      createTransaction(transactionData);
       totalAmount += data.price;
     }
   });
 
-  // process the pair of inventory transactions
   switch (paymentType) {
-    case "cash":
+    case "cash": // if cash, credit the cash
       createTransaction({
         trxTime: trxTime,
         ref: ref,
@@ -74,6 +73,7 @@ export const action = async ({ request }: ActionArgs) => {
       break;
     case "credit":
       createTransaction({
+        // if credit, credit theh account payable
         trxTime: trxTime,
         ref: ref,
         transaction: transactionSource,
@@ -86,7 +86,7 @@ export const action = async ({ request }: ActionArgs) => {
       break;
   }
 
-  return redirect("/inventory/procure");
+  return redirect("/inventory");
 };
 
 export const loader = async () => {
@@ -101,7 +101,8 @@ export const loader = async () => {
   inventories = inventories.filter((inventory) => inventory.name !== "default"); // remove the default subaccount
 
   const inventoryStatus = !!inventories[0]; // check if inventory already exists in database
-  if (!inventoryStatus) { // if no inventory created, redirect user to create inventory
+  if (!inventoryStatus) {
+    // if no inventory created, redirect user to create inventory
     return redirect("/inventory/create");
   }
 

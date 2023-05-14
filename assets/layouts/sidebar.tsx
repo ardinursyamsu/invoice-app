@@ -62,7 +62,7 @@ export default function Sidebar(props: any) {
                   href="/sales"
                   className="nav-link px-0 align-middle text-white"
                 >
-                  <i className="fs-4 bi-receipt"></i>
+                  <i className="fs-4 bi-receipt"></i>{" "}
                   <span className="ms-1 d-none d-sm-inline">Sales</span>
                 </a>
               </li>

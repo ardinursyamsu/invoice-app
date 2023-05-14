@@ -24,7 +24,7 @@ export const loader = async () => {
   const assets = await getAccountsByType("asset");
   const liabilities = await getAccountsByType("liability");
   const income = await getAccountsByType("income");
-  const expenses = await getAccountsByType("expense");
+  const expenses = await getAccountsByType("expense"); // definitely need to know why expense turns to be negative
   const equities = await getAccountsByType("equity");
 
   // transactions query total amount of each account transaction
@@ -67,12 +67,11 @@ export default function Index() {
     useLoaderData<typeof loader>();
 
   const netIncome =
-    totalAccount(transactions, income) - totalAccount(transactions, expenses);
+    totalAccount(transactions, income) + totalAccount(transactions, expenses); // definitely need to know why expense turns to be negative
   const suspense =
     totalAccount(transactions, assets) -
     (totalAccount(transactions, liabilities) +
-      totalAccount(transactions, equities) +
-      netIncome); // Net Income is part of retained earnings calculation
+      totalAccount(transactions, equities)); // Net Income is part of retained earnings calculation
 
   //console.log("equities", equities);
   return (
@@ -143,7 +142,7 @@ export default function Index() {
                   <div className="col text-end">
                     {equity.id == "retained-earnings"
                       ? formatter.format(
-                          displaySummary(transactions, equity.id) + netIncome
+                          displaySummary(transactions, equity.id)
                         )
                       : formatter.format(
                           displaySummary(transactions, equity.id)
