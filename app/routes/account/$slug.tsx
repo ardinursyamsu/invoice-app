@@ -1,7 +1,7 @@
 import { json } from "@remix-run/node";
 import type { LoaderArgs } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
-import AccountNavbar from "assets/layouts/account-navbar";
+import AccountNavbar from "assets/layouts/customnavbar/account-navbar";
 import Body from "assets/layouts/body";
 import { getAccountById } from "~/models/account.server";
 import { getSubAccountsByAccount } from "~/models/subaccount.server";

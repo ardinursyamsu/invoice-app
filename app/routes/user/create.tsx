@@ -1,6 +1,6 @@
 import { ActionArgs, redirect } from "@remix-run/node";
 import Body from "assets/layouts/body";
-import UserNavbar from "assets/layouts/user-navbar";
+import UserNavbar from "assets/layouts/customnavbar/user-navbar";
 import { useState } from "react";
 import invariant from "tiny-invariant";
 import { createUser } from "~/models/user.server";

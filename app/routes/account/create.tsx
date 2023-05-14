@@ -1,5 +1,5 @@
 import { ActionArgs, json, redirect } from "@remix-run/node";
-import AccountNavbar from "assets/layouts/account-navbar";
+import AccountNavbar from "assets/layouts/customnavbar/account-navbar";
 import Body from "assets/layouts/body";
 import { useState } from "react";
 import invariant from "tiny-invariant";

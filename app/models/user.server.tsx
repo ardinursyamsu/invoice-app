@@ -12,3 +12,7 @@ export async function getUsers() {
 export async function getUserById(userId: string) {
   return prisma.user.findFirst({ where: { id: userId } });
 }
+
+export async function getUserByType(type: string) {
+  return prisma.user.findMany({ where: { type: type } });
+}

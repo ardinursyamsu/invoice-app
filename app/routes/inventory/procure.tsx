@@ -1,4 +1,3 @@
-import InventoryNavbar from "assets/layouts/inventory-navbar";
 import Body from "assets/layouts/body";
 import ProcurementControl from "assets/components/procurement-control";
 import { createTransaction, getLastRefId } from "~/models/transaction.server";
@@ -11,6 +10,7 @@ import { useEffect, useState } from "react";
 import { getSubAccountsByAccount } from "~/models/subaccount.server";
 import { getUsers } from "~/models/user.server";
 import { Decimal } from "@prisma/client/runtime/library";
+import InventoryNavbar from "assets/layouts/customnavbar/inventory-navbar";
 
 const transactionSource = "invt";
 

@@ -2,9 +2,9 @@ import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import { formatter } from "assets/helper/helper";
 import Body from "assets/layouts/body";
-import InventoryNavbar from "assets/layouts/customnavbar/inventory-navbar";
 import { getSubAccountsByAccount } from "~/models/subaccount.server";
 import { getQuantityInventoryItem } from "~/models/transaction.server";
+import SalesNavbar from "assets/layouts/customnavbar/sales-navbar";
 
 export const loader = async () => {
   /*
@@ -31,50 +31,76 @@ export const loader = async () => {
     });
   }
 
-  /* example data to display in jsx
-  const inventoryData = [
-    { id: "jeans", name: "Jeans", quantity: 20, price: 32000 },
-    { id: "t-shirt", name: "Hoodie", quantity: 29, price: 25000 },
-    { id: "sweater", name: "Sweater", quantity: 18, price: 45000 },
-    { id: "hoodie", name: "Hoodie", quantity: 17, price: 48000 },
+  const salesData = [
+    {
+      refId: "1-sale",
+      name: "Jual Pakaian tuker nasi bakar",
+      customer: "Abraham",
+      total: 200000,
+      status: "paid",
+    },
+    {
+      refId: "2-sale",
+      name: "2 lusin pakaian bekas",
+      customer: "Naval",
+      total: 388123,
+      status: "paid",
+    },
+    {
+      refId: "3-sale",
+      name: "30 kaos om sonata",
+      customer: "Astuti",
+      total: 500500,
+      status: "unpaid",
+    },
+    {
+      refId: "4-sale",
+      name: "18 celana dalam",
+      customer: "Omar",
+      total: 129000,
+      status: "unpaid",
+    },
   ];
-  */
 
-  return json({ inventoryData });
+  return json({ salesData });
 };
 
-export default function Inventory() {
-  const { inventoryData } = useLoaderData<typeof loader>();
+export default function Sales() {
+  const { salesData } = useLoaderData<typeof loader>();
 
   return (
     <Body>
-      <InventoryNavbar />
+      <SalesNavbar />
       <div className="d-flex justify-content-center">
         <div className="self-align-center col-10">
           <table className="table table-bordered">
             <thead>
               <tr className="bg-dark text-white">
-                <th scope="col">#</th>
+                <th scope="col">Ref-Id</th>
                 <th className="text-start" scope="col">
-                  Inventory Name
+                  Sales List
                 </th>
                 <th className="text-center" scope="col">
-                  Quantity
+                  Customers
                 </th>
                 <th className="text-end" scope="col">
-                  Avg. Price
+                  Total
+                </th>
+                <th className="text-end" scope="col">
+                  Status
                 </th>
               </tr>
             </thead>
             <tbody>
-              {inventoryData.map((inventory: any, idx: any) => (
-                <tr key={idx + 1}>
-                  <th scope="row">{idx + 1}</th>
-                  <td className="text-start"><Link to="">{inventory.name}</Link></td>
-                  <td className="text-center">{inventory.quantity}</td>
-                  <td className="text-end">
-                    {formatter.format(inventory.price)}
+              {salesData.map((sales: any) => (
+                <tr key={sales.refId}>
+                  <th scope="row">{sales.refId}</th>
+                  <td className="text-start">
+                    <Link to="">{sales.name}</Link>
                   </td>
+                  <td className="text-center">{sales.customer}</td>
+                  <td className="text-end">{formatter.format(sales.total)}</td>
+                  <td className="text-end">{sales.status}</td>
                 </tr>
               ))}
             </tbody>

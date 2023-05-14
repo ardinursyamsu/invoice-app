@@ -1,6 +1,7 @@
 import { ActionArgs, redirect } from "@remix-run/node";
+import { Form } from "@remix-run/react";
 import Body from "assets/layouts/body";
-import InventoryNavbar from "assets/layouts/inventory-navbar";
+import InventoryNavbar from "assets/layouts/customnavbar/inventory-navbar";
 import { useState } from "react";
 import invariant from "tiny-invariant";
 import { createSubAccount } from "~/models/subaccount.server";
@@ -35,7 +36,7 @@ export default function CreateInventory() {
       <InventoryNavbar />
       <div className="px-4 py-5 my-5 text-center">
         <div className="col-lg-8 mx-auto">
-          <form className="card border-1 mb-3 shadow" method="post">
+          <Form className="card border-1 mb-3 shadow" method="post">
             <div className="card-header bg-dark text-white py-3">
               <h4>Create Inventory</h4>
             </div>
@@ -76,7 +77,7 @@ export default function CreateInventory() {
                 />
               </div>
             </div>
-          </form>
+          </Form>
         </div>
       </div>
     </Body>

@@ -2,7 +2,7 @@ import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import Body from "assets/layouts/body";
 import { getAccounts } from "~/models/account.server";
-import AccountNavbar from "assets/layouts/account-navbar";
+import AccountNavbar from "assets/layouts/customnavbar/account-navbar";
 
 export const loader = async () => {
   // Get sub-account type inventory

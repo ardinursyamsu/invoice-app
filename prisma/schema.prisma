@@ -47,3 +47,10 @@ model User {
   type        String
   transaction Transaction[]
 }
+
+model Inventory {
+  id       String  @id
+  name     String
+  quantity Decimal
+  avgPrice Decimal
+}

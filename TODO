@@ -1,34 +1,7 @@
-## Mandatory
-- Retained earnings is retained earnings + income since inception
-- Specified inventory source of payment. Cash/Account Payable
-
-# Receipt
-- What we've done to get money
-- Sell fixed asset
-- Sell inventory
-- Simply get money
-- Interest receipt
-
-if cash against asset, then asset is credited, cash is debited 
-sales is credited, expense is debited
-
-if cash against equity/liabilities, cash is debited, equity/liabilities is credited in equal amount
-
-receipt can't be against expenses
-
-# Payment
-- What we've done to pay money
-- acquire fixed asset
-- acquire inventory
-- Simply pay money
-- Interest expense
-
-if cash against equity/liabilities, then equities/liabilities is debited, cash is credited 
-expense is debited
-
-if cash against assets, cash is credited, assets is credited in equal amount
-
-payment can't be against sales
-
-## IMPORTANT
-RefId and date should be able to be changed by user (transaction & Inventory)
+# Resetting the todo(s)
+1. To create sales (invoice)
+- consist of two pages: create sales, and display sales
+2. split transactions into 2 pages
+- create transactions
+- display list transactions
+3. Do the same for payment & receipt
