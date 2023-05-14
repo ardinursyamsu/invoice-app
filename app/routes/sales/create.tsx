@@ -1,37 +1,235 @@
-import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { json, redirect } from "@remix-run/node";
+import { Form, useLoaderData } from "@remix-run/react";
 import SalesControl from "assets/components/sales-control";
 import { getCurrentDate } from "assets/helper/helper";
 import Body from "assets/layouts/body";
 import SalesNavbar from "assets/layouts/customnavbar/sales-navbar";
+import { useEffect, useState } from "react";
 import invariant from "tiny-invariant";
-import { getLastRefId } from "~/models/transaction.server";
+import { getSubAccountsByAccount } from "~/models/subaccount.server";
+import {
+  getLastRefId,
+  getQuantityInventoryItem,
+} from "~/models/transaction.server";
 import { getUserByType } from "~/models/user.server";
+import type { ActionArgs } from "@remix-run/node";
+
+const transactionSource = "sale";
+
+export const action = async ({ request }: ActionArgs) => {
+  const formData = await request.formData();
+
+  const rawdata = formData.get("data");
+  invariant(typeof rawdata === "string", "Data must be string");
+  const jsonData = JSON.parse(rawdata);
+  const { data } = jsonData;
+
+  const refId = formData.get("ref");
+  invariant(typeof refId === "string", "Data mut be string");
+  const ref = parseInt(refId);
+
+  const date = formData.get("trx-time");
+  invariant(typeof date === "string", "Data must be string");
+  const trxTime = new Date(date);
+
+  const userId = formData.get("user");
+  invariant(typeof userId === "string", "Data must be string");
+
+  var totalInventorySalesAmount = 0;
+  var totalInventoryCOGSAmount = 0;
+
+  // process each row of data input
+  data.forEach((element: typeof data) => {
+    const { id, data } = element;
+
+    for (var i = 0; i < data.quantity; i++) {
+      // credit the inventory
+      const transactionInventoryData = {
+        trxTime: trxTime,
+        ref: ref,
+        transaction: transactionSource,
+        accountId: "inventory",
+        subAccountId: data.inventoryId,
+        amount: data.avgPrice, // this should be the average
+        type: "cr",
+        userId: userId,
+      };
+
+      console.log("Credit the inventory: ", transactionInventoryData);
+      //createTransaction(transactionData);
+      totalInventorySalesAmount += data.price; // data for credit sales & debit AR
+      totalInventoryCOGSAmount += data.avgPrice; // data for debit cogs
+    }
+  });
+
+  const transactionCOGSData = {
+    trxTime: trxTime,
+    ref: ref,
+    transaction: transactionSource,
+    accountId: "cost-of-good-sold",
+    subAccountId: "cost-of-good-sold-default",
+    amount: totalInventoryCOGSAmount,
+    type: "db",
+    userId: userId,
+  };
+
+  console.log("Debit the COGS: ", transactionCOGSData);
+
+  const transactionSalesData = {
+    trxTime: trxTime,
+    ref: ref,
+    transaction: transactionSource,
+    accountId: "sales",
+    subAccountId: "sales-default",
+    amount: totalInventorySalesAmount,
+    type: "cr",
+    userId: userId,
+  };
+
+  console.log("Credit the Sales: ", transactionSalesData);
+
+  const transactionARData = {
+    trxTime: trxTime,
+    ref: ref,
+    transaction: transactionSource,
+    accountId: "account-receivable",
+    subAccountId: "account-receivable-default",
+    amount: totalInventorySalesAmount,
+    type: "db",
+    userId: userId,
+  };
+  console.log("Debit the Account Receivables: ", transactionARData);
+
+  const transactionRetainedEarningData = {
+    trxTime: trxTime,
+    ref: ref,
+    transaction: transactionSource,
+    accountId: "retained-earnings",
+    subAccountId: "retained-earnings-default",
+    amount: totalInventorySalesAmount - totalInventoryCOGSAmount,
+    type: "cr",
+    userId: userId,
+  };
+
+  console.log("Debit the Retained Earning: ", transactionRetainedEarningData);
+
+  return redirect("/sales/create");
+};
 
 export const loader = async () => {
   var id = await getLastRefId();
 
   const customers = await getUserByType("Customer");
 
-  // For the first time program running, transaction is containing nothing.
-  id = !!id ? id : { ref: 0 };
-
+  id = !!id ? id : { ref: 0 }; // For the first time program running, transaction is containing nothing.
   invariant(typeof id === "object", "Data is not valid");
   const refId = id.ref + 1;
 
-  return json({ customers, refId });
+  // Get every sub-account type inventory
+  const fullInventories = await getSubAccountsByAccount("inventory");
+
+  const inventoryStatus = !!fullInventories[0]; // check if inventory already exists in database
+  if (!inventoryStatus) {
+    // if no inventory created, redirect user to create inventory
+    return redirect("/inventory/create");
+  }
+
+  const inventoriesWithoutDefaultSubAccount = fullInventories.filter(
+    (inventory) => inventory.name !== "default"
+  ); // remove the default subaccount from list
+
+  const inventories: any[] = [];
+  for (const inventory of inventoriesWithoutDefaultSubAccount) {
+    // extend inventory list to include quantity and average price
+    const extendedInventory = await getQuantityInventoryItem(inventory.id);
+    inventories.push({
+      id: inventory.id,
+      name: inventory.name,
+      accountId: inventory.accountId,
+      avg: extendedInventory.avgPrice,
+      qty: extendedInventory.quantity,
+    });
+  }
+
+  //console.log(inventories)
+
+  return json({ customers, refId, inventories });
 };
 
 export default function CreateSales() {
-  const { customers, refId } = useLoaderData<typeof loader>();
+  const { customers, refId, inventories } = useLoaderData<typeof loader>();
 
   const date = getCurrentDate();
+
+  const defaultData = {
+    account: inventories[0],
+    avgPrice: inventories[0].avg,
+    quantity: 0,
+    price: 0,
+  };
+
+  const [data, setData] = useState([{ id: 1, data: defaultData }]);
+
+  // callback function to update transaction control data if there any change.
+  // is called by handleComponentDataChange
+  const callback = (prevData: any, newData: any) => {
+    const retData = prevData.map((prev: any) =>
+      prev.id == newData.id ? newData : prev
+    );
+    return retData;
+  };
+
+  // this handle any change in data in every transaction control
+  const handleComponentDataChange = (id: any, data: any) => {
+    const newData = { id, data };
+    setData((prevData) => callback(prevData, newData));
+  };
+
+  const [inputCount, setInputCount] = useState(1);
+  const [inputId, setInputId] = useState([1]);
+  const [customer, setCustomer] = useState(customers[0].id);
+  const [ref, setRef] = useState(refId);
+
+  useEffect(() => {
+    //console.log(data);
+  }, [data, inputId]);
+
+  // this will handle if customer dropdown menu change
+  const handleCustomerChange = (e: any) => {
+    setCustomer(e.target.value);
+  };
+
+  // this will handle if user change the ref Id
+  // Old ref id shouldn't be used
+  const handleRefIdChange = (e: any) => {
+    var newRef = parseInt(e.target.value);
+    newRef = !!newRef ? newRef : refId;
+    if (newRef < refId) {
+      newRef = refId;
+    }
+
+    setRef(newRef);
+  };
+
+  // this handle will add 1 more row of transaction control
+  const handleAddRow = () => {
+    setInputCount((prev) => (prev += 1));
+    setInputId((prev) => [...prev, inputCount + 1]);
+    setData((prev) => [...prev, { id: inputCount + 1, data: defaultData }]);
+  };
+
+  // handle if btn delete(X) is clicked
+  const handleDelete = (e: any) => {
+    const id = e.currentTarget.id;
+    setData((prevData) => prevData.filter((data) => data.id != parseInt(id)));
+    setInputId((prevInputId) =>
+      prevInputId.filter((inputId) => inputId != parseInt(id))
+    );
+  };
+
   return (
     <Body>
       <SalesNavbar />
-      Todo: 1. design input - ref - transactionSource = "sale" - customer - date
-      - inventory - inventory quantity - inventory price - inventory total -
-      total all
       <div className="container">
         <div className="row text-center mb-4 bg-warning rounded-2 p-2">
           <h4 className="text-dark">Write Invoice</h4>
@@ -55,21 +253,19 @@ export default function CreateSales() {
                 className="form-control"
                 name="ref"
                 type="text"
-                defaultValue={refId}
+                value={ref}
+                onChange={handleRefIdChange}
               />
             </div>
           </div>
           <div className="row mb-4">
             <label className="col-sm-3 col-form-label">Sales to</label>
             <div className="col-sm-3">
-              <select className="form-select">
+              <select className="form-select" onChange={handleCustomerChange}>
                 {customers.map((customer: any) => (
                   <option key={customer.id}>{customer.name}</option>
                 ))}
               </select>
-            </div>
-            <div className="col-sm-3">
-              <select className="form-select"></select>
             </div>
           </div>
         </div>
@@ -80,10 +276,41 @@ export default function CreateSales() {
             <div className="col-3">Price</div>
             <div className="col-4">Total</div>
           </div>
-          <SalesControl />
+          {inputId.map((id) => (
+            <SalesControl
+              key={id}
+              id={id}
+              data={{ inventories }}
+              onDelete={handleDelete}
+              callback={handleComponentDataChange}
+            />
+          ))}
+
+          <div className="row align-self-end">
+            <div>
+              <button
+                type="button"
+                className="btn btn-warning"
+                onClick={handleAddRow}
+              >
+                Add Row
+              </button>
+            </div>
+          </div>
         </div>
-        
       </div>
+      <Form className="container px-2" method="post">
+        <input type="hidden" name="trx-time" value={date} />
+        <input type="hidden" name="ref" value={refId.toString()} />
+        <input type="hidden" name="user" value={customer.toString()} />
+
+        <input type="hidden" name="data" value={JSON.stringify({ data })} />
+        <div className="container my-2">
+          <button className="btn btn-primary" type="submit">
+            Add Sales
+          </button>
+        </div>
+      </Form>
     </Body>
   );
 }

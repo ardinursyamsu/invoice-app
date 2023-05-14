@@ -4,7 +4,7 @@ import { createTransaction, getLastRefId } from "~/models/transaction.server";
 import invariant from "tiny-invariant";
 import { json, redirect } from "@remix-run/node";
 import type { ActionArgs } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { Form, useLoaderData } from "@remix-run/react";
 import { getCurrentDate } from "assets/helper/helper";
 import { useEffect, useState } from "react";
 import { getSubAccountsByAccount } from "~/models/subaccount.server";
@@ -92,11 +92,8 @@ export const action = async ({ request }: ActionArgs) => {
 export const loader = async () => {
   var id = await getLastRefId();
 
-  // For the first time program running, transaction is containing nothing.
-  id = !!id ? id : { ref: 0 };
-
+  id = !!id ? id : { ref: 0 }; // For the first time program running, transaction is containing nothing.
   invariant(typeof id === "object", "Data is not valid");
-
   const refId = id.ref + 1;
 
   // Getsub-account type inventory
@@ -168,7 +165,7 @@ export default function ProcureInventory() {
     setRef(newRef);
   };
 
-  // this will handle if user change peyment type
+  // this will handle if user change payment type
   const handlePaymentChange = (e: any) => {
     setPayment(e.target.value);
   };
@@ -275,7 +272,7 @@ export default function ProcureInventory() {
           </div>
         </div>
       </div>
-      <form className="container px-2" method="post">
+      <Form className="container px-2" method="post">
         <input type="hidden" name="trx-time" value={date} />
         <input type="hidden" name="ref" value={refId.toString()} />
         <input type="hidden" name="user" value={user.toString()} />
@@ -286,7 +283,7 @@ export default function ProcureInventory() {
             Add Transactions
           </button>
         </div>
-      </form>
+      </Form>
     </Body>
   );
 }
