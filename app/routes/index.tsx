@@ -67,7 +67,7 @@ export default function Index() {
     useLoaderData<typeof loader>();
 
   const netIncome =
-    totalAccount(transactions, income) + totalAccount(transactions, expenses); // definitely need to know why expense turns to be negative
+    totalAccount(transactions, income) - totalAccount(transactions, expenses); // definitely need to know why expense turns to be negative
   const suspense =
     totalAccount(transactions, assets) -
     (totalAccount(transactions, liabilities) +

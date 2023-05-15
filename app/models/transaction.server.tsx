@@ -77,7 +77,7 @@ export async function getTransactionsByAccount(accountId: string) {
       amount = Number(credit._sum.amount) - Number(debit._sum.amount);
       break;
     case "expense":
-      amount = Number(credit._sum.amount) - Number(debit._sum.amount);
+      amount = Number(debit._sum.amount) - Number(credit._sum.amount);
       break;
   }
 
@@ -152,9 +152,9 @@ export async function getQuantityInventoryItem(subAccountId: string) {
 
   const sum_cr = !!credit._sum.amount ? credit._sum.amount : 0;
   const sum_db = !!debit._sum.amount ? debit._sum.amount : 0;
-  
+
   let avgPrice = (Number(sum_db) - Number(sum_cr)) / quantity;
-  avgPrice = !!avgPrice && avgPrice || 0;
+  avgPrice = (!!avgPrice && avgPrice) || 0;
 
   return { subAccountId, quantity, avgPrice };
 }
