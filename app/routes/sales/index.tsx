@@ -7,11 +7,6 @@ import { getQuantityInventoryItem } from "~/models/transaction.server";
 import SalesNavbar from "assets/layouts/customnavbar/sales-navbar";
 
 export const loader = async () => {
-  /*
-   * id & name is obtained from sub-account with "inventory" account-type
-   * quantity is (sum of debit) - (sum of credit)
-   * price(avg price) - [(sum of price debit) - (sum of price credit)/quantity]
-   */
 
   // Get sub-account type inventory
   var inventories = await getSubAccountsByAccount("inventory");

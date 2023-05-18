@@ -11,6 +11,7 @@ import invariant from "tiny-invariant";
 import { createTransaction } from "~/models/transaction.server";
 import Body from "assets/layouts/body";
 import { getCurrentDate } from "assets/helper/helper";
+import TransactionNavbar from "assets/layouts/customnavbar/transaction-navbar";
 
 const transactionSource = "trxs";
 
@@ -146,6 +147,7 @@ export default function Transaction() {
 
   return (
     <Body>
+      <TransactionNavbar />
       <div className="container">
         <div className="row text-center mb-4 bg-warning rounded-2 p-2">
           <h4 className="text-dark">Add Transactions</h4>
