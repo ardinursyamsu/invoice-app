@@ -159,15 +159,22 @@ export async function getQuantityInventoryItem(subAccountId: string) {
   return { subAccountId, quantity, avgPrice };
 }
 
-
-export async function getAllTransaction(){
+export async function getAllTransaction() {
   return await prisma.transaction.findMany();
 }
 
-export async function getAllTransactionBySource(transactionSource: string){
-  return await prisma.transaction.findMany({where:{transaction: transactionSource}, distinct:['ref']})
+export async function getAllTransactionBySource(transactionSource: string) {
+  return await prisma.transaction.findMany({
+    where: { transaction: transactionSource },
+    distinct: ["ref"],
+  });
 }
 
-export async function getTransactionsByRefAndTransaction(transaction: string, ref: number){
-  return await prisma.transaction.findMany({where:{ref: ref, transaction:transaction}})
+export async function getTransactionsByRefAndTransaction(
+  transaction: string,
+  ref: number
+) {
+  return await prisma.transaction.findMany({
+    where: { ref: ref, transaction: transaction },
+  });
 }

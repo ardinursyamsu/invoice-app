@@ -1,61 +1,40 @@
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
-import { formatter } from "assets/helper/helper";
+import { displayCapitalFirst, formatter } from "assets/helper/helper";
 import Body from "assets/layouts/body";
-import { getSubAccountsByAccount } from "~/models/subaccount.server";
-import { getQuantityInventoryItem } from "~/models/transaction.server";
+import {
+  getAllTransactionBySource,
+  getTransactionsByRefAndTransaction,
+} from "~/models/transaction.server";
 import SalesNavbar from "assets/layouts/customnavbar/sales-navbar";
 
 export const loader = async () => {
+  const allTrxSales = await getAllTransactionBySource("sale");
 
-  // Get sub-account type inventory
-  var inventories = await getSubAccountsByAccount("inventory");
-  inventories = inventories.filter((inventory) => inventory.name !== "default"); // remove the default subaccount
-  var inventoryData: any = [];
+  var salesData:any[] = [];
 
-  // Getting the inventory data (id, name, quantity, average price)
-  for (let i = 0; i < inventories.length; i++) {
-    const inventoryId = inventories[i].id;
-    const inventoryName = inventories[i].name;
-    const inventory = await getQuantityInventoryItem(inventoryId);
-    inventoryData.push({
-      id: inventoryId,
-      name: inventoryName,
-      quantity: inventory.quantity,
-      price: inventory.avgPrice,
-    });
+  for (const sales of allTrxSales) {
+    const trxSales = await getTransactionsByRefAndTransaction(
+      sales.transaction,
+      sales.ref
+    );
+
+    const salesEntry = trxSales.find((trx: any) => trx.accountId === "sales")
+    var amount = !!salesEntry ? salesEntry.amount : 0;
+
+    const accountReceivableEntry = trxSales.find((trx: any) => trx.accountId === "account-receivable")
+    const cashEntry = trxSales.find((trx: any) => trx.accountId === "cash")
+
+    const amountPaid = Number(!!cashEntry? cashEntry.amount : 0) - Number(!!accountReceivableEntry? accountReceivableEntry.amount : 0)
+    var status = "Partially-paid";
+    if (amountPaid > 0){
+      status = "Paid"
+    } else if (amountPaid < 0){
+      status = "Unpaid"
+    }
+
+    salesData = [...salesData, {ref: sales.ref, transaction: sales.transaction, userId: sales.userId, amount: amount, status:  status}]
   }
-
-  const salesData = [
-    {
-      refId: "1-sale",
-      name: "Jual Pakaian tuker nasi bakar",
-      customer: "Abraham",
-      total: 200000,
-      status: "paid",
-    },
-    {
-      refId: "2-sale",
-      name: "2 lusin pakaian bekas",
-      customer: "Naval",
-      total: 388123,
-      status: "paid",
-    },
-    {
-      refId: "3-sale",
-      name: "30 kaos om sonata",
-      customer: "Astuti",
-      total: 500500,
-      status: "unpaid",
-    },
-    {
-      refId: "4-sale",
-      name: "18 celana dalam",
-      customer: "Omar",
-      total: 129000,
-      status: "unpaid",
-    },
-  ];
 
   return json({ salesData });
 };
@@ -71,31 +50,45 @@ export default function Sales() {
           <table className="table table-bordered">
             <thead>
               <tr className="bg-dark text-white">
-                <th scope="col">Ref-Id</th>
-                <th className="text-start" scope="col">
+                <th className="text-center col-1" scope="col">
+                  #
+                </th>
+                <th className="text-center col-2" scope="col">
+                  Ref-id
+                </th>
+                <th className="text-center col-3" scope="col">
                   Sales List
                 </th>
-                <th className="text-center" scope="col">
+                <th className="text-center col-2" scope="col">
                   Customers
                 </th>
-                <th className="text-end" scope="col">
+                <th className="text-center col-2" scope="col">
                   Total
                 </th>
-                <th className="text-end" scope="col">
+                <th className="text-center col-2" scope="col">
                   Status
                 </th>
               </tr>
             </thead>
             <tbody>
-              {salesData.map((sales: any) => (
-                <tr key={sales.refId}>
-                  <th scope="row">{sales.refId}</th>
-                  <td className="text-start">
-                    <Link to="">{sales.name}</Link>
+              {salesData.map((sales: any, idx: number) => (
+                <tr key={idx + 1}>
+                  <th className="text-center" scope="row">
+                    {idx + 1}
+                  </th>
+                  <td className="text-center">
+                    <Link
+                      to={sales.ref + "-" + sales.transaction.toUpperCase()}
+                    >
+                      {sales.ref + "-" + sales.transaction.toUpperCase()}
+                    </Link>
                   </td>
-                  <td className="text-center">{sales.customer}</td>
-                  <td className="text-end">{formatter.format(sales.total)}</td>
-                  <td className="text-end">{sales.status}</td>
+                  <td className="text-start"></td>
+                  <td className="text-center">
+                    {displayCapitalFirst(sales.userId)}
+                  </td>
+                  <td className="text-end">{formatter.format(sales.amount)}</td>
+                  <td className="text-start">{sales.status}</td>
                 </tr>
               ))}
             </tbody>

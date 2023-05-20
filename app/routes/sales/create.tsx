@@ -14,7 +14,7 @@ import {
 } from "~/models/transaction.server";
 import { getUserByType } from "~/models/user.server";
 import type { ActionArgs } from "@remix-run/node";
-import { Decimal } from "@prisma/client/runtime";
+import { Decimal } from "@prisma/client/runtime/library";
 
 const transactionSource = "sale";
 

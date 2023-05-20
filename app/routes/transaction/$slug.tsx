@@ -89,7 +89,7 @@ export const loader = async ({ params }: LoaderArgs) => {
     ref
   );
 
-  const theData = transactions.map((transaction, idx) => ({
+  const theData = transactions.map((transaction: any, idx: number) => ({
     id: idx,
     data: {
       account: transaction.accountId,
@@ -133,7 +133,7 @@ export default function Transaction() {
   const defaultData = {
     account: accounts[0],
     subAccount: subAccounts.find(
-      (subAccount) => subAccount.accountId == accounts[0].id
+      (subAccount: any) => subAccount.accountId == accounts[0].id
     ),
     debit: 0,
     credit: 0,
@@ -155,7 +155,7 @@ export default function Transaction() {
   // this handle any change in data in every transaction control
   const handleComponentDataChange = (id: any, data: any) => {
     const newData = { id, data };
-    setData((prevData) => callback(prevData, newData));
+    setData((prevData: any) => callback(prevData, newData));
   };
 
   const [inputCount, setInputCount] = useState(theData.length);
@@ -170,15 +170,15 @@ export default function Transaction() {
 
   // this handle will add 1 more row of transaction control
   const handleAddRow = () => {
-    setInputCount((prev) => (prev += 1));
+    setInputCount((prev: any) => (prev += 1));
     setInputId((prev) => [...prev, inputCount + 1]);
-    setData((prev) => [...prev, { id: inputCount + 1, data: defaultData }]);
+    setData((prev: any) => [...prev, { id: inputCount + 1, data: defaultData }]);
   };
 
   // handle if btn delete (X) is clicked
   const handleDelete = (e: any) => {
     const id = e.currentTarget.id;
-    setData((prevData) => prevData.filter((data) => data.id != parseInt(id)));
+    setData((prevData: any) => prevData.filter((data: any) => data.id != parseInt(id)));
     setInputId((prevInputId) =>
       prevInputId.filter((inputId) => inputId != parseInt(id))
     );

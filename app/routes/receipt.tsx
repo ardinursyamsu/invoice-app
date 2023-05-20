@@ -1,4 +1,4 @@
-import { Decimal } from "@prisma/client/runtime";
+import { Decimal } from "@prisma/client/runtime/library";
 import { ActionArgs, json, redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import CashControl from "assets/components/cash-control";
@@ -126,7 +126,7 @@ export default function Receipt() {
   const defaultData = {
     account: accounts[0],
     subAccounts: subAccounts.find(
-      (subAccount) => subAccount.accountId == accounts[0].id
+      (subAccount: any) => subAccount.accountId == accounts[0].id
     ),
     amount: 0,
   };
@@ -149,7 +149,7 @@ export default function Receipt() {
   };
 
   const [userList, setUserList] = useState(
-    users.filter((user) => user.type == "Customer")
+    users.filter((user:any) => user.type == "Customer")
   );
 
   const [inputCount, setInputCount] = useState(1);
@@ -158,7 +158,7 @@ export default function Receipt() {
 
   // filter cateogry of each user
   var typeUser: any = [];
-  users.forEach((user) => {
+  users.forEach((user: any) => {
     if (typeUser.indexOf(user.type) == -1) {
       typeUser = [...typeUser, user.type];
     }
@@ -171,7 +171,7 @@ export default function Receipt() {
   // do something if category (customer/supplier) change
   const handleCategoryChange = (e: any) => {
     const typeFilter = e.target.value;
-    setUserList(users.filter((user) => user.type == typeFilter));
+    setUserList(users.filter((user: any) => user.type == typeFilter));
   };
 
   // handle if add row button is clicked (add more row)
@@ -234,7 +234,7 @@ export default function Receipt() {
             </div>
             <div className="col-sm-3">
               <select className="form-select" onChange={handleUserChange}>
-                {userList.map((user) => (
+                {userList.map((user:any) => (
                   <option key={user.id}>{user.name}</option>
                 ))}
               </select>

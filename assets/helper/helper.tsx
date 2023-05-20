@@ -125,3 +125,10 @@ export const getDate = (dateFromDatabase: string) => {
 
   return date;
 };
+
+export const displayCapitalFirst = (sourceStr: string) => {
+  const firstLetter = sourceStr.charAt(0).toUpperCase();
+  const theRest = sourceStr.slice(1, sourceStr.length);
+
+  return firstLetter + theRest;
+};

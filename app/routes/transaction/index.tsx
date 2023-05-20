@@ -1,19 +1,13 @@
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
-import { displayDate, formatter } from "assets/helper/helper";
+import {
+  displayCapitalFirst,
+  displayDate,
+  formatter,
+} from "assets/helper/helper";
 import Body from "assets/layouts/body";
 import TransactionNavbar from "assets/layouts/customnavbar/transaction-navbar";
-import {
-  getAllTransaction,
-  getAllTransactionBySource,
-} from "~/models/transaction.server";
-
-const displayCapitalFirst = (sourceStr: string) => {
-  const firstLetter = sourceStr.charAt(0).toUpperCase();
-  const theRest = sourceStr.slice(1, sourceStr.length);
-
-  return firstLetter + theRest;
-};
+import { getAllTransactionBySource } from "~/models/transaction.server";
 
 export const loader = async () => {
   const transactions = await getAllTransactionBySource("trxs");
@@ -56,7 +50,7 @@ export default function TransactionIndex() {
               </tr>
             </thead>
             <tbody>
-              {transactions.map((transaction: any, idx) => (
+              {transactions.map((transaction: any, idx: number) => (
                 <tr className="h-2" key={idx + 1}>
                   <td className="text-center" scope="row">
                     {idx + 1}
