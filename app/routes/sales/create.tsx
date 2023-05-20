@@ -180,8 +180,8 @@ export default function CreateSales() {
     setData((prevData) => callback(prevData, newData));
   };
 
-  const [inputCount, setInputCount] = useState(1);
-  const [inputId, setInputId] = useState([1]);
+  const [inputCount, setInputCount] = useState(0);
+  const [inputId, setInputId] = useState([0]);
   const [customer, setCustomer] = useState(customers[0].id);
   const [ref, setRef] = useState(refId);
 
