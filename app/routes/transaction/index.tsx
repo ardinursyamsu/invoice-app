@@ -1,18 +1,29 @@
 import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
-import { formatter } from "assets/helper/helper";
+import { Link, useLoaderData } from "@remix-run/react";
+import { displayDate, formatter } from "assets/helper/helper";
 import Body from "assets/layouts/body";
 import TransactionNavbar from "assets/layouts/customnavbar/transaction-navbar";
-import { getAllTransaction } from "~/models/transaction.server";
+import {
+  getAllTransaction,
+  getAllTransactionBySource,
+} from "~/models/transaction.server";
+
+const displayCapitalFirst = (sourceStr: string) => {
+  const firstLetter = sourceStr.charAt(0).toUpperCase();
+  const theRest = sourceStr.slice(1, sourceStr.length);
+
+  return firstLetter + theRest;
+};
 
 export const loader = async () => {
-  const transactions = await getAllTransaction();
+  const transactions = await getAllTransactionBySource("trxs");
 
   return json({ transactions });
 };
 
 export default function TransactionIndex() {
   const { transactions } = useLoaderData<typeof loader>();
+
   return (
     <Body>
       <TransactionNavbar />
@@ -24,39 +35,59 @@ export default function TransactionIndex() {
                 <th className="text-center col-1" scope="col">
                   #
                 </th>
-                <th className="text-start col-3" scope="col">
+                <th className="text-center col-2" scope="col">
                   Date
                 </th>
-                <th className="text-center col-1" scope="col">
+                <th className="text-center col-2" scope="col">
                   Ref ID
                 </th>
                 <th className="text-center col-2" scope="col">
                   Account
                 </th>
                 <th className="text-center col-2" scope="col">
-                  Sub-account
+                  Sub-Account
                 </th>
                 <th className="text-center col-1" scope="col">
                   User
                 </th>
-                <th className="text-end col-2" scope="col">
+                <th className="text-center col-2" scope="col">
                   Amount
                 </th>
               </tr>
             </thead>
             <tbody>
-              {transactions.map((transaction: any) => (
-                <tr className="h-2" key={transaction.id}>
-                  <td className="text-center" scope="row">{transaction.id}</td>
-                  <td className="text-start">{transaction.trxTime}</td>
-                  <td className="text-center">
-                    {transaction.ref + "-" + transaction.transaction}
+              {transactions.map((transaction: any, idx) => (
+                <tr className="h-2" key={idx + 1}>
+                  <td className="text-center" scope="row">
+                    {idx + 1}
                   </td>
-                  <td className="text-center">{transaction.accountId}</td>
-                  <td className="text-center">{transaction.subAccountId}</td>
-                  <td className="text-center">{transaction.userId}</td>
+                  <td className="text-start">
+                    {displayDate(transaction.trxTime.toString())}
+                  </td>
+                  <td className="text-center">
+                    <Link
+                      to={
+                        transaction.ref +
+                        "-" +
+                        transaction.transaction.toUpperCase()
+                      }
+                    >
+                      {transaction.ref +
+                        "-" +
+                        transaction.transaction.toUpperCase()}
+                    </Link>
+                  </td>
+                  <td className="text-center">
+                    {displayCapitalFirst(transaction.accountId)}
+                  </td>
+                  <td className="text-center">
+                    {displayCapitalFirst(transaction.subAccountId)}
+                  </td>
+                  <td className="text-center">
+                    {displayCapitalFirst(transaction.userId)}
+                  </td>
                   <td className="text-end">
-                    {transaction.type +
+                    {transaction.type.toString().toUpperCase() +
                       " - " +
                       formatter.format(transaction.amount)}
                   </td>

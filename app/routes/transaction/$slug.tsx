@@ -3,14 +3,17 @@ import { useLoaderData } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import { getAccounts } from "~/models/account.server";
 import { getSubAccounts } from "~/models/subaccount.server";
-import { getLastRefId } from "~/models/transaction.server";
+import {
+  getLastRefId,
+  getTransactionsByRefAndTransaction,
+} from "~/models/transaction.server";
 import { getUsers } from "~/models/user.server";
-import type { ActionArgs } from "@remix-run/node";
+import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { TransactionControl } from "assets/components/transaction-control";
 import invariant from "tiny-invariant";
 import { createTransaction } from "~/models/transaction.server";
 import Body from "assets/layouts/body";
-import { getCurrentDate } from "assets/helper/helper";
+import { getCurrentDate, getDate } from "assets/helper/helper";
 import TransactionNavbar from "assets/layouts/customnavbar/transaction-navbar";
 
 const transactionSource = "trxs";
@@ -49,27 +52,61 @@ export const action = async ({ request }: ActionArgs) => {
       type = "cr";
       amount = credit;
     }
-    await createTransaction({
-      trxTime,
-      ref,
-      transaction,
-      accountId,
-      subAccountId,
-      amount,
-      type, // cr / db
-      userId,
-    });
+    // await createTransaction({
+    //   trxTime,
+    //   ref,
+    //   transaction,
+    //   accountId,
+    //   subAccountId,
+    //   amount,
+    //   type, // cr / db
+    //   userId,
+    // });
   });
 
   return redirect("/transaction");
 };
 
-export const loader = async () => {
+export const loader = async ({ params }: LoaderArgs) => {
   const accounts = await getAccounts();
   const subAccounts = await getSubAccounts();
   const users = await getUsers();
+  const { slug } = params;
+  const arrSlug = slug?.split("-");
 
-  var id = await getLastRefId();
+  var ref = 1;
+  var transaction = "";
+
+  if (!!arrSlug) {
+    ref = parseInt(arrSlug[0]);
+    transaction = arrSlug[1].toLowerCase();
+  } else {
+    return redirect("/transaction");
+  }
+
+  const transactions = await getTransactionsByRefAndTransaction(
+    transaction,
+    ref
+  );
+
+  const theData = transactions.map((transaction, idx) => ({
+    id: idx,
+    data: {
+      account: transaction.accountId,
+      subAccount: transaction.subAccountId,
+      debit: transaction.type == "db" ? transaction.amount : 0,
+      credit: transaction.type == "cr" ? transaction.amount : 0,
+      user: transaction.userId,
+    },
+  }));
+
+  var id = ref;
+
+  var date = getCurrentDate();
+
+  if (!!transactions) {
+    date = getDate(transactions[0].trxTime.toString());
+  }
 
   // check user
   const userStatus = !!users[0]; // if user hasn't created yet, force user to create first
@@ -78,21 +115,19 @@ export const loader = async () => {
   }
 
   // For the first time program running, transaction is containing nothing.
-  id = !!id ? id : { ref: 0 };
+  //id = !!id ? id : { ref: 0 };
 
-  invariant(typeof id === "object", "Data is not valid");
+  invariant(typeof id === "number", "id is not valid");
 
-  const refId = id.ref + 1;
+  const refId = id;
 
-  return json({ accounts, subAccounts, users, refId });
+  return json({ accounts, subAccounts, users, refId, date, theData });
 };
 
 /* -- Render in Client -- */
 export default function Transaction() {
-  const { accounts, subAccounts, users, refId } =
+  const { accounts, subAccounts, users, refId, date, theData } =
     useLoaderData<typeof loader>();
-
-  const date = getCurrentDate();
 
   // Default data so that every input-group doesn't send empty data
   const defaultData = {
@@ -106,7 +141,7 @@ export default function Transaction() {
   };
 
   // keeping track of individual transaction control data
-  const [data, setData] = useState([{ id: 1, data: defaultData }]);
+  const [data, setData] = useState(theData);
 
   // callback function to update transaction control data if there any change.
   // is called by handleComponentDataChange
@@ -123,11 +158,15 @@ export default function Transaction() {
     setData((prevData) => callback(prevData, newData));
   };
 
-  const [inputCount, setInputCount] = useState(0);
-  const [inputId, setInputId] = useState([0]);
+  const [inputCount, setInputCount] = useState(theData.length);
+  const [inputId, setInputId] = useState(
+    Array.from(Array(theData.length).keys())
+  );
 
   // update for every change in data state
-  useEffect(() => {}, [data, inputId]);
+  useEffect(() => {
+    console.log(data);
+  }, [data, inputId]);
 
   // this handle will add 1 more row of transaction control
   const handleAddRow = () => {
@@ -192,6 +231,7 @@ export default function Transaction() {
               key={id}
               id={id}
               data={{ accounts, subAccounts, users }}
+              defaultData = {theData.at(id)}
               callback={handleComponentDataChange}
               onDelete={handleDelete}
             />

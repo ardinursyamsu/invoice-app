@@ -18,11 +18,11 @@ export function TransactionControl(props: any) {
   const [selectedSubAccounts, setSelectedSubAccounts] = useState(
     subAccounts.filter((sub: any) => sub.accountId === accounts[0].id)
   );
-  const [account, setAccount] = useState(accounts[0].id);
-  const [subAccount, setSubAccount] = useState(selectedSubAccounts[0].id);
-  const [debit, setDebit] = useState(0);
-  const [credit, setCredit] = useState(0);
-  const [user, setUser] = useState(users[0].id);
+  const [account, setAccount] = useState(!!props.defaultData? props.defaultData.data.account : accounts[0].id);
+  const [subAccount, setSubAccount] = useState(!!props.defaultData? props.defaultData.data.subAccount : selectedSubAccounts[0].id);
+  const [debit, setDebit] = useState(!!props.defaultData? props.defaultData.data.debit : 0);
+  const [credit, setCredit] = useState(!!props.defaultData? props.defaultData.data.credit : 0);
+  const [user, setUser] = useState(!!props.defaultData? props.defaultData.data.user : users[0].id);
 
   const [data, setData] = useState({
     account: account,
@@ -87,6 +87,7 @@ export function TransactionControl(props: any) {
         <select
           className="form-select"
           name="account"
+          defaultValue={account}
           onChange={(e) => handleAccountChange(e)}
         >
           {accounts.map((account: any) => (
@@ -100,6 +101,7 @@ export function TransactionControl(props: any) {
         <select
           className="form-select"
           name="sub-account"
+          defaultValue={subAccount}
           onChange={(e) => handleSubAccountChange(e)}
         >
           {selectedSubAccounts.map((subAccount: any) => (
