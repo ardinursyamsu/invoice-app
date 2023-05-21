@@ -34,7 +34,7 @@ export function TransactionControl(props: any) {
 
   // call the higher state if there's any update in data
   useEffect(() => {
-    //console.log(data);
+    console.log(data);
     // the final state is in the parent. Use callback in here to update value in the parent
     props.callback(props.id, data);
   }, [data]);

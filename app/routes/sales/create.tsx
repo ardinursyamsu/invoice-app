@@ -9,7 +9,7 @@ import invariant from "tiny-invariant";
 import { getSubAccountsByAccount } from "~/models/subaccount.server";
 import {
   createTransaction,
-  getLastRefId,
+  getLastOrderId,
   getQuantityInventoryItem,
 } from "~/models/transaction.server";
 import { getUserByType } from "~/models/user.server";
@@ -41,20 +41,22 @@ export const action = async ({ request }: ActionArgs) => {
   var totalInventoryCOGSAmount = 0;
 
   // process each row of data input
-  data.forEach((element: typeof data) => {
+/*  data.forEach((element: typeof data) => {
     const { id, data } = element;
 
     for (var i = 0; i < data.quantity; i++) {
       createTransaction({
         // credit each of the inventory
         trxTime: trxTime,
-        ref: ref,
-        transaction: transactionSource,
+        orderId: ref,
+        sourceTrx: transactionSource,
+        controlTrx: "1",
         accountId: "inventory",
         subAccountId: data.inventoryId,
-        amount: data.avgPrice, // this should be the average
+        amount: data.avgPrice,
         type: "cr",
         userId: userId,
+        quantity: new Decimal(1);
       });
 
       totalInventorySalesAmount += data.price; // data for credit sales & debit AR
@@ -109,18 +111,18 @@ export const action = async ({ request }: ActionArgs) => {
     type: "cr",
     userId: userId,
   });
-
+*/
   return redirect("/sales");
 };
 
 export const loader = async () => {
-  var id = await getLastRefId();
+  var id = await getLastOrderId();
 
   const customers = await getUserByType("Customer");
 
-  id = !!id ? id : { ref: 0 }; // For the first time program running, transaction is containing nothing.
+  id = !!id ? id : { orderId: 0 }; // For the first time program running, transaction is containing nothing.
   invariant(typeof id === "object", "Data is not valid");
-  const refId = id.ref + 1;
+  const refId = id.orderId + 1;
 
   // Get every sub-account type inventory
   const fullInventories = await getSubAccountsByAccount("inventory");

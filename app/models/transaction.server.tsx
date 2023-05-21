@@ -5,22 +5,25 @@ export async function createTransaction(
   transaction: Pick<
     Transaction,
     | "trxTime"
-    | "ref"
-    | "transaction"
+    | "orderId"
+    | "sourceTrx"
+    | "controlTrx"
     | "accountId"
     | "subAccountId"
-    | "amount"
     | "type"
+    | "unitPrice"
+    | "quantity"
+    | "amount"
     | "userId"
   >
 ) {
   return prisma.transaction.create({ data: transaction });
 }
 
-export async function getLastRefId() {
+export async function getLastOrderId() {
   const ids = await prisma.transaction.findMany({
-    select: { ref: true },
-    orderBy: { ref: "desc" },
+    select: { orderId: true },
+    orderBy: { orderId: "desc" },
   });
 
   const lastId = ids.length === 0 ? 0 : ids[0];
@@ -136,18 +139,18 @@ export async function getSubAccountNetAmount(subAccountId: string) {
 export async function getQuantityInventoryItem(subAccountId: string) {
   let credit = await prisma.transaction.aggregate({
     where: { subAccountId: subAccountId, type: "cr" },
-    _count: { amount: true },
-    _sum: { amount: true },
+//    _count: { amount: true },
+    _sum: { amount: true, quantity: true },
   });
 
   let debit = await prisma.transaction.aggregate({
     where: { subAccountId: subAccountId, type: "db" },
-    _count: { amount: true },
-    _sum: { amount: true },
+//    _count: { amount: true },
+    _sum: { amount: true, quantity:true },
   });
 
-  const qty_cr = !!credit._count.amount ? credit._count.amount : 0;
-  const qty_db = !!debit._count.amount ? debit._count.amount : 0;
+  const qty_cr = !!credit._sum.quantity ? credit._sum.quantity : 0;
+  const qty_db = !!debit._sum.quantity ? debit._sum.quantity : 0;
   const quantity = Number(qty_db) - Number(qty_cr);
 
   const sum_cr = !!credit._sum.amount ? credit._sum.amount : 0;
@@ -163,18 +166,18 @@ export async function getAllTransaction() {
   return await prisma.transaction.findMany();
 }
 
-export async function getAllTransactionBySource(transactionSource: string) {
+export async function getAllTransactionBySource(sourceTrx: string) {
   return await prisma.transaction.findMany({
-    where: { transaction: transactionSource },
-    distinct: ["ref"],
+    where: { sourceTrx: sourceTrx },
+    distinct: ["orderId"],
   });
 }
 
 export async function getTransactionsByRefAndTransaction(
-  transaction: string,
-  ref: number
+  sourceTrx: string,
+  orderId: number
 ) {
   return await prisma.transaction.findMany({
-    where: { ref: ref, transaction: transaction },
+    where: { orderId: orderId, sourceTrx: sourceTrx },
   });
 }

@@ -3,15 +3,15 @@ import { useLoaderData } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import { getAccounts } from "~/models/account.server";
 import { getSubAccounts } from "~/models/subaccount.server";
-import { getLastRefId } from "~/models/transaction.server";
+import { createTransaction, getLastOrderId } from "~/models/transaction.server";
 import { getUsers } from "~/models/user.server";
 import type { ActionArgs } from "@remix-run/node";
 import { TransactionControl } from "assets/components/transaction-control";
 import invariant from "tiny-invariant";
-import { createTransaction } from "~/models/transaction.server";
 import Body from "assets/layouts/body";
 import { getCurrentDate } from "assets/helper/helper";
 import TransactionNavbar from "assets/layouts/customnavbar/transaction-navbar";
+import { Decimal } from "@prisma/client/runtime/library";
 
 const transactionSource = "trxs";
 
@@ -22,24 +22,25 @@ export const action = async ({ request }: ActionArgs) => {
   invariant(typeof date === "string", "Data must be string");
   const trxTime = new Date(date);
 
-  const refId = formData.get("ref");
-  invariant(typeof refId === "string", "Data mut be string");
-  const ref = parseInt(refId);
+  const orderIdAsString = formData.get("orderId");
+  invariant(typeof orderIdAsString === "string", "Data mut be string");
+  const orderId = parseInt(orderIdAsString);
 
   const rawdata = formData.get("data");
   invariant(typeof rawdata === "string", "Data must be string");
   const jsonData = JSON.parse(rawdata);
   const { data } = jsonData;
-  const transaction = transactionSource;
+  const sourceTrx = transactionSource;
 
   // processing foreach data that send by transcation-control
   data.forEach(async (element: any) => {
     const { id, data } = element;
     const { account, subAccount, debit, credit, user } = data;
-
+    const controlTrx = id;
     const accountId = account;
     const userId = user;
     const subAccountId = subAccount;
+    const quantity = 1; // default for transacction control must be 1
     var type;
     var amount;
     if (debit != 0) {
@@ -49,14 +50,19 @@ export const action = async ({ request }: ActionArgs) => {
       type = "cr";
       amount = credit;
     }
+    const unitPrice = new Decimal(amount); // default for transaction price are amount
+
     await createTransaction({
       trxTime,
-      ref,
-      transaction,
+      orderId,
+      sourceTrx,
+      controlTrx,
       accountId,
       subAccountId,
+      type,
+      unitPrice,
+      quantity,
       amount,
-      type, // cr / db
       userId,
     });
   });
@@ -69,27 +75,27 @@ export const loader = async () => {
   const subAccounts = await getSubAccounts();
   const users = await getUsers();
 
-  var id = await getLastRefId();
+  var id = await getLastOrderId();
 
   // check user
   const userStatus = !!users[0]; // if user hasn't created yet, force user to create first
   if (!userStatus) {
-    return redirect("/user");
+    return redirect("/user/create");
   }
 
   // For the first time program running, transaction is containing nothing.
-  id = !!id ? id : { ref: 0 };
+  id = !!id ? id : { orderId: 0 };
 
   invariant(typeof id === "object", "Data is not valid");
 
-  const refId = id.ref + 1;
+  const orderId = id.orderId + 1;
 
-  return json({ accounts, subAccounts, users, refId });
+  return json({ accounts, subAccounts, users, orderId });
 };
 
 /* -- Render in Client -- */
-export default function Transaction() {
-  const { accounts, subAccounts, users, refId } =
+export default function CreateTransaction() {
+  const { accounts, subAccounts, users, orderId } =
     useLoaderData<typeof loader>();
 
   const date = getCurrentDate();
@@ -106,7 +112,7 @@ export default function Transaction() {
   };
 
   // keeping track of individual transaction control data
-  const [data, setData] = useState([{ id: 1, data: defaultData }]);
+  const [data, setData] = useState([{ id: 0, data: defaultData }]);
 
   // callback function to update transaction control data if there any change.
   // is called by handleComponentDataChange
@@ -127,7 +133,9 @@ export default function Transaction() {
   const [inputId, setInputId] = useState([0]);
 
   // update for every change in data state
-  useEffect(() => {}, [data, inputId]);
+  useEffect(() => {
+    console.log(data);
+  }, [data, inputId]);
 
   // this handle will add 1 more row of transaction control
   const handleAddRow = () => {
@@ -139,6 +147,7 @@ export default function Transaction() {
   // handle if btn delete (X) is clicked
   const handleDelete = (e: any) => {
     const id = e.currentTarget.id;
+    console.log(id);
     setData((prevData) => prevData.filter((data) => data.id != parseInt(id)));
     setInputId((prevInputId) =>
       prevInputId.filter((inputId) => inputId != parseInt(id))
@@ -170,7 +179,7 @@ export default function Transaction() {
               className="form-control"
               name="ref"
               type="text"
-              defaultValue={refId.toString()}
+              defaultValue={orderId.toString()}
             />
           </div>
         </div>
@@ -212,7 +221,7 @@ export default function Transaction() {
 
       <form method="post">
         <input type="hidden" name="trx-time" value={date} />
-        <input type="hidden" name="ref" value={refId.toString()} />
+        <input type="hidden" name="orderId" value={orderId.toString()} />
         <input type="hidden" name="data" value={JSON.stringify({ data })} />
         <div className="container my-2">
           <button className="btn btn-primary" type="submit">

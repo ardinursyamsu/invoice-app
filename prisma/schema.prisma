@@ -13,11 +13,14 @@ datasource db {
 model Transaction {
   id           Int        @id @default(autoincrement())
   trxTime      DateTime
-  ref          Int
-  transaction  String
+  orderId      Int
+  sourceTrx    String // (sale, prch, invt, pymt, rcpt )
+  controlTrx   Int // (control Id)
   account      Account    @relation(fields: [accountId], references: [id])
   accountId    String
-  type         String
+  type         String // (cr, db)
+  unitPrice    Decimal?
+  quantity     Int?
   amount       Decimal
   subAccount   SubAccount @relation(fields: [subAccountId], references: [id])
   subAccountId String
@@ -28,7 +31,7 @@ model Transaction {
 model Account {
   id           String        @id
   name         String
-  type         String
+  type         String // (income, expense, asset, equity, liability)
   transactions Transaction[]
   subAccounts  SubAccount[]
 }
@@ -44,13 +47,6 @@ model SubAccount {
 model User {
   id          String        @id
   name        String
-  type        String
+  type        String // (customer, supplier, other)
   transaction Transaction[]
-}
-
-model Inventory {
-  id       String  @id
-  name     String
-  quantity Decimal
-  avgPrice Decimal
 }

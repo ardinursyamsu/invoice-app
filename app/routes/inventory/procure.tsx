@@ -1,6 +1,6 @@
 import Body from "assets/layouts/body";
 import ProcurementControl from "assets/components/procurement-control";
-import { createTransaction, getLastRefId } from "~/models/transaction.server";
+import { createTransaction, getLastOrderId } from "~/models/transaction.server";
 import invariant from "tiny-invariant";
 import { json, redirect } from "@remix-run/node";
 import type { ActionArgs } from "@remix-run/node";
@@ -18,16 +18,16 @@ export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
 
   const rawdata = formData.get("data");
-  invariant(typeof rawdata === "string", "Data must be string");
+  invariant(typeof rawdata === "string", "rawdata must be string");
   const jsonData = JSON.parse(rawdata);
   const { data } = jsonData;
 
-  const refId = formData.get("ref");
-  invariant(typeof refId === "string", "Data mut be string");
-  const ref = parseInt(refId);
+  const order = formData.get("orderId");
+  invariant(typeof order === "string", "order mut be string");
+  const orderId = parseInt(order);
 
   const date = formData.get("trx-time");
-  invariant(typeof date === "string", "Data must be string");
+  invariant(typeof date === "string", "date must be string");
   const trxTime = new Date(date);
 
   const userId = formData.get("user");
@@ -37,64 +37,74 @@ export const action = async ({ request }: ActionArgs) => {
 
   var totalAmount = 0;
 
-  // process each row of data input
-  data.forEach((element: typeof data) => {
+  const exampleData = {
+    id: 0,
+    data: {
+      inventoryId: "hitam--pendek--xl-combed-30s",
+      quantity: 100,
+      price: 10000,
+      total: 1000000,
+    },
+  };
+
+  data.forEach((element: any) => {
+    // iterate for each control
     const { id, data } = element;
+    const { inventoryId, quantity, price, total } = data;
 
-    for (var i = 0; i < data.quantity; i++) {
-      createTransaction({
-        // process debit for each inventory
-        trxTime: trxTime,
-        ref: ref,
-        transaction: transactionSource,
-        accountId: "inventory",
-        subAccountId: data.inventoryId,
-        amount: data.price,
-        type: "db",
-        userId: userId,
-      });
+    // create transaction for inventory
+    createTransaction({
+      trxTime: trxTime,
+      orderId: orderId,
+      sourceTrx: transactionSource,
+      controlTrx: id,
+      accountId: "inventory",
+      subAccountId: inventoryId,
+      unitPrice: new Decimal(price),
+      quantity: quantity,
+      amount: new Decimal(total),
+      type: "db",
+      userId: userId,
+    });
 
-      totalAmount += data.price;
+    // create transaction for Account payable or cash
+    var account = "";
+    var subAccount = "";
+    switch (paymentType) {
+      case "cash": // if cash, credit the cash
+        account = "cash";
+        subAccount = "cash-default";
+        break;
+      case "credit": // if credit, credit theh account payable
+        account = "account-payable";
+        subAccount = "account-payable-default";
+        break;
     }
-  });
 
-  switch (paymentType) {
-    case "cash": // if cash, credit the cash
-      createTransaction({
-        trxTime: trxTime,
-        ref: ref,
-        transaction: transactionSource,
-        accountId: "cash",
-        subAccountId: "cash-default",
-        amount: new Decimal(totalAmount),
-        type: "cr",
-        userId: userId,
-      });
-      break;
-    case "credit":
-      createTransaction({
-        // if credit, credit theh account payable
-        trxTime: trxTime,
-        ref: ref,
-        transaction: transactionSource,
-        accountId: "account-payable",
-        subAccountId: "account-payable-default",
-        amount: new Decimal(totalAmount),
-        type: "cr",
-        userId: userId,
-      });
-      break;
-  }
+    createTransaction({
+      trxTime: trxTime,
+      orderId: orderId,
+      sourceTrx: transactionSource,
+      controlTrx: id,
+      accountId: account,
+      subAccountId: subAccount,
+      unitPrice: new Decimal(total),
+      quantity: 1,
+      amount: new Decimal(total),
+      type: "cr",
+      userId: userId,
+    });
+  });
 
   return redirect("/inventory");
 };
 
 export const loader = async () => {
-  var id = await getLastRefId();
+  var id = await getLastOrderId();
 
-  id = !!id ? id : { ref: 0 }; // For the first time program running, transaction is containing nothing.
+  id = !!id ? id : { orderId: 0 }; // For the first time program running, transaction is containing nothing.
   invariant(typeof id === "object", "Data is not valid");
-  const refId = id.ref + 1;
+  const order = id.orderId + 1;
 
   // Getsub-account type inventory
   var inventories = await getSubAccountsByAccount("inventory");
@@ -108,11 +118,12 @@ export const loader = async () => {
 
   const users = await getUsers();
 
-  return json({ refId, inventories, users });
+  return json({ order, inventories, users });
 };
+
 /* -- Render in Client -- */
 export default function ProcureInventory() {
-  const { refId, inventories, users } = useLoaderData<typeof loader>();
+  const { order, inventories, users } = useLoaderData<typeof loader>();
 
   const date = getCurrentDate();
 
@@ -122,7 +133,7 @@ export default function ProcureInventory() {
     price: 0,
   };
 
-  const [data, setData] = useState([{ id: 1, data: defaultData }]);
+  const [data, setData] = useState([{ id: 0, data: defaultData }]);
 
   // callback function to update transaction control data if there any change.
   // is called by handleComponentDataChange
@@ -139,10 +150,10 @@ export default function ProcureInventory() {
     setData((prevData) => callback(prevData, newData));
   };
 
-  const [inputCount, setInputCount] = useState(1);
-  const [inputId, setInputId] = useState([1]);
+  const [inputCount, setInputCount] = useState(0);
+  const [inputId, setInputId] = useState([0]);
   const [user, setUser] = useState(users[0].id);
-  const [ref, setRef] = useState(refId);
+  const [orderId, setOrderId] = useState(order);
   const [payment, setPayment] = useState("cash");
 
   useEffect(() => {
@@ -157,13 +168,13 @@ export default function ProcureInventory() {
   // this will handle if user change the ref Id
   // Old ref id shouldn't be used
   const handleRefIdChange = (e: any) => {
-    var newRef = parseInt(e.target.value);
-    newRef = !!newRef ? newRef : refId;
-    if (newRef < refId) {
-      newRef = refId;
+    var newOrderId = parseInt(e.target.value);
+    newOrderId = !!newOrderId ? newOrderId : orderId;
+    if (newOrderId < orderId) {
+      newOrderId = orderId;
     }
 
-    setRef(newRef);
+    setOrderId(newOrderId);
   };
 
   // this will handle if user change payment type
@@ -224,9 +235,9 @@ export default function ProcureInventory() {
           <div className="col-sm-3">
             <input
               className="form-control"
-              name="ref"
+              name="orderId"
               type="text"
-              value={ref}
+              value={orderId}
               onChange={handleRefIdChange}
             />
           </div>
@@ -275,7 +286,7 @@ export default function ProcureInventory() {
       </div>
       <Form className="container px-2" method="post">
         <input type="hidden" name="trx-time" value={date} />
-        <input type="hidden" name="ref" value={refId.toString()} />
+        <input type="hidden" name="orderId" value={orderId.toString()} />
         <input type="hidden" name="user" value={user.toString()} />
         <input type="hidden" name="payment" value={payment.toString()} />
         <input type="hidden" name="data" value={JSON.stringify({ data })} />

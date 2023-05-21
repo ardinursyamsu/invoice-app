@@ -1,8 +1,14 @@
-# Resetting the todo(s)
-1. split transactions into 2 pages
-- create transactions
-- display list transactions
-2. Do the same for payment & receipt
-3. Find out why expenses query result is negative
-4. Fix the display sales page
-5. Create display transaction detail from sales 
+# TODO LIST
+1. Inventory (Index | Create | Procure | Write-off)
+2. Sales (Index | Create | Detail | Edit)
+3. Transaction (Index | Create | Edit)
+4. Payment (Index | Create | Edit)
+5. Receipt (Index | Create | Edit)
+
+
+# Bookeeping record rule
+Every transaction (1 control) handle their own balance transaction
+
+id ---> transaction per unit time (datetime)
+|--- form ---> source of transaction (sales, transaction, payment, receipt, inventory, purchase, etc ...)
+     |--- control ---> control id (every line of transaction)

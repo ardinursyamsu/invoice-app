@@ -13,6 +13,7 @@ export default function ProcurementControl(props: any) {
     inventoryId: inventory,
     quantity: quantity,
     price: price,
+    total: total,
   });
 
   // call the higher state if there's any update in data
@@ -28,10 +29,19 @@ export default function ProcurementControl(props: any) {
   };
 
   const handleQtyChange = (e: any) => {
-    const currentQty = parseInt(e.target.value);
+    var currentQty = parseInt(e.target.value);
+    //console.log(currentQty);
+    if (currentQty < 0){
+      currentQty = 0;
+      console.log(currentQty)
+    }
     setQuantity(!!currentQty ? currentQty : 0);
     setTotal(currentQty * price);
-    setData((prevData) => ({ ...prevData, quantity: currentQty }));
+    setData((prevData) => ({
+      ...prevData,
+      quantity: currentQty,
+      total: currentQty * price,
+    }));
   };
 
   const handlePriceChange = (e: any) => {
@@ -39,7 +49,11 @@ export default function ProcurementControl(props: any) {
     const currentPrice = parseInt(currentPriceAsString.replace(/[^\d.-]/g, ""));
     setPrice(currentPrice);
     setTotal(currentPrice * quantity);
-    setData((prevData) => ({ ...prevData, price: currentPrice }));
+    setData((prevData) => ({
+      ...prevData,
+      price: currentPrice,
+      total: currentPrice * quantity,
+    }));
   };
 
   return (
@@ -62,7 +76,7 @@ export default function ProcurementControl(props: any) {
           type="number"
           className="form-control text-end"
           onChange={handleQtyChange}
-          defaultValue={0}
+          value={quantity}
         />
       </div>
       <div className="col-3 my-2">

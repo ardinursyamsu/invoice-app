@@ -61,14 +61,16 @@ export default function TransactionIndex() {
                   <td className="text-center">
                     <Link
                       to={
-                        transaction.ref +
+                        transaction.orderId +
                         "-" +
-                        transaction.transaction.toUpperCase()
+                        transaction.sourceTrx.toUpperCase()
                       }
                     >
-                      {transaction.ref +
+                      {
+                        transaction.orderId +
                         "-" +
-                        transaction.transaction.toUpperCase()}
+                        transaction.sourceTrx.toUpperCase()
+                      }
                     </Link>
                   </td>
                   <td className="text-center">

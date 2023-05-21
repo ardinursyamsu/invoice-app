@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import invariant from "tiny-invariant";
 import { getAccountById, getAccounts } from "~/models/account.server";
 import { getSubAccounts } from "~/models/subaccount.server";
-import { createTransaction, getLastRefId } from "~/models/transaction.server";
+import { createTransaction, getLastOrderId } from "~/models/transaction.server";
 import { getUsers } from "~/models/user.server";
 
 const transactionSource = "pymt";
@@ -33,7 +33,7 @@ export const action = async ({ request }: ActionArgs) => {
   const { data } = jsonData;
 
   // process each record
-  data.forEach(async (element: any) => {
+/*  data.forEach(async (element: any) => {
     const { id, data } = element;
     const account = await getAccountById(data.account);
     const accountId = account.id;
@@ -61,7 +61,7 @@ export const action = async ({ request }: ActionArgs) => {
       // credit the sales (from the amount)
       console.log("credit the sales", {trxTime: trxTime, ref: ref, accountId: "sales", subAccountId: "sales-default", amount: amount, type: "cr", userId: user})
       */
-    } else {
+  /*  } else {
       await createTransaction({
         trxTime: trxTime,
         ref: ref,
@@ -90,7 +90,7 @@ export const action = async ({ request }: ActionArgs) => {
     type: "cr",
     userId: user,
   });
-
+*/
   return redirect("/receipt");
 };
 
@@ -99,20 +99,20 @@ export const loader = async () => {
   const subAccounts = await getSubAccounts();
   const users = await getUsers();
 
-  var id = await getLastRefId();
+  var id = await getLastOrderId();
 
   // For the first time program running, transaction is containing nothing.
-  id = !!id ? id : { ref: 0 };
+  id = !!id ? id : { orderId: 0 };
 
   // check user
   const userStatus = !!users[0]; // if user hasn't created yet, force user to create first
   if (!userStatus) {
-    return redirect("/user");
+    return redirect("/user/create");
   }
 
   invariant(typeof id === "object", "Data is not valid");
 
-  const refId = id.ref + 1;
+  const refId = id.orderId + 1;
 
   return json({ accounts, subAccounts, users, refId });
 };
