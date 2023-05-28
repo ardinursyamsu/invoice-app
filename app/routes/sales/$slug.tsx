@@ -5,7 +5,7 @@ import { useLoaderData } from "@remix-run/react";
 import { displayCapitalFirst, formatter, getCurrentDate } from "assets/helper/helper";
 import Body from "assets/layouts/body";
 import SalesNavbar from "assets/layouts/customnavbar/sales-navbar";
-import { getTransactionsByRefAndTransaction } from "~/models/transaction.server";
+import { getTransactionsByOrderIdAndTransactionSource } from "~/models/transaction.server";
 
 export async function loader({ params }: LoaderArgs) {
   const slug = params.slug;
@@ -14,7 +14,7 @@ export async function loader({ params }: LoaderArgs) {
   const transaction = splitSlug?.at(1)?.toLowerCase();
   Number(0);
 
-  const salesTransaction = await getTransactionsByRefAndTransaction(
+  const salesTransaction = await getTransactionsByOrderIdAndTransactionSource(
     transaction ? transaction : "",
     Number(ref ? ref : 0)
   );

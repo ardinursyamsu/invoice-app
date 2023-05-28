@@ -4,7 +4,7 @@ import { displayCapitalFirst, formatter } from "assets/helper/helper";
 import Body from "assets/layouts/body";
 import {
   getAllTransactionBySource,
-  getTransactionsByRefAndTransaction,
+  getTransactionsByOrderIdAndTransactionSource,
 } from "~/models/transaction.server";
 import SalesNavbar from "assets/layouts/customnavbar/sales-navbar";
 
@@ -14,9 +14,9 @@ export const loader = async () => {
   var salesData:any[] = [];
 
   for (const sales of allTrxSales) {
-    const trxSales = await getTransactionsByRefAndTransaction(
-      sales.transaction,
-      sales.ref
+    const trxSales = await getTransactionsByOrderIdAndTransactionSource(
+      sales.sourceTrx,
+      sales.orderId
     );
 
     const salesEntry = trxSales.find((trx: any) => trx.accountId === "sales")
@@ -33,7 +33,8 @@ export const loader = async () => {
       status = "Unpaid"
     }
 
-    salesData = [...salesData, {ref: sales.ref, transaction: sales.transaction, userId: sales.userId, amount: amount, status:  status}]
+    salesData = [...salesData, {orderId: sales.orderId, sourceTrx: sales.sourceTrx, userId: sales.userId, amount: amount, status:  status}]
+    console.log(salesData);
   }
 
   return json({ salesData });
@@ -78,9 +79,9 @@ export default function Sales() {
                   </th>
                   <td className="text-center">
                     <Link
-                      to={sales.ref + "-" + sales.transaction.toUpperCase()}
+                      to={sales.orderId + "-" + sales.sourceTrx}
                     >
-                      {sales.ref + "-" + sales.transaction.toUpperCase()}
+                      {sales.orderId + "-" + sales.sourceTrx.toUpperCase()}
                     </Link>
                   </td>
                   <td className="text-start"></td>

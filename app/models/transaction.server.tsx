@@ -173,7 +173,7 @@ export async function getAllTransactionBySource(sourceTrx: string) {
   });
 }
 
-export async function getTransactionsByRefAndTransaction(
+export async function getTransactionsByOrderIdAndTransactionSource(
   sourceTrx: string,
   orderId: number
 ) {

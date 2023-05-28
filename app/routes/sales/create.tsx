@@ -26,9 +26,9 @@ export const action = async ({ request }: ActionArgs) => {
   const jsonData = JSON.parse(rawdata);
   const { data } = jsonData;
 
-  const refId = formData.get("ref");
-  invariant(typeof refId === "string", "Data mut be string");
-  const ref = parseInt(refId);
+  const orderId = formData.get("orderId");
+  invariant(typeof orderId === "string", "Data mut be string");
+  const ref = parseInt(orderId);
 
   const date = formData.get("trx-time");
   invariant(typeof date === "string", "Data must be string");
@@ -40,78 +40,89 @@ export const action = async ({ request }: ActionArgs) => {
   var totalInventorySalesAmount = 0;
   var totalInventoryCOGSAmount = 0;
 
-  // process each row of data input
-/*  data.forEach((element: typeof data) => {
+  // iterate for each controlId
+  data.forEach(async (element: any) => {
     const { id, data } = element;
+    const { inventoryId, avgPrice, quantity, price } = data;
 
-    for (var i = 0; i < data.quantity; i++) {
-      createTransaction({
-        // credit each of the inventory
-        trxTime: trxTime,
-        orderId: ref,
-        sourceTrx: transactionSource,
-        controlTrx: "1",
-        accountId: "inventory",
-        subAccountId: data.inventoryId,
-        amount: data.avgPrice,
-        type: "cr",
-        userId: userId,
-        quantity: new Decimal(1);
-      });
+    const total = price * quantity;
+    const totalCost = avgPrice * quantity;
 
-      totalInventorySalesAmount += data.price; // data for credit sales & debit AR
-      totalInventoryCOGSAmount += data.avgPrice; // data for debit cogs
-    }
+    // credit the inventory
+    createTransaction({
+      trxTime: trxTime,
+      orderId: parseInt(orderId),
+      sourceTrx: transactionSource,
+      controlTrx: id,
+      accountId: "inventory",
+      subAccountId: inventoryId,
+      unitPrice: new Decimal(avgPrice),
+      quantity: quantity,
+      amount: new Decimal(totalCost),
+      type: "cr",
+      userId: userId,
+    });
+
+    // debit the cogs
+    createTransaction({
+      trxTime: trxTime,
+      orderId: parseInt(orderId),
+      sourceTrx: transactionSource,
+      controlTrx: id,
+      accountId: "cost-of-good-sold",
+      subAccountId: "cost-of-good-sold-default",
+      unitPrice: new Decimal(totalCost),
+      quantity: 1,
+      amount: new Decimal(totalCost),
+      type: "db",
+      userId: userId,
+    });
+
+    // record the sales credit
+    createTransaction({
+      trxTime: trxTime,
+      orderId: parseInt(orderId),
+      sourceTrx: transactionSource,
+      controlTrx: id,
+      accountId: "sales",
+      subAccountId: "sales-default",
+      unitPrice: new Decimal(total),
+      quantity: 1,
+      amount: new Decimal(total),
+      type: "cr",
+      userId: userId,
+    });
+
+    // record the a/r debit
+    createTransaction({
+      trxTime: trxTime,
+      orderId: parseInt(orderId),
+      sourceTrx: transactionSource,
+      controlTrx: id,
+      accountId: "account-receivable",
+      subAccountId: "account-receivable-default",
+      unitPrice: new Decimal(total),
+      quantity: 1,
+      amount: new Decimal(total),
+      type: "db",
+      userId: userId,
+    });
+    // record the retained earnings
+    createTransaction({
+      trxTime: trxTime,
+      orderId: parseInt(orderId),
+      sourceTrx: transactionSource,
+      controlTrx: id,
+      accountId: "retained-earnings",
+      subAccountId: "retained-earnings-default",
+      unitPrice: new Decimal(total - totalCost),
+      quantity: 1,
+      amount: new Decimal(total - totalCost),
+      type: "cr",
+      userId: userId,
+    });
   });
 
-  createTransaction({
-    // debit the cost of good sold the same amount as inventories credited
-    trxTime: trxTime,
-    ref: ref,
-    transaction: transactionSource,
-    accountId: "cost-of-good-sold",
-    subAccountId: "cost-of-good-sold-default",
-    amount: new Decimal(totalInventoryCOGSAmount),
-    type: "db",
-    userId: userId,
-  });
-
-  createTransaction({
-    // credit the sales as amount willing be paid by customer
-    trxTime: trxTime,
-    ref: ref,
-    transaction: transactionSource,
-    accountId: "sales",
-    subAccountId: "sales-default",
-    amount: new Decimal(totalInventorySalesAmount),
-    type: "cr",
-    userId: userId,
-  });
-
-  createTransaction({
-    // debit the AR as amount willing be paid by customer
-    trxTime: trxTime,
-    ref: ref,
-    transaction: transactionSource,
-    accountId: "account-receivable",
-    subAccountId: "account-receivable-default",
-    amount: new Decimal(totalInventorySalesAmount),
-    type: "db",
-    userId: userId,
-  });
-
-  createTransaction({
-    // Credit the retained earnings as difference between amount paid by customer and the cost
-    trxTime: trxTime,
-    ref: ref,
-    transaction: transactionSource,
-    accountId: "retained-earnings",
-    subAccountId: "retained-earnings-default",
-    amount: new Decimal(totalInventorySalesAmount - totalInventoryCOGSAmount),
-    type: "cr",
-    userId: userId,
-  });
-*/
   return redirect("/sales");
 };
 
@@ -122,7 +133,7 @@ export const loader = async () => {
 
   id = !!id ? id : { orderId: 0 }; // For the first time program running, transaction is containing nothing.
   invariant(typeof id === "object", "Data is not valid");
-  const refId = id.orderId + 1;
+  const order = id.orderId + 1;
 
   // Get every sub-account type inventory
   const fullInventories = await getSubAccountsByAccount("inventory");
@@ -150,16 +161,16 @@ export const loader = async () => {
     });
   }
 
-  return json({ customers, refId, inventories });
+  return json({ customers, order, inventories });
 };
 
 export default function CreateSales() {
-  const { customers, refId, inventories } = useLoaderData<typeof loader>();
+  const { customers, order, inventories } = useLoaderData<typeof loader>();
 
   const date = getCurrentDate();
 
   const defaultData = {
-    account: inventories[0],
+    account: inventories[0].id,
     avgPrice: inventories[0].avg,
     quantity: 0,
     price: 0,
@@ -182,10 +193,10 @@ export default function CreateSales() {
     setData((prevData) => callback(prevData, newData));
   };
 
-  const [inputCount, setInputCount] = useState(0);
-  const [inputId, setInputId] = useState([0]);
+  const [inputCount, setInputCount] = useState(1);
+  const [inputId, setInputId] = useState([1]);
   const [customer, setCustomer] = useState(customers[0].id);
-  const [ref, setRef] = useState(refId);
+  const [orderId, setOrderId] = useState(order);
 
   useEffect(() => {
     //console.log(data);
@@ -199,13 +210,13 @@ export default function CreateSales() {
   // this will handle if user change the ref Id
   // Old ref id shouldn't be used
   const handleRefIdChange = (e: any) => {
-    var newRef = parseInt(e.target.value);
-    newRef = !!newRef ? newRef : refId;
-    if (newRef < refId) {
-      newRef = refId;
+    var newOrderId = parseInt(e.target.value);
+    newOrderId = !!newOrderId ? newOrderId : orderId;
+    if (newOrderId < orderId) {
+      newOrderId = orderId;
     }
 
-    setRef(newRef);
+    setOrderId(newOrderId);
   };
 
   // this handle will add 1 more row of transaction control
@@ -250,7 +261,7 @@ export default function CreateSales() {
                 className="form-control"
                 name="ref"
                 type="text"
-                value={ref}
+                value={orderId}
                 onChange={handleRefIdChange}
               />
             </div>
@@ -268,8 +279,8 @@ export default function CreateSales() {
         </div>
         <div className="d-flex flex-column border rounded-2 py-2 px-4 my-2">
           <div className="row mb-2 bg-dark text-white p-2 rounded">
-            <div className="col-4">Inventory</div>
-            <div className="col-1">Qty</div>
+            <div className="col-3">Inventory</div>
+            <div className="col-2">Qty</div>
             <div className="col-3">Price</div>
             <div className="col-4">Total</div>
           </div>
@@ -298,7 +309,7 @@ export default function CreateSales() {
       </div>
       <Form className="container px-2" method="post">
         <input type="hidden" name="trx-time" value={date} />
-        <input type="hidden" name="ref" value={refId.toString()} />
+        <input type="hidden" name="orderId" value={orderId.toString()} />
         <input type="hidden" name="user" value={customer.toString()} />
 
         <input type="hidden" name="data" value={JSON.stringify({ data })} />

@@ -35,18 +35,6 @@ export const action = async ({ request }: ActionArgs) => {
 
   const paymentType = formData.get("payment");
 
-  var totalAmount = 0;
-
-  const exampleData = {
-    id: 0,
-    data: {
-      inventoryId: "hitam--pendek--xl-combed-30s",
-      quantity: 100,
-      price: 10000,
-      total: 1000000,
-    },
-  };
-
   data.forEach((element: any) => {
     // iterate for each control
     const { id, data } = element;
@@ -133,7 +121,7 @@ export default function ProcureInventory() {
     price: 0,
   };
 
-  const [data, setData] = useState([{ id: 0, data: defaultData }]);
+  const [data, setData] = useState([{ id: 1, data: defaultData }]);
 
   // callback function to update transaction control data if there any change.
   // is called by handleComponentDataChange
@@ -150,8 +138,8 @@ export default function ProcureInventory() {
     setData((prevData) => callback(prevData, newData));
   };
 
-  const [inputCount, setInputCount] = useState(0);
-  const [inputId, setInputId] = useState([0]);
+  const [inputCount, setInputCount] = useState(1);
+  const [inputId, setInputId] = useState([1]);
   const [user, setUser] = useState(users[0].id);
   const [orderId, setOrderId] = useState(order);
   const [payment, setPayment] = useState("cash");

@@ -62,7 +62,7 @@ export default function SalesControl(props: any) {
 
   return (
     <div className="row border rounded-2 mb-2 py-2">
-      <div className="col-4">
+      <div className="col-3">
         <select className="form-select" onChange={handleInventoryChange}>
           {inventories.map((inventory: typeof inventories) => (
             <option key={inventory.id} value={inventory.id}>
@@ -72,7 +72,7 @@ export default function SalesControl(props: any) {
         </select>
       </div>
 
-      <div className="col-1">
+      <div className="col-2">
         <input
           name="quantity"
           className="form-control text-end"

@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { getAccounts } from "~/models/account.server";
 import { getSubAccounts } from "~/models/subaccount.server";
 import {
-  getLastRefId,
-  getTransactionsByRefAndTransaction,
+  getLastOrderId,
+  getTransactionsByOrderIdAndTransactionSource,
 } from "~/models/transaction.server";
 import { getUsers } from "~/models/user.server";
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
@@ -84,7 +84,7 @@ export const loader = async ({ params }: LoaderArgs) => {
     return redirect("/transaction");
   }
 
-  const transactions = await getTransactionsByRefAndTransaction(
+  const transactions = await getTransactionsByOrderIdAndTransactionSource(
     transaction,
     ref
   );
