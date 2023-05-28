@@ -34,7 +34,6 @@ export const loader = async () => {
     }
 
     salesData = [...salesData, {orderId: sales.orderId, sourceTrx: sales.sourceTrx, userId: sales.userId, amount: amount, status:  status}]
-    console.log(salesData);
   }
 
   return json({ salesData });
