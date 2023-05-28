@@ -8,6 +8,7 @@ import {
 } from "assets/helper/helper";
 import Body from "assets/layouts/body";
 import SalesNavbar from "assets/layouts/customnavbar/sales-navbar";
+import { getSubAccountsByAccount } from "~/models/subaccount.server";
 import { getTransactionsByOrderIdAndTransactionSource } from "~/models/transaction.server";
 
 export async function loader({ params }: LoaderArgs) {
@@ -20,6 +21,8 @@ export async function loader({ params }: LoaderArgs) {
     transaction ? transaction : "",
     Number(ref ? ref : 0)
   );
+
+  const inventoryItems = await getSubAccountsByAccount("inventory");
 
   // group based control id
   const totalNumControl =
@@ -40,17 +43,25 @@ export async function loader({ params }: LoaderArgs) {
     var quantity = 0;
     var total = 0;
     for (const trx of control) {
-      if (trx.accountId == "inventory") {
-        name = trx.subAccountId;
-        quantity = Number(trx.quantity);
-      } else if (trx.accountId == "sales") {
-        total = Number(trx.amount);
-        price = total / quantity;
-        totalSales += total;
-      } else if (trx.accountId == "account-receivable") {
-        totalAR += Number(trx.amount);
-      } else if (trx.accountId == "cash") {
-        totalPaid += Number(trx.amount);
+      switch (trx.accountId) {
+        case "inventory":
+          const inventoryName = inventoryItems.find(
+            (inventory) => inventory.id == trx.subAccountId
+          )?.name;
+          name = !!inventoryName ? inventoryName : "";
+          quantity = Number(trx.quantity);
+          break;
+        case "sales":
+          total = Number(trx.amount);
+          price = total / quantity;
+          totalSales += total;
+          break;
+        case "account-receivable":
+          totalAR += Number(trx.amount);
+          break;
+        case "cash":
+          totalPaid += Number(trx.amount);
+          break;
       }
     }
     inventories.push({ name, price, quantity, total });
