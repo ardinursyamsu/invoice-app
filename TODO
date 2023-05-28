@@ -1,9 +1,9 @@
 # TODO LIST
-1. Inventory (Index | Create | Procure | Write-off)
-2. Sales (Index | Create | Detail | Edit)
-3. Transaction (Index | Create | Edit)
-4. Payment (Index | Create | Edit)
-5. Receipt (Index | Create | Edit)
+1. Inventory (Index ✓| Create ✓| Procure ✓| Write-off)
+2. Sales (Index ✓| Create ✓| Detail ✓| Receipt | Edit)
+3. Transaction (Index ✓| Create |✓ Edit✓)
+4. Payment (Index | Create ✓| Edit)
+5. Receipt (Index | Create ✓| Edit)
 
 
 # Bookeeping record rule

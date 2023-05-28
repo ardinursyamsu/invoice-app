@@ -4,6 +4,7 @@ import { useLoaderData } from "@remix-run/react";
 import CashControl from "assets/components/cash-control";
 import { getCurrentDate } from "assets/helper/helper";
 import Body from "assets/layouts/body";
+import ReceiptNavbar from "assets/layouts/customnavbar/receipt-navbar";
 import { useEffect, useState } from "react";
 import invariant from "tiny-invariant";
 import { getAccountById, getAccounts } from "~/models/account.server";
@@ -196,6 +197,7 @@ export default function Receipt() {
 
   return (
     <Body>
+      <ReceiptNavbar />
       <div className="container">
         <div className="col">
           <div className="row text-center mb-4 bg-warning rounded-2 p-2">
