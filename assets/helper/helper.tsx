@@ -132,3 +132,16 @@ export const displayCapitalFirst = (sourceStr: string) => {
 
   return firstLetter + theRest;
 };
+
+export const decodeTransactionSource = (trxSourceCode: string) => {
+  switch(trxSourceCode){
+    case "invt":
+      return "Inventory";
+      break;
+    case "sale":
+      return "Sales";
+      break;
+    default:
+      return "";
+  }
+}

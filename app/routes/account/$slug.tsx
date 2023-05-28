@@ -5,7 +5,6 @@ import AccountNavbar from "assets/layouts/customnavbar/account-navbar";
 import Body from "assets/layouts/body";
 import { getAccountById } from "~/models/account.server";
 import { getSubAccountsByAccount } from "~/models/subaccount.server";
-import { getUserById } from "~/models/user.server";
 
 export const loader = async ({ params }: LoaderArgs) => {
   const accountId = params.slug;

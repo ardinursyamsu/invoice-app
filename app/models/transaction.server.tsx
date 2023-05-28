@@ -139,14 +139,14 @@ export async function getSubAccountNetAmount(subAccountId: string) {
 export async function getQuantityInventoryItem(subAccountId: string) {
   let credit = await prisma.transaction.aggregate({
     where: { subAccountId: subAccountId, type: "cr" },
-//    _count: { amount: true },
+    //    _count: { amount: true },
     _sum: { amount: true, quantity: true },
   });
 
   let debit = await prisma.transaction.aggregate({
     where: { subAccountId: subAccountId, type: "db" },
-//    _count: { amount: true },
-    _sum: { amount: true, quantity:true },
+    //    _count: { amount: true },
+    _sum: { amount: true, quantity: true },
   });
 
   const qty_cr = !!credit._sum.quantity ? credit._sum.quantity : 0;
@@ -179,5 +179,12 @@ export async function getTransactionsByRefAndTransaction(
 ) {
   return await prisma.transaction.findMany({
     where: { orderId: orderId, sourceTrx: sourceTrx },
+  });
+}
+
+export async function getInventoryTransactionList(inventoryId: string) {
+  return await prisma.transaction.findMany({
+    where: { subAccountId: inventoryId },
+    distinct: ["orderId"],
   });
 }
