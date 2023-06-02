@@ -1,5 +1,13 @@
+import { json } from "@remix-run/node";
 import Body from "assets/layouts/body";
 import PaymentNavbar from "assets/layouts/customnavbar/payment-navbar";
+import { getAllTransactionBySource } from "~/models/transaction.server";
+
+export const loader = async () => {
+  const data = await getAllTransactionBySource("pymt");
+  
+  return json(data)
+}
 
 export default function Payment() {
   return (

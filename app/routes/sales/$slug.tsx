@@ -1,6 +1,6 @@
 import { json } from "@remix-run/node";
 import type { LoaderArgs } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData } from "@remix-run/react";
 import {
   displayCapitalFirst,
   formatter,
@@ -43,6 +43,7 @@ export async function loader({ params }: LoaderArgs) {
     var quantity = 0;
     var total = 0;
     for (const trx of control) {
+      /*
       switch (trx.accountId) {
         case "inventory":
           const inventoryName = inventoryItems.find(
@@ -57,11 +58,32 @@ export async function loader({ params }: LoaderArgs) {
           totalSales += total;
           break;
         case "account-receivable":
+          if (trx.type ==)
           totalAR += Number(trx.amount);
           break;
         case "cash":
           totalPaid += Number(trx.amount);
           break;
+      }*/
+
+      if (trx.accountId === "inventory"){
+        const inventoryName = inventoryItems.find(
+          (inventory) => inventory.id == trx.subAccountId
+        )?.name;
+        name = !!inventoryName ? inventoryName : "";
+        quantity = Number(trx.quantity);
+      } else if (trx.accountId === "sales") {
+        total = Number(trx.amount);
+          price = total / quantity;
+          totalSales += total;
+      } else if (trx.accountId === "account-receivable"){
+        if (trx.type == "db"){
+          totalAR += Number(trx.amount);
+        } else {
+          totalAR -= Number(trx.amount)
+        }
+      } else if (trx.accountId === "cash"){
+        totalPaid += Number(trx.amount)
       }
     }
     inventories.push({ name, price, quantity, total });
@@ -108,23 +130,27 @@ export default function DisplaySales() {
               </tr>
             </thead>
             <tbody>
-              {inventories.map((inventory: any, idx: any) => (
-                <tr key={idx + 1}>
-                  <th scope="col" className="text-center">
-                    {idx + 1}
-                  </th>
-                  <td>
-                    {displayCapitalFirst(inventory.name.replaceAll("-", " "))}
-                  </td>
-                  <td className="text-end">
-                    {formatter.format(inventory.price)}
-                  </td>
-                  <td className="text-center">{inventory.quantity}</td>
-                  <td className="text-end">
-                    {formatter.format(inventory.total)}
-                  </td>
-                </tr>
-              ))}
+              {inventories.map((inventory: any, idx: any) =>
+                inventory.name != "" /* check if entry actually exist */ ? (
+                  <tr key={idx + 1}>
+                    <th scope="col" className="text-center">
+                      {idx + 1}
+                    </th>
+                    <td>
+                      {displayCapitalFirst(inventory.name.replaceAll("-", " "))}
+                    </td>
+                    <td className="text-end">
+                      {formatter.format(inventory.price)}
+                    </td>
+                    <td className="text-center">{inventory.quantity}</td>
+                    <td className="text-end">
+                      {formatter.format(inventory.total)}
+                    </td>
+                  </tr>
+                ) : (
+                  "" /* if not don't display */
+                )
+              )}
               <tr>
                 <td colSpan={4} className="text-end">
                   <b>Total</b>
@@ -155,7 +181,14 @@ export default function DisplaySales() {
           </table>
         </div>
         <div className="text-end">
-          <button className="btn btn-primary">Receive Cash</button>
+          <Link to={"/sales/receipt?orderid=" + slug}>
+          <button className="btn btn-warning mx-2" >
+              Edit Transaction
+            </button>
+            <button className="btn btn-primary" type="submit">
+              Receive Cash
+            </button>
+          </Link>
         </div>
       </div>
     </Body>

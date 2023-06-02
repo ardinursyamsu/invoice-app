@@ -1,5 +1,13 @@
+import { json } from "@remix-run/node";
 import Body from "assets/layouts/body";
 import ReceiptNavbar from "assets/layouts/customnavbar/receipt-navbar";
+import { getAllTransactionBySource } from "~/models/transaction.server";
+
+export const loader = async () => {
+  const data = await getAllTransactionBySource("rcpt");
+  
+  return json(data)
+}
 
 export default function ReceiptIndex() {
   return (
