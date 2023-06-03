@@ -22,7 +22,9 @@ const transactionSource = "sale";
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
   const totalReceipt = formData.get("totalReceipt")?.toString();
-  var amount = parseInt(!!totalReceipt? totalReceipt.replace(/[^\d.-]/g, "") : "");
+  var amount = parseInt(
+    !!totalReceipt ? totalReceipt.replace(/[^\d.-]/g, "") : ""
+  );
   const order = formData.get("orderId")?.toString().split("-");
   const orderId = !!order ? parseInt(order[0]) : 0;
   const trxSource = !!order ? order[1] : "";
@@ -33,9 +35,10 @@ export const action = async ({ request }: ActionArgs) => {
   const lastNumControlId = relatedTrx[relatedTrx.length - 1]?.controlTrx;
   const userId = relatedTrx[relatedTrx.length - 1]?.userId;
 
-  const trxTime = !!formData.get("trxTime") ? formData.get("trxTime") : getCurrentDate();
+  const trxTime = !!formData.get("trxTime")
+    ? formData.get("trxTime")
+    : getCurrentDate();
   invariant(typeof trxTime == "string", "trxTime must be String");
-
 
   const controlTrx = lastNumControlId + 1;
   // credit the AR
@@ -103,27 +106,27 @@ export async function loader({ request }: LoaderArgs) {
     var quantity = 0;
     var total = 0;
     for (const trx of control) {
-      switch (trx.accountId) {
-        case "inventory":
-          const inventoryName = inventoryItems.find(
-            (inventory) => inventory.id == trx.subAccountId
-          )?.name;
-          name = !!inventoryName ? inventoryName : "";
-          quantity = Number(trx.quantity);
-          break;
-        case "sales":
-          total = Number(trx.amount);
-          price = total / quantity;
-          totalSales += total;
-          break;
-        case "account-receivable":
+      if (trx.accountId === "inventory") {
+        const inventoryName = inventoryItems.find(
+          (inventory) => inventory.id == trx.subAccountId
+        )?.name;
+        name = !!inventoryName ? inventoryName : "";
+        quantity = Number(trx.quantity);
+      } else if (trx.accountId === "sales") {
+        total = Number(trx.amount);
+        price = total / quantity;
+        totalSales += total;
+      } else if (trx.accountId === "account-receivable") {
+        if (trx.type == "db") {
           totalAR += Number(trx.amount);
-          break;
-        case "cash":
-          totalPaid += Number(trx.amount);
-          break;
+        } else {
+          totalAR -= Number(trx.amount);
+        }
+      } else if (trx.accountId === "cash") {
+        totalPaid += Number(trx.amount);
       }
     }
+
     inventories.push({ name, price, quantity, total });
   }
 
@@ -148,9 +151,8 @@ export default function DisplaySales() {
 
   const [date, setDate] = useState(getCurrentDate());
   const handleDateChange = (e: any) => {
-    setDate(e.target.value)
-  } 
-  
+    setDate(e.target.value);
+  };
 
   return (
     <Body>
@@ -196,27 +198,27 @@ export default function DisplaySales() {
               </tr>
             </thead>
             <tbody>
-              {!!inventories
-                ? inventories.map((inventory: any, idx: any) => (
-                    <tr key={idx + 1}>
-                      <th scope="col" className="text-center">
-                        {idx + 1}
-                      </th>
-                      <td>
-                        {displayCapitalFirst(
-                          inventory.name.replaceAll("-", " ")
-                        )}
-                      </td>
-                      <td className="text-end">
-                        {formatter.format(inventory.price)}
-                      </td>
-                      <td className="text-center">{inventory.quantity}</td>
-                      <td className="text-end">
-                        {formatter.format(inventory.total)}
-                      </td>
-                    </tr>
-                  ))
-                : ""}
+              {inventories.map((inventory: any, idx: any) =>
+                inventory.name != "" /* check if entry actually exist */ ? (
+                  <tr key={idx + 1}>
+                    <th scope="col" className="text-center">
+                      {idx + 1}
+                    </th>
+                    <td>
+                      {displayCapitalFirst(inventory.name.replaceAll("-", " "))}
+                    </td>
+                    <td className="text-end">
+                      {formatter.format(inventory.price)}
+                    </td>
+                    <td className="text-center">{inventory.quantity}</td>
+                    <td className="text-end">
+                      {formatter.format(inventory.total)}
+                    </td>
+                  </tr>
+                ) : (
+                  "" /* if not don't display */
+                )
+              )}
               <tr>
                 <td colSpan={4} className="text-end">
                   <b>Total</b>
