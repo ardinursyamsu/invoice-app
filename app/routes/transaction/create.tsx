@@ -12,8 +12,7 @@ import Body from "assets/layouts/body";
 import { getCurrentDate } from "assets/helper/helper";
 import TransactionNavbar from "assets/layouts/customnavbar/transaction-navbar";
 import { Decimal } from "@prisma/client/runtime/library";
-
-const transactionSource = "trxs";
+import { TRX_CREDIT, TRX_DEBIT, TRX_SOURCE_TRANSACTION } from "assets/helper/constants";
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
@@ -30,7 +29,7 @@ export const action = async ({ request }: ActionArgs) => {
   invariant(typeof rawdata === "string", "Data must be string");
   const jsonData = JSON.parse(rawdata);
   const { data } = jsonData;
-  const sourceTrx = transactionSource;
+  const sourceTrx = TRX_SOURCE_TRANSACTION;
 
   // processing foreach data that send by transcation-control
   data.forEach(async (element: any) => {
@@ -44,10 +43,10 @@ export const action = async ({ request }: ActionArgs) => {
     var type;
     var amount;
     if (debit != 0) {
-      type = "db";
+      type = TRX_DEBIT;
       amount = debit;
     } else {
-      type = "cr";
+      type = TRX_CREDIT;
       amount = credit;
     }
     const unitPrice = new Decimal(amount); // default for transaction price are amount

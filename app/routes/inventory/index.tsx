@@ -1,5 +1,6 @@
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
+import { ACT_INVENTORY } from "assets/helper/constants";
 import { formatter } from "assets/helper/helper";
 import Body from "assets/layouts/body";
 import InventoryNavbar from "assets/layouts/customnavbar/inventory-navbar";
@@ -14,7 +15,7 @@ export const loader = async () => {
    */
 
   // Get sub-account type inventory
-  var inventories = await getSubAccountsByAccount("inventory");
+  var inventories = await getSubAccountsByAccount(ACT_INVENTORY);
   inventories = inventories.filter((inventory) => inventory.name !== "default"); // remove the default subaccount
   var inventoryData: any = [];
 

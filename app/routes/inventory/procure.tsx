@@ -11,8 +11,17 @@ import { getSubAccountsByAccount } from "~/models/subaccount.server";
 import { getUsers } from "~/models/user.server";
 import { Decimal } from "@prisma/client/runtime/library";
 import InventoryNavbar from "assets/layouts/customnavbar/inventory-navbar";
-import { TRX_SOURCE_INVENTORY } from "assets/helper/constants";
-
+import {
+  ACT_ACCOUNT_RECEIVABLE,
+  ACT_CASH,
+  ACT_INVENTORY,
+  SUB_ACCOUNT_RECEIVABLE,
+  SUB_CASH,
+  SUB_NAME_DEFAULT,
+  TRX_CREDIT,
+  TRX_DEBIT,
+  TRX_SOURCE_INVENTORY,
+} from "assets/helper/constants";
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
@@ -46,12 +55,12 @@ export const action = async ({ request }: ActionArgs) => {
       orderId: orderId,
       sourceTrx: TRX_SOURCE_INVENTORY,
       controlTrx: id,
-      accountId: "inventory",
+      accountId: ACT_INVENTORY,
       subAccountId: inventoryId,
       unitPrice: new Decimal(price),
       quantity: quantity,
       amount: new Decimal(total),
-      type: "db",
+      type: TRX_DEBIT,
       userId: userId,
     });
 
@@ -60,12 +69,12 @@ export const action = async ({ request }: ActionArgs) => {
     var subAccount = "";
     switch (paymentType) {
       case "cash": // if cash, credit the cash
-        account = "cash";
-        subAccount = "cash-default";
+        account = ACT_CASH;
+        subAccount = SUB_CASH;
         break;
       case "credit": // if credit, credit theh account payable
-        account = "account-payable";
-        subAccount = "account-payable-default";
+        account = ACT_ACCOUNT_RECEIVABLE;
+        subAccount = SUB_ACCOUNT_RECEIVABLE;
         break;
     }
 
@@ -79,7 +88,7 @@ export const action = async ({ request }: ActionArgs) => {
       unitPrice: new Decimal(total),
       quantity: 1,
       amount: new Decimal(total),
-      type: "cr",
+      type: TRX_CREDIT,
       userId: userId,
     });
   });
@@ -96,7 +105,9 @@ export const loader = async () => {
 
   // Getsub-account type inventory
   var inventories = await getSubAccountsByAccount("inventory");
-  inventories = inventories.filter((inventory) => inventory.name !== "default"); // remove the default subaccount
+  inventories = inventories.filter(
+    (inventory) => inventory.name !== SUB_NAME_DEFAULT
+  ); // remove the default subaccount
 
   const inventoryStatus = !!inventories[0]; // check if inventory already exists in database
   if (!inventoryStatus) {

@@ -15,7 +15,7 @@ import {
 import { getUserByType } from "~/models/user.server";
 import type { ActionArgs } from "@remix-run/node";
 import { Decimal } from "@prisma/client/runtime/library";
-import { TRX_SOURCE_SALES } from "assets/helper/constants";
+import { ACT_ACCOUNT_RECEIVABLE, ACT_COGS, ACT_INVENTORY, ACT_RETAINED_EARNINGS, ACT_SALES, SUB_ACCOUNT_RECEIVABLE, SUB_COGS, SUB_NAME_DEFAULT, SUB_RETAINED_EARNINGS, SUB_SALES, TRX_CREDIT, TRX_DEBIT, TRX_SOURCE_SALES } from "assets/helper/constants";
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
@@ -53,12 +53,12 @@ export const action = async ({ request }: ActionArgs) => {
       orderId: parseInt(orderId),
       sourceTrx: TRX_SOURCE_SALES,
       controlTrx: id,
-      accountId: "inventory",
+      accountId: ACT_INVENTORY,
       subAccountId: inventoryId,
       unitPrice: new Decimal(avgPrice),
       quantity: quantity,
       amount: new Decimal(totalCost),
-      type: "cr",
+      type: TRX_CREDIT,
       userId: userId,
     });
 
@@ -68,12 +68,12 @@ export const action = async ({ request }: ActionArgs) => {
       orderId: parseInt(orderId),
       sourceTrx: TRX_SOURCE_SALES,
       controlTrx: id,
-      accountId: "cost-of-good-sold",
-      subAccountId: "cost-of-good-sold-default",
+      accountId: ACT_COGS,
+      subAccountId: SUB_COGS,
       unitPrice: new Decimal(totalCost),
       quantity: 1,
       amount: new Decimal(totalCost),
-      type: "db",
+      type: TRX_DEBIT,
       userId: userId,
     });
 
@@ -83,12 +83,12 @@ export const action = async ({ request }: ActionArgs) => {
       orderId: parseInt(orderId),
       sourceTrx: TRX_SOURCE_SALES,
       controlTrx: id,
-      accountId: "sales",
-      subAccountId: "sales-default",
+      accountId: ACT_SALES,
+      subAccountId: SUB_SALES,
       unitPrice: new Decimal(total),
       quantity: 1,
       amount: new Decimal(total),
-      type: "cr",
+      type: TRX_CREDIT,
       userId: userId,
     });
 
@@ -98,12 +98,12 @@ export const action = async ({ request }: ActionArgs) => {
       orderId: parseInt(orderId),
       sourceTrx: TRX_SOURCE_SALES,
       controlTrx: id,
-      accountId: "account-receivable",
-      subAccountId: "account-receivable-default",
+      accountId: ACT_ACCOUNT_RECEIVABLE,
+      subAccountId: SUB_ACCOUNT_RECEIVABLE,
       unitPrice: new Decimal(total),
       quantity: 1,
       amount: new Decimal(total),
-      type: "db",
+      type: TRX_DEBIT,
       userId: userId,
     });
     // record the retained earnings
@@ -112,12 +112,12 @@ export const action = async ({ request }: ActionArgs) => {
       orderId: parseInt(orderId),
       sourceTrx: TRX_SOURCE_SALES,
       controlTrx: id,
-      accountId: "retained-earnings",
-      subAccountId: "retained-earnings-default",
+      accountId: ACT_RETAINED_EARNINGS,
+      subAccountId: SUB_RETAINED_EARNINGS,
       unitPrice: new Decimal(total - totalCost),
       quantity: 1,
       amount: new Decimal(total - totalCost),
-      type: "cr",
+      type: TRX_CREDIT,
       userId: userId,
     });
   });
@@ -135,7 +135,7 @@ export const loader = async () => {
   const order = id.orderId + 1;
 
   // Get every sub-account type inventory
-  const fullInventories = await getSubAccountsByAccount("inventory");
+  const fullInventories = await getSubAccountsByAccount(ACT_INVENTORY);
 
   const inventoryStatus = !!fullInventories[0]; // check if inventory already exists in database
   if (!inventoryStatus) {
@@ -144,7 +144,7 @@ export const loader = async () => {
   }
 
   const inventoriesWithoutDefaultSubAccount = fullInventories.filter(
-    (inventory) => inventory.name !== "default"
+    (inventory) => inventory.name !== SUB_NAME_DEFAULT
   ); // remove the default subaccount from list
 
   const inventories: any[] = [];

@@ -34,7 +34,6 @@ export const action = async ({ request }: ActionArgs) => {
   invariant(typeof rawdata === "string", "Data must be string");
   const jsonData = JSON.parse(rawdata);
   const { data } = jsonData;
-  const transaction = TRX_SOURCE_TRANSACTION;
 
   // processing foreach data that send by transcation-control
   data.forEach(async (element: any) => {
@@ -56,7 +55,7 @@ export const action = async ({ request }: ActionArgs) => {
     // await createTransaction({
     //   trxTime,
     //   ref,
-    //   transaction,
+    //   TRX_SOURCE_TRANSACTION,
     //   accountId,
     //   subAccountId,
     //   amount,

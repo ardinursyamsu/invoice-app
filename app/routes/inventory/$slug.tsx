@@ -6,11 +6,12 @@ import { getInventoryTransactionList } from "~/models/transaction.server";
 import { useLoaderData } from "@remix-run/react";
 import { decodeTransactionSource, getDate } from "assets/helper/helper";
 import { getSubAccountsByAccount } from "~/models/subaccount.server";
+import { ACT_INVENTORY } from "assets/helper/constants";
 
 export const loader = async ({ params }: LoaderArgs) => {
   const slug = !!params.slug ? params.slug : "";
   const inventoryTransactionList = await getInventoryTransactionList(slug);
-  const inventoryList = await getSubAccountsByAccount("inventory");
+  const inventoryList = await getSubAccountsByAccount(ACT_INVENTORY);
 
   return json({ inventoryTransactionList, inventoryList });
 };

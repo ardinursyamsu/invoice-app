@@ -1,10 +1,11 @@
 import { json } from "@remix-run/node";
+import { TRX_SOURCE_RECEIPT } from "assets/helper/constants";
 import Body from "assets/layouts/body";
 import ReceiptNavbar from "assets/layouts/customnavbar/receipt-navbar";
 import { getAllTransactionBySource } from "~/models/transaction.server";
 
 export const loader = async () => {
-  const data = await getAllTransactionBySource("rcpt");
+  const data = await getAllTransactionBySource(TRX_SOURCE_RECEIPT);
   
   return json(data)
 }

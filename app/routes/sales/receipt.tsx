@@ -2,7 +2,7 @@ import { Decimal } from "@prisma/client/runtime/library";
 import { json, redirect } from "@remix-run/node";
 import type { LoaderArgs, ActionArgs } from "@remix-run/node";
 import { Form, useLoaderData } from "@remix-run/react";
-import { TRX_SOURCE_SALES } from "assets/helper/constants";
+import { ACT_ACCOUNT_RECEIVABLE, ACT_CASH, ACT_INVENTORY, ACT_SALES, TRX_DEBIT, TRX_SOURCE_SALES } from "assets/helper/constants";
 import {
   displayCapitalFirst,
   formatter,
@@ -84,7 +84,7 @@ export async function loader({ request }: LoaderArgs) {
     Number(ref ? ref : 0)
   );
 
-  const inventoryItems = await getSubAccountsByAccount("inventory");
+  const inventoryItems = await getSubAccountsByAccount(ACT_INVENTORY);
 
   // group based control id
   const totalNumControl =
@@ -105,23 +105,23 @@ export async function loader({ request }: LoaderArgs) {
     var quantity = 0;
     var total = 0;
     for (const trx of control) {
-      if (trx.accountId === "inventory") {
+      if (trx.accountId === ACT_INVENTORY) {
         const inventoryName = inventoryItems.find(
           (inventory) => inventory.id == trx.subAccountId
         )?.name;
         name = !!inventoryName ? inventoryName : "";
         quantity = Number(trx.quantity);
-      } else if (trx.accountId === "sales") {
+      } else if (trx.accountId === ACT_SALES) {
         total = Number(trx.amount);
         price = total / quantity;
         totalSales += total;
-      } else if (trx.accountId === "account-receivable") {
-        if (trx.type == "db") {
+      } else if (trx.accountId === ACT_ACCOUNT_RECEIVABLE) {
+        if (trx.type == TRX_DEBIT) {
           totalAR += Number(trx.amount);
         } else {
           totalAR -= Number(trx.amount);
         }
-      } else if (trx.accountId === "cash") {
+      } else if (trx.accountId === ACT_CASH) {
         totalPaid += Number(trx.amount);
       }
     }

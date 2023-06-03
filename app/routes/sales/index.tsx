@@ -7,7 +7,7 @@ import {
   getTransactionsByOrderIdAndTransactionSource,
 } from "~/models/transaction.server";
 import SalesNavbar from "assets/layouts/customnavbar/sales-navbar";
-import { TRX_SOURCE_SALES } from "assets/helper/constants";
+import { ACT_ACCOUNT_RECEIVABLE, ACT_CASH, ACT_SALES, TRX_DEBIT, TRX_SOURCE_SALES } from "assets/helper/constants";
 
 export const loader = async () => {
   const allTrxSales = await getAllTransactionBySource(TRX_SOURCE_SALES);
@@ -26,13 +26,13 @@ export const loader = async () => {
     var cashEntry = 0.0;
     var accountReceivableEntry = 0.0;
     for (const trx of trxSales) {
-      if (trx.accountId === "sales") {
+      if (trx.accountId === ACT_SALES) {
         const salesAmount = trx?.amount;
         amount += Number(salesAmount);
-      } else if (trx.accountId === "account-receivable" && trx.type === "db") {
+      } else if (trx.accountId === ACT_ACCOUNT_RECEIVABLE && trx.type === TRX_DEBIT) {
         const arAmount = trx?.amount;
         accountReceivableEntry += Number(arAmount);
-      } else if (trx.accountId === "cash" && trx.type == "db") {
+      } else if (trx.accountId === ACT_CASH && trx.type == TRX_DEBIT) {
         const cashAmount = trx?.amount;
         cashEntry += Number(cashAmount);
       }

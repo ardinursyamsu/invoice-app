@@ -2,6 +2,13 @@ import { json } from "@remix-run/node";
 import type { LoaderArgs } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import {
+  ACT_ACCOUNT_RECEIVABLE,
+  ACT_CASH,
+  ACT_INVENTORY,
+  ACT_SALES,
+  TRX_DEBIT,
+} from "assets/helper/constants";
+import {
   displayCapitalFirst,
   formatter,
   getCurrentDate,
@@ -22,7 +29,7 @@ export async function loader({ params }: LoaderArgs) {
     Number(ref ? ref : 0)
   );
 
-  const inventoryItems = await getSubAccountsByAccount("inventory");
+  const inventoryItems = await getSubAccountsByAccount(ACT_INVENTORY);
 
   // group based control id
   const totalNumControl =
@@ -43,24 +50,24 @@ export async function loader({ params }: LoaderArgs) {
     var quantity = 0;
     var total = 0;
     for (const trx of control) {
-      if (trx.accountId === "inventory"){
+      if (trx.accountId === ACT_INVENTORY) {
         const inventoryName = inventoryItems.find(
           (inventory) => inventory.id == trx.subAccountId
         )?.name;
         name = !!inventoryName ? inventoryName : "";
         quantity = Number(trx.quantity);
-      } else if (trx.accountId === "sales") {
+      } else if (trx.accountId === ACT_SALES) {
         total = Number(trx.amount);
-          price = total / quantity;
-          totalSales += total;
-      } else if (trx.accountId === "account-receivable"){
-        if (trx.type == "db"){
+        price = total / quantity;
+        totalSales += total;
+      } else if (trx.accountId === ACT_ACCOUNT_RECEIVABLE) {
+        if (trx.type == TRX_DEBIT) {
           totalAR += Number(trx.amount);
         } else {
-          totalAR -= Number(trx.amount)
+          totalAR -= Number(trx.amount);
         }
-      } else if (trx.accountId === "cash"){
-        totalPaid += Number(trx.amount)
+      } else if (trx.accountId === ACT_CASH) {
+        totalPaid += Number(trx.amount);
       }
     }
     inventories.push({ name, price, quantity, total });
@@ -159,9 +166,7 @@ export default function DisplaySales() {
         </div>
         <div className="text-end">
           <Link to={"/sales/receipt?orderid=" + slug}>
-          <button className="btn btn-warning mx-2" >
-              Edit Transaction
-            </button>
+            <button className="btn btn-warning mx-2">Edit Transaction</button>
             <button className="btn btn-primary" type="submit">
               Receive Cash
             </button>

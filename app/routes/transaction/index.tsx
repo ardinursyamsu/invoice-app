@@ -1,5 +1,6 @@
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
+import { TRX_SOURCE_TRANSACTION } from "assets/helper/constants";
 import {
   displayCapitalFirst,
   displayDate,
@@ -10,7 +11,7 @@ import TransactionNavbar from "assets/layouts/customnavbar/transaction-navbar";
 import { getAllTransactionBySource } from "~/models/transaction.server";
 
 export const loader = async () => {
-  const transactions = await getAllTransactionBySource("trxs");
+  const transactions = await getAllTransactionBySource(TRX_SOURCE_TRANSACTION);
 
   return json({ transactions });
 };

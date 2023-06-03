@@ -1,5 +1,6 @@
 import { ActionArgs, redirect } from "@remix-run/node";
 import { Form } from "@remix-run/react";
+import { ACT_INVENTORY } from "assets/helper/constants";
 import Body from "assets/layouts/body";
 import InventoryNavbar from "assets/layouts/customnavbar/inventory-navbar";
 import { useState } from "react";
@@ -13,7 +14,7 @@ export const action = async ({ request }: ActionArgs) => {
 
   invariant(typeof id === "string", "This should be a string");
   invariant(typeof name === "string", "This should be a string");
-  const accountId = "inventory";
+  const accountId = ACT_INVENTORY;
 
   await createSubAccount({ id, name, accountId });
   return redirect("/inventory");

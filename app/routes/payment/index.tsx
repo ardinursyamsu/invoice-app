@@ -1,10 +1,11 @@
 import { json } from "@remix-run/node";
+import { TRX_SOURCE_PAYMENT } from "assets/helper/constants";
 import Body from "assets/layouts/body";
 import PaymentNavbar from "assets/layouts/customnavbar/payment-navbar";
 import { getAllTransactionBySource } from "~/models/transaction.server";
 
 export const loader = async () => {
-  const data = await getAllTransactionBySource("pymt");
+  const data = await getAllTransactionBySource(TRX_SOURCE_PAYMENT);
   
   return json(data)
 }
