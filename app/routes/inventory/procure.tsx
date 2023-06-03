@@ -11,8 +11,8 @@ import { getSubAccountsByAccount } from "~/models/subaccount.server";
 import { getUsers } from "~/models/user.server";
 import { Decimal } from "@prisma/client/runtime/library";
 import InventoryNavbar from "assets/layouts/customnavbar/inventory-navbar";
+import { TRX_SOURCE_INVENTORY } from "assets/helper/constants";
 
-const transactionSource = "invt";
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
@@ -44,7 +44,7 @@ export const action = async ({ request }: ActionArgs) => {
     createTransaction({
       trxTime: trxTime,
       orderId: orderId,
-      sourceTrx: transactionSource,
+      sourceTrx: TRX_SOURCE_INVENTORY,
       controlTrx: id,
       accountId: "inventory",
       subAccountId: inventoryId,
@@ -72,7 +72,7 @@ export const action = async ({ request }: ActionArgs) => {
     createTransaction({
       trxTime: trxTime,
       orderId: orderId,
-      sourceTrx: transactionSource,
+      sourceTrx: TRX_SOURCE_INVENTORY,
       controlTrx: id,
       accountId: account,
       subAccountId: subAccount,

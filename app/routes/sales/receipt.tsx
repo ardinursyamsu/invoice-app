@@ -2,6 +2,7 @@ import { Decimal } from "@prisma/client/runtime/library";
 import { json, redirect } from "@remix-run/node";
 import type { LoaderArgs, ActionArgs } from "@remix-run/node";
 import { Form, useLoaderData } from "@remix-run/react";
+import { TRX_SOURCE_SALES } from "assets/helper/constants";
 import {
   displayCapitalFirst,
   formatter,
@@ -16,8 +17,6 @@ import {
   createTransaction,
   getTransactionsByOrderIdAndTransactionSource,
 } from "~/models/transaction.server";
-
-const transactionSource = "sale";
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
@@ -45,7 +44,7 @@ export const action = async ({ request }: ActionArgs) => {
   createTransaction({
     trxTime: new Date(trxTime),
     orderId: orderId,
-    sourceTrx: transactionSource,
+    sourceTrx: TRX_SOURCE_SALES,
     controlTrx: controlTrx,
     accountId: "account-receivable",
     subAccountId: "account-receivable-default",
@@ -59,7 +58,7 @@ export const action = async ({ request }: ActionArgs) => {
   createTransaction({
     trxTime: new Date(trxTime),
     orderId: orderId,
-    sourceTrx: transactionSource,
+    sourceTrx: TRX_SOURCE_SALES,
     controlTrx: controlTrx,
     accountId: "cash",
     subAccountId: "cash-default",

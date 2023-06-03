@@ -15,8 +15,7 @@ import {
 import { getUserByType } from "~/models/user.server";
 import type { ActionArgs } from "@remix-run/node";
 import { Decimal } from "@prisma/client/runtime/library";
-
-const transactionSource = "sale";
+import { TRX_SOURCE_SALES } from "assets/helper/constants";
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
@@ -52,7 +51,7 @@ export const action = async ({ request }: ActionArgs) => {
     createTransaction({
       trxTime: trxTime,
       orderId: parseInt(orderId),
-      sourceTrx: transactionSource,
+      sourceTrx: TRX_SOURCE_SALES,
       controlTrx: id,
       accountId: "inventory",
       subAccountId: inventoryId,
@@ -67,7 +66,7 @@ export const action = async ({ request }: ActionArgs) => {
     createTransaction({
       trxTime: trxTime,
       orderId: parseInt(orderId),
-      sourceTrx: transactionSource,
+      sourceTrx: TRX_SOURCE_SALES,
       controlTrx: id,
       accountId: "cost-of-good-sold",
       subAccountId: "cost-of-good-sold-default",
@@ -82,7 +81,7 @@ export const action = async ({ request }: ActionArgs) => {
     createTransaction({
       trxTime: trxTime,
       orderId: parseInt(orderId),
-      sourceTrx: transactionSource,
+      sourceTrx: TRX_SOURCE_SALES,
       controlTrx: id,
       accountId: "sales",
       subAccountId: "sales-default",
@@ -97,7 +96,7 @@ export const action = async ({ request }: ActionArgs) => {
     createTransaction({
       trxTime: trxTime,
       orderId: parseInt(orderId),
-      sourceTrx: transactionSource,
+      sourceTrx: TRX_SOURCE_SALES,
       controlTrx: id,
       accountId: "account-receivable",
       subAccountId: "account-receivable-default",
@@ -111,7 +110,7 @@ export const action = async ({ request }: ActionArgs) => {
     createTransaction({
       trxTime: trxTime,
       orderId: parseInt(orderId),
-      sourceTrx: transactionSource,
+      sourceTrx: TRX_SOURCE_SALES,
       controlTrx: id,
       accountId: "retained-earnings",
       subAccountId: "retained-earnings-default",

@@ -1,0 +1,5 @@
+export const TRX_SOURCE_SALES = "sale"
+export const TRX_SOURCE_TRANSACTION = "trxs"
+export const TRX_SOURCE_RECEIPT = "rcpt"
+export const TRX_SOURCE_PAYMENT = "pymt"
+export const TRX_SOURCE_INVENTORY = "invt"

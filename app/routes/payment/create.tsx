@@ -12,8 +12,6 @@ import { getSubAccounts } from "~/models/subaccount.server";
 import { createTransaction, getLastOrderId } from "~/models/transaction.server";
 import { getUsers } from "~/models/user.server";
 
-const transactionSource = "pymt";
-
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
 

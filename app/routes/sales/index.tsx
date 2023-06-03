@@ -7,10 +7,10 @@ import {
   getTransactionsByOrderIdAndTransactionSource,
 } from "~/models/transaction.server";
 import SalesNavbar from "assets/layouts/customnavbar/sales-navbar";
-import { Decimal } from "@prisma/client/runtime";
+import { TRX_SOURCE_SALES } from "assets/helper/constants";
 
 export const loader = async () => {
-  const allTrxSales = await getAllTransactionBySource("sale");
+  const allTrxSales = await getAllTransactionBySource(TRX_SOURCE_SALES);
 
   var salesData: any[] = [];
 

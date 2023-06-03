@@ -15,8 +15,9 @@ import { createTransaction } from "~/models/transaction.server";
 import Body from "assets/layouts/body";
 import { getCurrentDate, getDate } from "assets/helper/helper";
 import TransactionNavbar from "assets/layouts/customnavbar/transaction-navbar";
+import { TRX_SOURCE_TRANSACTION } from "assets/helper/constants";
 
-const transactionSource = "trxs";
+
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
@@ -33,7 +34,7 @@ export const action = async ({ request }: ActionArgs) => {
   invariant(typeof rawdata === "string", "Data must be string");
   const jsonData = JSON.parse(rawdata);
   const { data } = jsonData;
-  const transaction = transactionSource;
+  const transaction = TRX_SOURCE_TRANSACTION;
 
   // processing foreach data that send by transcation-control
   data.forEach(async (element: any) => {
