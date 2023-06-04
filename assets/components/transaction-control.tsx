@@ -34,7 +34,7 @@ export function TransactionControl(props: any) {
 
   // call the higher state if there's any update in data
   useEffect(() => {
-    console.log(data);
+    //console.log(data);
     // the final state is in the parent. Use callback in here to update value in the parent
     props.callback(props.id, data);
   }, [data]);
@@ -76,7 +76,6 @@ export function TransactionControl(props: any) {
   };
 
   const handleUserChange = (e: any) => {
-    console.log("user: ", e.target.value);
     setUser(e.target.value);
     setData((prevData) => ({ ...prevData, user: e.target.value }));
   };

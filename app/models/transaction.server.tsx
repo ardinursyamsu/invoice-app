@@ -188,3 +188,12 @@ export async function getInventoryTransactionList(inventoryId: string) {
     distinct: ["orderId"],
   });
 }
+
+export async function deleteTransactionsByOrderIdAndTransactionSource(
+  trxSource: string,
+  orderId: number
+) {
+  return await prisma.transaction.deleteMany({
+    where: { orderId: orderId, sourceTrx: trxSource },
+  });
+}

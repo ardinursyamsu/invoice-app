@@ -6,17 +6,35 @@ import Body from "assets/layouts/body";
 import SalesNavbar from "assets/layouts/customnavbar/sales-navbar";
 import { useEffect, useState } from "react";
 import invariant from "tiny-invariant";
-import { getSubAccounts, getSubAccountsByAccount } from "~/models/subaccount.server";
+import {
+  getSubAccounts,
+  getSubAccountsByAccount,
+} from "~/models/subaccount.server";
 import {
   createTransaction,
-  getLastOrderId,
+  deleteTransactionsByOrderIdAndTransactionSource,
   getQuantityInventoryItem,
   getTransactionsByOrderIdAndTransactionSource,
 } from "~/models/transaction.server";
 import { getUserByType, getUsers } from "~/models/user.server";
 import type { ActionArgs } from "@remix-run/node";
 import { Decimal } from "@prisma/client/runtime/library";
-import { getAccounts } from "~/models/account.server";
+import {
+  ACT_ACCOUNT_RECEIVABLE,
+  ACT_COGS,
+  ACT_INVENTORY,
+  ACT_RETAINED_EARNINGS,
+  ACT_SALES,
+  SUB_ACCOUNT_RECEIVABLE,
+  SUB_CASH,
+  SUB_COGS,
+  SUB_NAME_DEFAULT,
+  SUB_RETAINED_EARNINGS,
+  SUB_SALES,
+  TRX_CREDIT,
+  TRX_DEBIT,
+  TRX_SOURCE_SALES,
+} from "assets/helper/constants";
 
 const transactionSource = "sale";
 
@@ -39,8 +57,16 @@ export const action = async ({ request }: ActionArgs) => {
   const userId = formData.get("user");
   invariant(typeof userId === "string", "Data must be string");
 
-  var totalInventorySalesAmount = 0;
-  var totalInventoryCOGSAmount = 0;
+  // get the old transaction
+  const oldSalesTransaction =
+    await getTransactionsByOrderIdAndTransactionSource(TRX_SOURCE_SALES, ref);
+  // get the payment only transaction
+  const receiptTransaction = oldSalesTransaction.filter(
+    (trx) => trx.subAccountId === SUB_CASH
+  );
+
+  // delete the old transaction
+  await deleteTransactionsByOrderIdAndTransactionSource(TRX_SOURCE_SALES, ref);
 
   // iterate for each controlId
   data.forEach(async (element: any) => {
@@ -56,12 +82,12 @@ export const action = async ({ request }: ActionArgs) => {
       orderId: parseInt(orderId),
       sourceTrx: transactionSource,
       controlTrx: id,
-      accountId: "inventory",
+      accountId: ACT_INVENTORY,
       subAccountId: inventoryId,
       unitPrice: new Decimal(avgPrice),
       quantity: quantity,
       amount: new Decimal(totalCost),
-      type: "cr",
+      type: TRX_CREDIT,
       userId: userId,
     });
 
@@ -71,12 +97,12 @@ export const action = async ({ request }: ActionArgs) => {
       orderId: parseInt(orderId),
       sourceTrx: transactionSource,
       controlTrx: id,
-      accountId: "cost-of-good-sold",
-      subAccountId: "cost-of-good-sold-default",
+      accountId: ACT_COGS,
+      subAccountId: SUB_COGS,
       unitPrice: new Decimal(totalCost),
       quantity: 1,
       amount: new Decimal(totalCost),
-      type: "db",
+      type: TRX_DEBIT,
       userId: userId,
     });
 
@@ -86,12 +112,12 @@ export const action = async ({ request }: ActionArgs) => {
       orderId: parseInt(orderId),
       sourceTrx: transactionSource,
       controlTrx: id,
-      accountId: "sales",
-      subAccountId: "sales-default",
+      accountId: ACT_SALES,
+      subAccountId: SUB_SALES,
       unitPrice: new Decimal(total),
       quantity: 1,
       amount: new Decimal(total),
-      type: "cr",
+      type: TRX_CREDIT,
       userId: userId,
     });
 
@@ -101,12 +127,12 @@ export const action = async ({ request }: ActionArgs) => {
       orderId: parseInt(orderId),
       sourceTrx: transactionSource,
       controlTrx: id,
-      accountId: "account-receivable",
-      subAccountId: "account-receivable-default",
+      accountId: ACT_ACCOUNT_RECEIVABLE,
+      subAccountId: SUB_ACCOUNT_RECEIVABLE,
       unitPrice: new Decimal(total),
       quantity: 1,
       amount: new Decimal(total),
-      type: "db",
+      type: TRX_DEBIT,
       userId: userId,
     });
     // record the retained earnings
@@ -115,15 +141,20 @@ export const action = async ({ request }: ActionArgs) => {
       orderId: parseInt(orderId),
       sourceTrx: transactionSource,
       controlTrx: id,
-      accountId: "retained-earnings",
-      subAccountId: "retained-earnings-default",
+      accountId: ACT_RETAINED_EARNINGS,
+      subAccountId: SUB_RETAINED_EARNINGS,
       unitPrice: new Decimal(total - totalCost),
       quantity: 1,
       amount: new Decimal(total - totalCost),
-      type: "cr",
+      type: TRX_CREDIT,
       userId: userId,
     });
   });
+
+  // add the old cash payment
+  for (const trx of receiptTransaction) {
+    await createTransaction(trx);
+  }
 
   return redirect("/sales");
 };
@@ -135,30 +166,55 @@ export const loader = async ({ request }: LoaderArgs) => {
   const ref = splitSlug?.at(0);
   const transaction = splitSlug?.at(1)?.toLowerCase();
 
-  const accounts = await getAccounts();
-  const subAccounts = await getSubAccounts();
   const users = await getUsers();
+  const customers = await getUserByType("Customer");
 
+  // get the transaction related to the orderID
   const salesTransaction = await getTransactionsByOrderIdAndTransactionSource(
     transaction ? transaction : "",
     Number(ref ? ref : 0)
   );
 
-  const theData = salesTransaction.map((transaction: any, idx: number) => ({
-    id: idx,
-    data: {
-      account: transaction.accountId,
-      subAccount: transaction.subAccountId,
-      debit: transaction.type == "db" ? transaction.amount : 0,
-      credit: transaction.type == "cr" ? transaction.amount : 0,
-      user: transaction.userId,
-    },
-  }));
+  // group based control id
+  const totalNumControl =
+    salesTransaction[salesTransaction.length - 1]?.controlTrx;
+  var arrPerControl = [];
+  for (var i = 1; i <= totalNumControl; i++) {
+    arrPerControl.push(salesTransaction.filter((trx) => trx.controlTrx == i));
+  }
 
-  var id = ref;
+  // generate the data to be passed to control(s)
+  var theData: any = [];
+  var theDataCounter = 1;
+  for (const control of arrPerControl) {
+    var inventoryId = "";
+    var avgPrice;
+    var quantity = 0;
+    var totalAmount = 0.0;
 
+    for (const trx of control) {
+      if (trx.accountId == ACT_INVENTORY) {
+        inventoryId = trx.subAccountId;
+        avgPrice = !!trx.unitPrice ? trx.unitPrice : 0.0;
+        quantity = !!trx.quantity ? trx.quantity : 0;
+      } else if (trx.subAccountId == SUB_SALES) {
+        totalAmount = !!trx.amount ? Number(trx.amount) : 0.0;
+      }
+    }
+    const price = Number(totalAmount) / quantity;
+
+    if (inventoryId === "") {
+      continue; // to escape from control that has no inventory transaction (recipt, payment, etc...)
+    }
+    theData.push({
+      id: theDataCounter,
+      data: { inventoryId, avgPrice, quantity, price },
+    });
+    theDataCounter++;
+  }
+
+  // get date
   var date = getCurrentDate();
-
   if (!!salesTransaction) {
     date = getDate(salesTransaction[0].trxTime.toString());
   }
@@ -172,17 +228,40 @@ export const loader = async ({ request }: LoaderArgs) => {
   // For the first time program running, transaction is containing nothing.
   //id = !!id ? id : { ref: 0 };
 
-  invariant(typeof id === "number", "id is not valid");
+  var refId = ref;
+  const order = !!refId ? Number(refId) : 0;
 
-  const refId = id;
+  // Get every sub-account type inventory
+  const fullInventories = await getSubAccountsByAccount(ACT_INVENTORY);
 
-  return json({ accounts, subAccounts, users, refId, date, theData });
+  const inventoryStatus = !!fullInventories[0]; // check if inventory already exists in database
+  if (!inventoryStatus) {
+    // if no inventory created, redirect user to create inventory
+    return redirect("/inventory/create");
+  }
+
+  const inventoriesWithoutDefaultSubAccount = fullInventories.filter(
+    (inventory) => inventory.name !== SUB_NAME_DEFAULT
+  ); // remove the default subaccount from list
+
+  const inventories: any[] = [];
+  for (const inventory of inventoriesWithoutDefaultSubAccount) {
+    // extend inventory list to include quantity and average price
+    const extendedInventory = await getQuantityInventoryItem(inventory.id);
+    inventories.push({
+      id: inventory.id,
+      name: inventory.name,
+      accountId: inventory.accountId,
+      avg: extendedInventory.avgPrice,
+      qty: extendedInventory.quantity,
+    });
+  }
+  return json({ customers, order, inventories, date, theData });
 };
 
-export default function CreateSales() {
-  const { customers, order, inventories } = useLoaderData<typeof loader>();
-
-  const date = getCurrentDate();
+export default function EditSales() {
+  const { customers, order, inventories, date, theData } =
+    useLoaderData<typeof loader>();
 
   const defaultData = {
     account: inventories[0].id,
@@ -191,7 +270,8 @@ export default function CreateSales() {
     price: 0,
   };
 
-  const [data, setData] = useState([{ id: 1, data: defaultData }]);
+  // keeping track of individual transaction control data
+  const [data, setData] = useState(theData);
 
   // callback function to update transaction control data if there any change.
   // is called by handleComponentDataChange
@@ -205,11 +285,14 @@ export default function CreateSales() {
   // this handle any change in data in every transaction control
   const handleComponentDataChange = (id: any, data: any) => {
     const newData = { id, data };
-    setData((prevData) => callback(prevData, newData));
+    setData((prevData: any) => callback(prevData, newData));
   };
 
-  const [inputCount, setInputCount] = useState(1);
-  const [inputId, setInputId] = useState([1]);
+  const [inputCount, setInputCount] = useState(theData.length);
+  const [inputId, setInputId] = useState(
+    Array.from(Array(theData.length).keys())
+  );
+
   const [customer, setCustomer] = useState(customers[0].id);
   const [orderId, setOrderId] = useState(order);
 
@@ -236,15 +319,20 @@ export default function CreateSales() {
 
   // this handle will add 1 more row of transaction control
   const handleAddRow = () => {
-    setInputCount((prev) => (prev += 1));
+    setInputCount((prev: any) => (prev += 1));
     setInputId((prev) => [...prev, inputCount + 1]);
-    setData((prev) => [...prev, { id: inputCount + 1, data: defaultData }]);
+    setData((prev: any) => [
+      ...prev,
+      { id: inputCount + 1, data: defaultData },
+    ]);
   };
 
   // handle if btn delete(X) is clicked
   const handleDelete = (e: any) => {
     const id = e.currentTarget.id;
-    setData((prevData) => prevData.filter((data) => data.id != parseInt(id)));
+    setData((prevData: any) =>
+      prevData.filter((data: any) => data.id != parseInt(id))
+    );
     setInputId((prevInputId) =>
       prevInputId.filter((inputId) => inputId != parseInt(id))
     );
@@ -304,6 +392,7 @@ export default function CreateSales() {
               key={id}
               id={id}
               data={{ inventories }}
+              defaultData={data.at(id)}
               onDelete={handleDelete}
               callback={handleComponentDataChange}
             />

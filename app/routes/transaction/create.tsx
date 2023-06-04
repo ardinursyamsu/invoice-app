@@ -111,7 +111,7 @@ export default function CreateTransaction() {
   };
 
   // keeping track of individual transaction control data
-  const [data, setData] = useState([{ id: 0, data: defaultData }]);
+  const [data, setData] = useState([{ id: 1, data: defaultData }]);
 
   // callback function to update transaction control data if there any change.
   // is called by handleComponentDataChange
@@ -128,8 +128,8 @@ export default function CreateTransaction() {
     setData((prevData) => callback(prevData, newData));
   };
 
-  const [inputCount, setInputCount] = useState(0);
-  const [inputId, setInputId] = useState([0]);
+  const [inputCount, setInputCount] = useState(1);
+  const [inputId, setInputId] = useState([1]);
 
   // update for every change in data state
   useEffect(() => {
@@ -146,7 +146,7 @@ export default function CreateTransaction() {
   // handle if btn delete (X) is clicked
   const handleDelete = (e: any) => {
     const id = e.currentTarget.id;
-    console.log(id);
+    
     setData((prevData) => prevData.filter((data) => data.id != parseInt(id)));
     setInputId((prevInputId) =>
       prevInputId.filter((inputId) => inputId != parseInt(id))

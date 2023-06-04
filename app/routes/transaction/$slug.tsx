@@ -165,7 +165,7 @@ export default function Transaction() {
 
   // update for every change in data state
   useEffect(() => {
-    console.log(data);
+    //console.log(data);
   }, [data, inputId]);
 
   // this handle will add 1 more row of transaction control

@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 export default function SalesControl(props: any) {
   const { inventories } = props.data;
 
-  const [inventory, setInventory] = useState(inventories[0].id);
-  const [avgPrice, setAvgPrice] = useState(inventories[0].avg);
-  const [quantity, setQuantity] = useState(0);
-  const [price, setPrice] = useState(0);
+  
+
+  const [inventory, setInventory] = useState(!!props.defaultData? props.defaultData.data.inventoryId : inventories[0].id);
+  const [avgPrice, setAvgPrice] = useState(!!props.defaultData? props.defaultData.data.avgPrice : inventories[0].avg);
+  const [quantity, setQuantity] = useState(!!props.defaultData? props.defaultData.data.quantity : 0);
+  const [price, setPrice] = useState(!!props.defaultData? props.defaultData.data.price : 0);
   const [total, setTotal] = useState(price * quantity);
 
   const [data, setData] = useState({
@@ -63,7 +65,7 @@ export default function SalesControl(props: any) {
   return (
     <div className="row border rounded-2 mb-2 py-2">
       <div className="col-3">
-        <select className="form-select" onChange={handleInventoryChange}>
+        <select className="form-select" onChange={handleInventoryChange} defaultValue={inventory}>
           {inventories.map((inventory: typeof inventories) => (
             <option key={inventory.id} value={inventory.id}>
               {inventory.name}

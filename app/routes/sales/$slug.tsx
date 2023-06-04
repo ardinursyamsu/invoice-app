@@ -165,8 +165,10 @@ export default function DisplaySales() {
           </table>
         </div>
         <div className="text-end">
-          <Link to={"/sales/receipt?orderid=" + slug}>
+          <Link to={"/sales/edit?orderid=" + slug}>
             <button className="btn btn-warning mx-2">Edit Transaction</button>
+          </Link>
+          <Link to={"/sales/receipt?orderid=" + slug}>
             <button className="btn btn-primary" type="submit">
               Receive Cash
             </button>
