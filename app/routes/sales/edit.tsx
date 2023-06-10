@@ -21,6 +21,7 @@ import type { ActionArgs } from "@remix-run/node";
 import { Decimal } from "@prisma/client/runtime/library";
 import {
   ACT_ACCOUNT_RECEIVABLE,
+  ACT_CASH,
   ACT_COGS,
   ACT_INVENTORY,
   ACT_RETAINED_EARNINGS,
@@ -68,6 +69,8 @@ export const action = async ({ request }: ActionArgs) => {
   // delete the old transaction
   await deleteTransactionsByOrderIdAndTransactionSource(TRX_SOURCE_SALES, ref);
 
+  const lastControlId = data[data.length - 1].id;
+
   // iterate for each controlId
   data.forEach(async (element: any) => {
     const { id, data } = element;
@@ -77,7 +80,7 @@ export const action = async ({ request }: ActionArgs) => {
     const totalCost = avgPrice * quantity;
 
     // credit the inventory
-    createTransaction({
+    await createTransaction({
       trxTime: trxTime,
       orderId: parseInt(orderId),
       sourceTrx: transactionSource,
@@ -92,7 +95,7 @@ export const action = async ({ request }: ActionArgs) => {
     });
 
     // debit the cogs
-    createTransaction({
+    await createTransaction({
       trxTime: trxTime,
       orderId: parseInt(orderId),
       sourceTrx: transactionSource,
@@ -107,7 +110,7 @@ export const action = async ({ request }: ActionArgs) => {
     });
 
     // record the sales credit
-    createTransaction({
+    await createTransaction({
       trxTime: trxTime,
       orderId: parseInt(orderId),
       sourceTrx: transactionSource,
@@ -122,7 +125,7 @@ export const action = async ({ request }: ActionArgs) => {
     });
 
     // record the a/r debit
-    createTransaction({
+    await createTransaction({
       trxTime: trxTime,
       orderId: parseInt(orderId),
       sourceTrx: transactionSource,
@@ -136,7 +139,7 @@ export const action = async ({ request }: ActionArgs) => {
       userId: userId,
     });
     // record the retained earnings
-    createTransaction({
+    await createTransaction({
       trxTime: trxTime,
       orderId: parseInt(orderId),
       sourceTrx: transactionSource,
@@ -153,7 +156,37 @@ export const action = async ({ request }: ActionArgs) => {
 
   // add the old cash payment
   for (const trx of receiptTransaction) {
-    await createTransaction(trx);
+    // create cash transaction
+    const cashTransaction = {
+      trxTime: trxTime,
+      orderId: parseInt(orderId),
+      sourceTrx: transactionSource,
+      controlTrx: lastControlId + 1,
+      accountId: ACT_CASH,
+      subAccountId: SUB_CASH,
+      unitPrice: trx.unitPrice,
+      quantity: trx.quantity,
+      amount: trx.amount,
+      type: TRX_DEBIT,
+      userId: userId,
+    };
+    await createTransaction(cashTransaction);
+
+    // create the account receivable pair
+    const accountReceivableTransaction = {
+      trxTime: trxTime,
+      orderId: parseInt(orderId),
+      sourceTrx: transactionSource,
+      controlTrx: lastControlId + 1,
+      accountId: ACT_ACCOUNT_RECEIVABLE,
+      subAccountId: SUB_ACCOUNT_RECEIVABLE,
+      unitPrice: trx.unitPrice,
+      quantity: trx.quantity,
+      amount: trx.amount,
+      type: TRX_CREDIT,
+      userId: userId,
+    };
+    await createTransaction(accountReceivableTransaction);
   }
 
   return redirect("/sales");
@@ -176,8 +209,10 @@ export const loader = async ({ request }: LoaderArgs) => {
   );
 
   // group based control id
-  const totalNumControl =
-    salesTransaction[salesTransaction.length - 1]?.controlTrx;
+  const totalNumControl = salesTransaction.filter(
+    (trx) => trx.accountId == "inventory"
+  ).length;
+
   var arrPerControl = [];
   for (var i = 1; i <= totalNumControl; i++) {
     arrPerControl.push(salesTransaction.filter((trx) => trx.controlTrx == i));
@@ -264,7 +299,7 @@ export default function EditSales() {
     useLoaderData<typeof loader>();
 
   const defaultData = {
-    account: inventories[0].id,
+    inventoryId: inventories[0].id,
     avgPrice: inventories[0].avg,
     quantity: 0,
     price: 0,
@@ -290,14 +325,14 @@ export default function EditSales() {
 
   const [inputCount, setInputCount] = useState(theData.length);
   const [inputId, setInputId] = useState(
-    Array.from(Array(theData.length).keys())
+    Array.from(theData.map((data: any) => data.id))
   );
 
   const [customer, setCustomer] = useState(customers[0].id);
   const [orderId, setOrderId] = useState(order);
 
   useEffect(() => {
-    //console.log(data);
+    //console.log("data", data);
   }, [data, inputId]);
 
   // this will handle if customer dropdown menu change
@@ -392,7 +427,7 @@ export default function EditSales() {
               key={id}
               id={id}
               data={{ inventories }}
-              defaultData={data.at(id)}
+              defaultData={data.find((d: any) => d.id == id)}
               onDelete={handleDelete}
               callback={handleComponentDataChange}
             />

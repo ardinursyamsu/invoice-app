@@ -32,8 +32,14 @@ export async function loader({ params }: LoaderArgs) {
   const inventoryItems = await getSubAccountsByAccount(ACT_INVENTORY);
 
   // group based control id
-  const totalNumControl =
-    salesTransaction[salesTransaction.length - 1]?.controlTrx;
+  const totalInventoryControl = salesTransaction.filter(
+    (trx) => trx.accountId == "inventory"
+  ).length;
+  const totalCashControl = salesTransaction.filter(
+    (trx) => trx.accountId == "cash"
+  ).length;
+  const totalNumControl = totalInventoryControl + totalCashControl;
+
   var arrPerControl = [];
   for (var i = 1; i <= totalNumControl; i++) {
     arrPerControl.push(salesTransaction.filter((trx) => trx.controlTrx == i));
