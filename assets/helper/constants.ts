@@ -32,3 +32,9 @@ export const SUB_NAME_DEFAULT               = "default";
 
 export const TRX_DEBIT                      = "db";
 export const TRX_CREDIT                     = "cr";
+
+export const ACC_TYPE_ASSET                 = "asset";
+export const ACC_TYPE_LIABILITY             = "liability";
+export const ACC_TYPE_EQUITY                = "equity";
+export const ACC_TYPE_INCOME                = "income";
+export const ACC_TYPE_EXPENSE               = "expense";
