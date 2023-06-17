@@ -2,6 +2,19 @@ import { Decimal } from "@prisma/client/runtime/library";
 import { ActionArgs, json, redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import CashControl from "assets/components/cash-control";
+import {
+  ACC_TYPE_ASSET,
+  ACC_TYPE_EQUITY,
+  ACC_TYPE_EXPENSE,
+  ACC_TYPE_LIABILITY,
+  ACT_CASH,
+  ACT_RETAINED_EARNINGS,
+  SUB_CASH,
+  SUB_RETAINED_EARNINGS,
+  TRX_CREDIT,
+  TRX_DEBIT,
+  TRX_SOURCE_PAYMENT,
+} from "assets/helper/constants";
 import { getCurrentDate } from "assets/helper/helper";
 import Body from "assets/layouts/body";
 import PaymentNavbar from "assets/layouts/customnavbar/payment-navbar";
@@ -11,6 +24,9 @@ import { getAccountById, getAccounts } from "~/models/account.server";
 import { getSubAccounts } from "~/models/subaccount.server";
 import { createTransaction, getLastOrderId } from "~/models/transaction.server";
 import { getUsers } from "~/models/user.server";
+import CreateTransaction from "../transaction/create";
+
+const trxSource = TRX_SOURCE_PAYMENT;
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
@@ -31,66 +47,156 @@ export const action = async ({ request }: ActionArgs) => {
   const jsonData = JSON.parse(rawdata);
   const { data } = jsonData;
 
-  // process each record
-/*  data.forEach(async (element: any) => {
+  // iterate for each controlId
+  data.forEach(async (element: any) => {
     const { id, data } = element;
-    const account = await getAccountById(data.account);
-    const accountId = account.id;
-    const accountType = account.type;
-    const subAccount = data.subAccount;
-    const amount = data.amount;
-    //console.log(trxTime, ref, user, accountId, accountType, subAccount, amount);
+    const { account, subAccount, amount } = data;
 
-    if (accountType === "asset") {
-      await createTransaction({
-        trxTime: trxTime,
-        ref: ref,
-        transaction: transactionSource,
-        accountId: accountId,
-        subAccountId: subAccount,
-        amount: amount,
-        type: "db",
-        userId: user,
-      });
-      /* case for fixed asset & inventory 
-      // credit the asset (acquired cost)
-      console.log("credit the asset", {trxTime: trxTime, ref: ref, accountId: accountId, subAccountId: subAccount, amount: amount,  type: "cr", userId: user})
-      // debit the expense (acquired cost of the assets)
-      console.log("debit the expense", {trxTime: trxTime, ref: ref, accountId: "expense-trial", subAccountId: "expense-trial-default", amount: amount, type: "db", userId: user})
-      // credit the sales (from the amount)
-      console.log("credit the sales", {trxTime: trxTime, ref: ref, accountId: "sales", subAccountId: "sales-default", amount: amount, type: "cr", userId: user})
-      */
-  /*  } else {
-      await createTransaction({
-        trxTime: trxTime,
-        ref: ref,
-        transaction: transactionSource,
-        accountId: accountId,
-        subAccountId: subAccount,
-        amount: amount,
-        type: "db",
-        userId: user,
-      });
+    const accountData = await getAccountById(account);
+    const accountType = !!accountData ? accountData.type : "";
+
+    switch (accountType.toLowerCase()) {
+      case ACC_TYPE_ASSET:
+        // debit the asset
+        createTransaction({
+          trxTime: trxTime,
+          orderId: parseInt(refId),
+          sourceTrx: trxSource,
+          controlTrx: id,
+          accountId: account,
+          subAccountId: subAccount,
+          unitPrice: new Decimal(amount),
+          quantity: 1,
+          amount: new Decimal(amount),
+          type: TRX_DEBIT,
+          userId: user,
+        });
+        // credit the cash
+        createTransaction({
+          trxTime: trxTime,
+          orderId: parseInt(refId),
+          sourceTrx: trxSource,
+          controlTrx: id,
+          accountId: ACT_CASH,
+          subAccountId: SUB_CASH,
+          unitPrice: new Decimal(amount),
+          quantity: 1,
+          amount: new Decimal(amount),
+          type: TRX_CREDIT,
+          userId: user,
+        });
+        break;
+
+      case ACC_TYPE_LIABILITY:
+        // debit the liabilities
+        createTransaction({
+          trxTime: trxTime,
+          orderId: parseInt(refId),
+          sourceTrx: trxSource,
+          controlTrx: id,
+          accountId: account,
+          subAccountId: subAccount,
+          unitPrice: new Decimal(amount),
+          quantity: 1,
+          amount: new Decimal(amount),
+          type: TRX_DEBIT,
+          userId: user,
+        });
+        // credit the cash
+        createTransaction({
+          trxTime: trxTime,
+          orderId: parseInt(refId),
+          sourceTrx: trxSource,
+          controlTrx: id,
+          accountId: ACT_CASH,
+          subAccountId: SUB_CASH,
+          unitPrice: new Decimal(amount),
+          quantity: 1,
+          amount: new Decimal(amount),
+          type: TRX_CREDIT,
+          userId: user,
+        });
+        break;
+
+      case ACC_TYPE_EQUITY:
+        // debit the equitiies
+        createTransaction({
+          trxTime: trxTime,
+          orderId: parseInt(refId),
+          sourceTrx: trxSource,
+          controlTrx: id,
+          accountId: account,
+          subAccountId: subAccount,
+          unitPrice: new Decimal(amount),
+          quantity: 1,
+          amount: new Decimal(amount),
+          type: TRX_DEBIT,
+          userId: user,
+        });
+        // credit the cash
+        createTransaction({
+          trxTime: trxTime,
+          orderId: parseInt(refId),
+          sourceTrx: trxSource,
+          controlTrx: id,
+          accountId: ACT_CASH,
+          subAccountId: SUB_CASH,
+          unitPrice: new Decimal(amount),
+          quantity: 1,
+          amount: new Decimal(amount),
+          type: TRX_CREDIT,
+          userId: user,
+        });
+        break;
+
+      case ACC_TYPE_EXPENSE:
+        // debit the equitiies
+        createTransaction({
+          trxTime: trxTime,
+          orderId: parseInt(refId),
+          sourceTrx: trxSource,
+          controlTrx: id,
+          accountId: account,
+          subAccountId: subAccount,
+          unitPrice: new Decimal(amount),
+          quantity: 1,
+          amount: new Decimal(amount),
+          type: TRX_DEBIT,
+          userId: user,
+        });
+        // credit the cash
+        createTransaction({
+          trxTime: trxTime,
+          orderId: parseInt(refId),
+          sourceTrx: trxSource,
+          controlTrx: id,
+          accountId: ACT_CASH,
+          subAccountId: SUB_CASH,
+          unitPrice: new Decimal(amount),
+          quantity: 1,
+          amount: new Decimal(amount),
+          type: TRX_CREDIT,
+          userId: user,
+        });
+        // debit the retained earnings
+        createTransaction({
+          trxTime: trxTime,
+          orderId: parseInt(refId),
+          sourceTrx: trxSource,
+          controlTrx: id,
+          accountId: ACT_RETAINED_EARNINGS,
+          subAccountId: SUB_RETAINED_EARNINGS,
+          unitPrice: new Decimal(amount),
+          quantity: 1,
+          amount: new Decimal(amount),
+          type: TRX_DEBIT,
+          userId: user,
+        });
+        break;
     }
   });
 
-  // process totalcash attributed to the transactions
-  var cashAmount = 0;
-  data.forEach((element: any) => {
-    cashAmount += element.data.amount;
-  });
-  await createTransaction({
-    trxTime: trxTime,
-    ref: ref,
-    transaction: transactionSource,
-    accountId: "cash",
-    subAccountId: "cash-default",
-    amount: new Decimal(cashAmount),
-    type: "cr",
-    userId: user,
-  });
-*/
-  return redirect("/receipt");
+  return redirect("/payment");
 };
 
 export const loader = async () => {
@@ -165,12 +271,13 @@ export default function Payment() {
 
   useEffect(() => {
     //console.log("test effect: ", data);
-  }, [data, inputId]);
+    setUserId(userList[0].id)
+  }, [data, inputId, userList]);
 
   // do something if category (customer/supplier) change
   const handleCategoryChange = (e: any) => {
     const typeFilter = e.target.value;
-    setUserList(users.filter((user:any) => user.type == typeFilter));
+    setUserList(users.filter((user: any) => user.type == typeFilter));
   };
 
   // handle if add row button is clicked (add more row)
@@ -224,7 +331,7 @@ export default function Payment() {
             </div>
           </div>
           <div className="row mb-4">
-            <label className="col-sm-2 col-form-label">Receipt from</label>
+            <label className="col-sm-2 col-form-label">Payment to</label>
             <div className="col-sm-3">
               <select onChange={handleCategoryChange} className="form-select">
                 {typeUser.map((type: string) => (
@@ -234,7 +341,7 @@ export default function Payment() {
             </div>
             <div className="col-sm-3">
               <select className="form-select" onChange={handleUserChange}>
-                {userList.map((user:any) => (
+                {userList.map((user: any) => (
                   <option key={user.id}>{user.name}</option>
                 ))}
               </select>

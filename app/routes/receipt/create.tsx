@@ -3,6 +3,9 @@ import { ActionArgs, json, redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import CashControl from "assets/components/cash-control";
 import {
+  ACC_TYPE_ASSET,
+  ACC_TYPE_EQUITY,
+  ACC_TYPE_LIABILITY,
   ACT_CASH,
   SUB_CASH,
   TRX_CREDIT,
@@ -48,10 +51,8 @@ export const action = async ({ request }: ActionArgs) => {
     const accountData = await getAccountById(account);
     const accountType = !!accountData ? accountData.type : "";
 
-    console.log(accountType);
-
     switch (accountType.toLowerCase()) {
-      case "asset":
+      case ACC_TYPE_ASSET:
         // credit the asset
         createTransaction({
           trxTime: trxTime,
@@ -82,7 +83,7 @@ export const action = async ({ request }: ActionArgs) => {
         });
         break;
 
-      case "liability":
+      case ACC_TYPE_LIABILITY:
         // credit the liabilities
         createTransaction({
           trxTime: trxTime,
@@ -113,7 +114,7 @@ export const action = async ({ request }: ActionArgs) => {
         });
         break;
 
-      case "equity":
+      case ACC_TYPE_EQUITY:
         // credit the equitiies
         createTransaction({
           trxTime: trxTime,
