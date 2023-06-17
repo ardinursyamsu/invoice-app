@@ -222,7 +222,8 @@ export default function Receipt() {
 
   useEffect(() => {
     //console.log("test effect: ", data);
-  }, [data, inputId]);
+    setUserId(userList[0].id)
+  }, [data, inputId, userList]);
 
   // do something if category (customer/supplier) change
   const handleCategoryChange = (e: any) => {
