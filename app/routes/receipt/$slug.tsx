@@ -1,50 +1,54 @@
 import { Decimal } from "@prisma/client/runtime/library";
-import { ActionArgs, json, redirect } from "@remix-run/node";
+import { ActionArgs, LoaderArgs, json, redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import CashControl from "assets/components/cash-control";
 import {
   ACC_TYPE_ASSET,
   ACC_TYPE_EQUITY,
-  ACC_TYPE_EXPENSE,
   ACC_TYPE_LIABILITY,
   ACT_CASH,
-  ACT_RETAINED_EARNINGS,
   SUB_CASH,
-  SUB_RETAINED_EARNINGS,
   TRX_CREDIT,
   TRX_DEBIT,
-  TRX_SOURCE_PAYMENT,
+  TRX_SOURCE_RECEIPT,
 } from "assets/helper/constants";
-import { getCurrentDate } from "assets/helper/helper";
+import { getCurrentDate, getDate } from "assets/helper/helper";
 import Body from "assets/layouts/body";
-import PaymentNavbar from "assets/layouts/customnavbar/payment-navbar";
+import ReceiptNavbar from "assets/layouts/customnavbar/receipt-navbar";
 import { useEffect, useState } from "react";
 import invariant from "tiny-invariant";
 import { getAccountById, getAccounts } from "~/models/account.server";
 import { getSubAccounts } from "~/models/subaccount.server";
-import { createTransaction, getLastOrderId } from "~/models/transaction.server";
+import {
+  createTransaction,
+  deleteTransactionsByOrderIdAndTransactionSource,
+  getTransactionsByOrderIdAndTransactionSource,
+} from "~/models/transaction.server";
 import { getUsers } from "~/models/user.server";
 
-const trxSource = TRX_SOURCE_PAYMENT;
+const trxSource = TRX_SOURCE_RECEIPT;
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
-
-  const date = formData.get("trx-time");
-  invariant(typeof date === "string", "Data must be string");
-  const trxTime = new Date(date);
-
-  const refId = formData.get("ref");
-  invariant(typeof refId === "string", "Data mut be string");
-  const ref = parseInt(refId);
-
-  const user = formData.get("user");
-  invariant(typeof user === "string", "Data mut be string");
 
   const rawdata = formData.get("data");
   invariant(typeof rawdata === "string", "Data must be string");
   const jsonData = JSON.parse(rawdata);
   const { data } = jsonData;
+
+  const orderId = formData.get("orderId");
+  invariant(typeof orderId === "string", "Data mut be string");
+  const ref = parseInt(orderId);
+
+  const date = formData.get("trx-time");
+  invariant(typeof date === "string", "Data must be string");
+  const trxTime = new Date(date);
+
+  const userId = formData.get("user");
+  invariant(typeof userId === "string", "Data must be string");
+
+  // delete the old transaction
+  await deleteTransactionsByOrderIdAndTransactionSource(trxSource, ref);
 
   // iterate for each controlId
   data.forEach(async (element: any) => {
@@ -56,10 +60,10 @@ export const action = async ({ request }: ActionArgs) => {
 
     switch (accountType.toLowerCase()) {
       case ACC_TYPE_ASSET:
-        // debit the asset
+        // credit the asset
         createTransaction({
           trxTime: trxTime,
-          orderId: parseInt(refId),
+          orderId: parseInt(orderId),
           sourceTrx: trxSource,
           controlTrx: id,
           accountId: account,
@@ -67,13 +71,13 @@ export const action = async ({ request }: ActionArgs) => {
           unitPrice: new Decimal(amount),
           quantity: 1,
           amount: new Decimal(amount),
-          type: TRX_DEBIT,
-          userId: user,
+          type: TRX_CREDIT,
+          userId: userId,
         });
-        // credit the cash
+        // debit the cash
         createTransaction({
           trxTime: trxTime,
-          orderId: parseInt(refId),
+          orderId: parseInt(orderId),
           sourceTrx: trxSource,
           controlTrx: id,
           accountId: ACT_CASH,
@@ -81,16 +85,16 @@ export const action = async ({ request }: ActionArgs) => {
           unitPrice: new Decimal(amount),
           quantity: 1,
           amount: new Decimal(amount),
-          type: TRX_CREDIT,
-          userId: user,
+          type: TRX_DEBIT,
+          userId: userId,
         });
         break;
 
       case ACC_TYPE_LIABILITY:
-        // debit the liabilities
+        // credit the liabilities
         createTransaction({
           trxTime: trxTime,
-          orderId: parseInt(refId),
+          orderId: parseInt(orderId),
           sourceTrx: trxSource,
           controlTrx: id,
           accountId: account,
@@ -98,13 +102,13 @@ export const action = async ({ request }: ActionArgs) => {
           unitPrice: new Decimal(amount),
           quantity: 1,
           amount: new Decimal(amount),
-          type: TRX_DEBIT,
-          userId: user,
+          type: TRX_CREDIT,
+          userId: userId,
         });
-        // credit the cash
+        // debit the cash
         createTransaction({
           trxTime: trxTime,
-          orderId: parseInt(refId),
+          orderId: parseInt(orderId),
           sourceTrx: trxSource,
           controlTrx: id,
           accountId: ACT_CASH,
@@ -112,16 +116,16 @@ export const action = async ({ request }: ActionArgs) => {
           unitPrice: new Decimal(amount),
           quantity: 1,
           amount: new Decimal(amount),
-          type: TRX_CREDIT,
-          userId: user,
+          type: TRX_DEBIT,
+          userId: userId,
         });
         break;
 
       case ACC_TYPE_EQUITY:
-        // debit the equitiies
+        // credit the equitiies
         createTransaction({
           trxTime: trxTime,
-          orderId: parseInt(refId),
+          orderId: parseInt(orderId),
           sourceTrx: trxSource,
           controlTrx: id,
           accountId: account,
@@ -129,13 +133,13 @@ export const action = async ({ request }: ActionArgs) => {
           unitPrice: new Decimal(amount),
           quantity: 1,
           amount: new Decimal(amount),
-          type: TRX_DEBIT,
-          userId: user,
+          type: TRX_CREDIT,
+          userId: userId,
         });
-        // credit the cash
+        // debit the cash
         createTransaction({
           trxTime: trxTime,
-          orderId: parseInt(refId),
+          orderId: parseInt(orderId),
           sourceTrx: trxSource,
           controlTrx: id,
           accountId: ACT_CASH,
@@ -143,90 +147,92 @@ export const action = async ({ request }: ActionArgs) => {
           unitPrice: new Decimal(amount),
           quantity: 1,
           amount: new Decimal(amount),
-          type: TRX_CREDIT,
-          userId: user,
-        });
-        break;
-
-      case ACC_TYPE_EXPENSE:
-        // debit the equitiies
-        createTransaction({
-          trxTime: trxTime,
-          orderId: parseInt(refId),
-          sourceTrx: trxSource,
-          controlTrx: id,
-          accountId: account,
-          subAccountId: subAccount,
-          unitPrice: new Decimal(amount),
-          quantity: 1,
-          amount: new Decimal(amount),
           type: TRX_DEBIT,
-          userId: user,
-        });
-        // credit the cash
-        createTransaction({
-          trxTime: trxTime,
-          orderId: parseInt(refId),
-          sourceTrx: trxSource,
-          controlTrx: id,
-          accountId: ACT_CASH,
-          subAccountId: SUB_CASH,
-          unitPrice: new Decimal(amount),
-          quantity: 1,
-          amount: new Decimal(amount),
-          type: TRX_CREDIT,
-          userId: user,
-        });
-        // debit the retained earnings
-        createTransaction({
-          trxTime: trxTime,
-          orderId: parseInt(refId),
-          sourceTrx: trxSource,
-          controlTrx: id,
-          accountId: ACT_RETAINED_EARNINGS,
-          subAccountId: SUB_RETAINED_EARNINGS,
-          unitPrice: new Decimal(amount),
-          quantity: 1,
-          amount: new Decimal(amount),
-          type: TRX_DEBIT,
-          userId: user,
+          userId: userId,
         });
         break;
     }
   });
 
-  return redirect("/payment");
+  return redirect("/receipt");
 };
 
-export const loader = async () => {
+export const loader = async ({ params }: LoaderArgs) => {
+  const slug = params.slug;
+  const splitSlug = slug?.split("-");
+  const ref = splitSlug?.at(1);
+  const transaction = splitSlug?.at(0)?.toLowerCase();
+
   const accounts = await getAccounts();
   const subAccounts = await getSubAccounts();
   const users = await getUsers();
 
-  var id = await getLastOrderId();
+  // get the transaction related to the orderID
+  const receiptTransactions =
+    await getTransactionsByOrderIdAndTransactionSource(
+      transaction ? transaction : "",
+      Number(ref ? ref : 0)
+    );
 
-  // For the first time program running, transaction is containing nothing.
-  id = !!id ? id : { orderId: 0 };
+  // group based control id
+  const totalNumControl = receiptTransactions.filter(
+    (trx) => trx.accountId == ACT_CASH
+  ).length;
+
+  var arrPerControl = [];
+  for (var i = 1; i <= totalNumControl; i++) {
+    arrPerControl.push(
+      receiptTransactions.filter((trx) => trx.controlTrx == i)
+    );
+  }
+
+  // generate the data to be passed to control(s)
+  var theData: any = [];
+  var theDataCounter = 1;
+  for (const control of arrPerControl) {
+    var account = "";
+    var subAccount = "";
+    var amount = 0.0;
+
+    for (const trx of control) {
+      if (trx.accountId == ACT_CASH) {
+        amount = !!trx.amount ? Number(trx.amount) : 0.0;
+      } else {
+        account = !!trx.accountId ? trx.accountId : "";
+        subAccount = !!trx.subAccountId ? trx.subAccountId : "";
+      }
+    }
+    theData.push({
+      id: theDataCounter,
+      data: { account, subAccount, amount },
+    });
+    theDataCounter++;
+  }
+
+  // get date
+  var date = getCurrentDate();
+  if (!!receiptTransactions) {
+    date = getDate(receiptTransactions[0].trxTime.toString());
+  }
 
   // check user
   const userStatus = !!users[0]; // if user hasn't created yet, force user to create first
   if (!userStatus) {
-    return redirect("/user/create");
+    return redirect("/user");
   }
 
-  invariant(typeof id === "object", "Data is not valid");
+  var refId = ref;
+  const order = !!refId ? Number(refId) : 0;
 
-  const refId = id.orderId + 1;
-
-  return json({ accounts, subAccounts, users, refId });
+  return json({ accounts, subAccounts, users, order, date, theData });
 };
 
 /* -- Render in Client --*/
-export default function Payment() {
-  const { accounts, subAccounts, users, refId } =
+export default function EditReceipt() {
+  const { accounts, subAccounts, users, order, date, theData } =
     useLoaderData<typeof loader>();
 
-  const date = getCurrentDate();
+  //const date = getCurrentDate();
   const defaultData = {
     account: accounts[0],
     subAccounts: subAccounts.find(
@@ -236,7 +242,7 @@ export default function Payment() {
   };
 
   // keeping track of individual transaction control data
-  const [data, setData] = useState([{ id: 1, data: defaultData }]);
+  const [data, setData] = useState(theData);
 
   // callback function to update transaction control data if there any change
   const callback = (prevData: any, newData: any) => {
@@ -249,16 +255,18 @@ export default function Payment() {
   // this handle any change in data in every transaction control
   const handleComponentDataChange = (id: any, data: any) => {
     const newData = { id, data };
-    setData((prevData) => callback(prevData, newData));
+    setData((prevData: any) => callback(prevData, newData));
   };
 
   const [userList, setUserList] = useState(
     users.filter((user: any) => user.type == "Customer")
   );
 
-  const [inputCount, setInputCount] = useState(1);
-  const [inputId, setInputId] = useState([1]);
-  const [userId, setUserId] = useState(userList[0].id);
+  const [inputCount, setInputCount] = useState(theData.length);
+  const [inputId, setInputId] = useState(
+    Array.from(theData.map((data: any) => data.id))
+  );
+  const [userId, setUserId] = useState(users[0].id);
 
   // filter cateogry of each user
   var typeUser: any = [];
@@ -270,7 +278,7 @@ export default function Payment() {
 
   useEffect(() => {
     //console.log("test effect: ", data);
-    setUserId(userList[0].id)
+    setUserId(userList[0].id);
   }, [data, inputId, userList]);
 
   // do something if category (customer/supplier) change
@@ -281,9 +289,12 @@ export default function Payment() {
 
   // handle if add row button is clicked (add more row)
   const handleAddRow = () => {
-    setInputCount((prev) => (prev += 1));
+    setInputCount((prev: any) => (prev += 1));
     setInputId((prev) => [...prev, inputCount + 1]);
-    setData((prev) => [...prev, { id: inputCount + 1, data: defaultData }]);
+    setData((prev: any) => [
+      ...prev,
+      { id: inputCount + 1, data: defaultData },
+    ]);
   };
 
   // handle if btn delete (X) is clicked
@@ -301,12 +312,12 @@ export default function Payment() {
 
   return (
     <Body>
-      <PaymentNavbar />
+      <ReceiptNavbar />
       <div className="container">
-        <div className="row text-center mb-4 bg-warning rounded-2 p-2">
-          <h4 className="text-dark">Add Payment</h4>
-        </div>
         <div className="col">
+          <div className="row text-center mb-4 bg-warning rounded-2 p-2">
+            <h4 className="text-dark">Edit Receipt</h4>
+          </div>
           <div className="row mb-2">
             <label className="col-sm-2 col-form-label">Transaction Time</label>
             <div className="col-sm-3">
@@ -325,12 +336,12 @@ export default function Payment() {
                 className="form-control"
                 name="ref"
                 type="text"
-                defaultValue={refId}
+                defaultValue={order}
               />
             </div>
           </div>
           <div className="row mb-4">
-            <label className="col-sm-2 col-form-label">Payment to</label>
+            <label className="col-sm-2 col-form-label">Receipt from</label>
             <div className="col-sm-3">
               <select onChange={handleCategoryChange} className="form-select">
                 {typeUser.map((type: string) => (
@@ -356,6 +367,7 @@ export default function Payment() {
               <CashControl
                 key={id}
                 id={id}
+                defaultData={data.find((d: any) => d.id == id)}
                 data={{ accounts, subAccounts }}
                 callback={handleComponentDataChange}
                 onDelete={handleDelete}
@@ -377,13 +389,13 @@ export default function Payment() {
         </div>
         <form method="post">
           <input type="hidden" name="trx-time" value={date} />
-          <input type="hidden" name="ref" value={refId.toString()} />
+          <input type="hidden" name="orderId" value={order?.toString()} />
           <input type="hidden" name="user" value={userId} />
           <input type="hidden" name="data" value={JSON.stringify({ data })} />
           <input
             className="btn btn-primary"
             type="submit"
-            value="Add Transactions"
+            value="Edit Transactions"
           />
         </form>
       </div>

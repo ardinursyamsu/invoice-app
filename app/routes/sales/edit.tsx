@@ -210,7 +210,7 @@ export const loader = async ({ request }: LoaderArgs) => {
 
   // group based control id
   const totalNumControl = salesTransaction.filter(
-    (trx) => trx.accountId == "inventory"
+    (trx) => trx.accountId == ACT_INVENTORY
   ).length;
 
   var arrPerControl = [];

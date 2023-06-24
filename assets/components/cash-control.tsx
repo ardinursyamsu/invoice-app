@@ -5,11 +5,11 @@ export default function CashControl(props: any) {
   const { accounts, subAccounts } = props.data;
 
   const [selectedSubAccounts, setSelectedSubAccounts] = useState(
-    subAccounts.filter((sub: any) => sub.accountId === accounts[0].id)
+    subAccounts.filter((sub: any) => sub.accountId === props.defaultData.data.account)
   );
-  const [account, setAccount] = useState(accounts[0].id);
-  const [subAccount, setSubAccount] = useState(selectedSubAccounts[0].id);
-  const [amount, setAmount] = useState(0);
+  const [account, setAccount] = useState(!!props.defaultData? props.defaultData.data.account : accounts[0].id);
+  const [subAccount, setSubAccount] = useState(!!props.defaultData? props.defaultData.data.subAccount : selectedSubAccounts[0].id);
+  const [amount, setAmount] = useState(!!props.defaultData? props.defaultData.data.amount : 0);
 
   const [data, setData] = useState({
     account: account,
@@ -47,7 +47,7 @@ export default function CashControl(props: any) {
   return (
     <div className="row border rounded-2 mb-2 py-2">
       <div className="col-4">
-        <select className="form-select" onChange={handleAccountChange}>
+        <select className="form-select" onChange={handleAccountChange} defaultValue={account}>
           {accounts.map((account: any) => (
             <option value={account.id} key={account.id}>
               {account.name}
@@ -56,7 +56,7 @@ export default function CashControl(props: any) {
         </select>
       </div>
       <div className="col-4">
-        <select name="account" className="form-select">
+        <select name="account" className="form-select" defaultValue={subAccount}>
           {selectedSubAccounts.map((subAccount: any) => (
             <option key={subAccount.id}>{subAccount.name}</option>
           ))}
