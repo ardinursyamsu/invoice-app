@@ -1,6 +1,6 @@
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
-import { TRX_SOURCE_TRANSACTION } from "assets/helper/constants";
+import { ACT_CASH, TRX_SOURCE_TRANSACTION } from "assets/helper/constants";
 import {
   displayCapitalFirst,
   displayDate,
@@ -8,16 +8,42 @@ import {
 } from "assets/helper/helper";
 import Body from "assets/layouts/body";
 import TransactionNavbar from "assets/layouts/customnavbar/transaction-navbar";
-import { getAllTransactionBySource } from "~/models/transaction.server";
+import { getAllTransactionBySource, getTransactionsByOrderIdAndTransactionSource } from "~/models/transaction.server";
 
+const trxSource = TRX_SOURCE_TRANSACTION
 export const loader = async () => {
-  const transactions = await getAllTransactionBySource(TRX_SOURCE_TRANSACTION);
+  const data = await getAllTransactionBySource(trxSource);
 
-  return json({ transactions });
+  var transactionsData = [];
+
+  for (const trx of data) {
+    const transactionPerOrderId =
+      await getTransactionsByOrderIdAndTransactionSource(
+        trxSource,
+        trx.orderId
+      );
+
+    const trxTime = trx.trxTime;
+    const refId = trx.orderId.toString() + "-" + trx.sourceTrx.toString();
+    var remark = "";
+    const user = trx.userId;
+    var totalAmount = 0;
+    for (const transactionCtrl of transactionPerOrderId) {
+      if (transactionCtrl.accountId == ACT_CASH) {
+        totalAmount += Number(transactionCtrl.amount);
+      } else {
+        remark += transactionCtrl.accountId + ", ";
+      }
+    }
+
+    transactionsData.push({ trxTime, refId, remark, user, totalAmount });
+  }
+
+  return json({ transactionsData });
 };
 
 export default function TransactionIndex() {
-  const { transactions } = useLoaderData<typeof loader>();
+  const { transactionsData } = useLoaderData<typeof loader>();
 
   return (
     <Body>
@@ -36,11 +62,9 @@ export default function TransactionIndex() {
                 <th className="text-center col-2" scope="col">
                   Ref ID
                 </th>
-                <th className="text-center col-2" scope="col">
-                  Account
-                </th>
-                <th className="text-center col-2" scope="col">
-                  Sub-Account
+                <th className="text-center col-4" scope="col">
+                  Remark
+                
                 </th>
                 <th className="text-center col-1" scope="col">
                   User
@@ -51,44 +75,29 @@ export default function TransactionIndex() {
               </tr>
             </thead>
             <tbody>
-              {transactions.map((transaction: any, idx: number) => (
-                <tr className="h-2" key={idx + 1}>
-                  <td className="text-center" scope="row">
-                    {idx + 1}
-                  </td>
-                  <td className="text-start">
-                    {displayDate(transaction.trxTime.toString())}
-                  </td>
-                  <td className="text-center">
-                    <Link
-                      to={
-                        transaction.orderId +
-                        "-" +
-                        transaction.sourceTrx.toUpperCase()
-                      }
-                    >
-                      {
-                        transaction.orderId +
-                        "-" +
-                        transaction.sourceTrx.toUpperCase()
-                      }
-                    </Link>
-                  </td>
-                  <td className="text-center">
-                    {displayCapitalFirst(transaction.accountId)}
-                  </td>
-                  <td className="text-center">
-                    {displayCapitalFirst(transaction.subAccountId)}
-                  </td>
-                  <td className="text-center">
-                    {displayCapitalFirst(transaction.userId)}
-                  </td>
-                  <td className="text-end">
-                    {transaction.type.toString().toUpperCase() +
-                      " - " +
-                      formatter.format(transaction.amount)}
-                  </td>
-                </tr>
+              {transactionsData.map((transaction: any, idx: number) => (
+                <tr key={idx + 1}>
+                <th className="text-center" scope="row">
+                  {idx + 1}
+                </th>
+                <td className="text-center">
+                  {displayDate(transaction.trxTime)}
+                </td>
+                <td className="text-center">
+                  <Link to={transaction.refId}>
+                    {transaction.refId.toUpperCase()}
+                  </Link>
+                </td>
+                <td className="text-start">
+                  {displayCapitalFirst(transaction.remark).replaceAll("-", " ")}
+                </td>
+                <td className="text-end">
+                  {displayCapitalFirst(transaction.user)}
+                </td>
+                <td className="text-end">
+                  {formatter.format(transaction.totalAmount)}
+                </td>
+              </tr>
               ))}
             </tbody>
           </table>

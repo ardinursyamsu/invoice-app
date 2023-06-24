@@ -133,6 +133,7 @@ export function TransactionControl(props: any) {
           className="form-select"
           name="user"
           onChange={(e) => handleUserChange(e)}
+          defaultValue={user}
         >
           {users.map((user: any) => (
             <option key={user.id} value={user.id}>

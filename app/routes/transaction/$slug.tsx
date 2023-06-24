@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getAccounts } from "~/models/account.server";
 import { getSubAccounts } from "~/models/subaccount.server";
 import {
+  deleteTransactionsByOrderIdAndTransactionSource,
   getLastOrderId,
   getTransactionsByOrderIdAndTransactionSource,
 } from "~/models/transaction.server";
@@ -15,7 +16,8 @@ import { createTransaction } from "~/models/transaction.server";
 import Body from "assets/layouts/body";
 import { getCurrentDate, getDate } from "assets/helper/helper";
 import TransactionNavbar from "assets/layouts/customnavbar/transaction-navbar";
-import { TRX_SOURCE_TRANSACTION } from "assets/helper/constants";
+import { TRX_CREDIT, TRX_DEBIT, TRX_SOURCE_TRANSACTION } from "assets/helper/constants";
+import { Decimal } from "@prisma/client/runtime/library";
 
 
 
@@ -26,42 +28,52 @@ export const action = async ({ request }: ActionArgs) => {
   invariant(typeof date === "string", "Data must be string");
   const trxTime = new Date(date);
 
-  const refId = formData.get("ref");
-  invariant(typeof refId === "string", "Data mut be string");
-  const ref = parseInt(refId);
+  const orderIdAsString = formData.get("orderId");
+  invariant(typeof orderIdAsString === "string", "Data mut be string");
+  const orderId = parseInt(orderIdAsString);
 
   const rawdata = formData.get("data");
   invariant(typeof rawdata === "string", "Data must be string");
   const jsonData = JSON.parse(rawdata);
   const { data } = jsonData;
+  const sourceTrx = TRX_SOURCE_TRANSACTION;
+
+  // delete the old transaction
+  await deleteTransactionsByOrderIdAndTransactionSource(sourceTrx, orderId);
 
   // processing foreach data that send by transcation-control
   data.forEach(async (element: any) => {
     const { id, data } = element;
     const { account, subAccount, debit, credit, user } = data;
-
+    const controlTrx = id;
     const accountId = account;
     const userId = user;
     const subAccountId = subAccount;
+    const quantity = 1; // default for transacction control must be 1
     var type;
     var amount;
     if (debit != 0) {
-      type = "db";
+      type = TRX_DEBIT;
       amount = debit;
     } else {
-      type = "cr";
+      type = TRX_CREDIT;
       amount = credit;
     }
-    // await createTransaction({
-    //   trxTime,
-    //   ref,
-    //   TRX_SOURCE_TRANSACTION,
-    //   accountId,
-    //   subAccountId,
-    //   amount,
-    //   type, // cr / db
-    //   userId,
-    // });
+    const unitPrice = new Decimal(amount); // default for transaction price are amount
+    
+    await createTransaction({
+      trxTime,
+      orderId,
+      sourceTrx,
+      controlTrx,
+      accountId,
+      subAccountId,
+      type,
+      unitPrice,
+      quantity,
+      amount,
+      userId,
+    });
   });
 
   return redirect("/transaction");
@@ -252,7 +264,7 @@ export default function Transaction() {
 
       <form method="post">
         <input type="hidden" name="trx-time" value={date} />
-        <input type="hidden" name="ref" value={refId.toString()} />
+        <input type="hidden" name="orderId" value={refId.toString()} />
         <input type="hidden" name="data" value={JSON.stringify({ data })} />
         <div className="container my-2">
           <button className="btn btn-primary" type="submit">
