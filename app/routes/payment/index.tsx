@@ -26,7 +26,7 @@ export const loader = async () => {
       );
 
     const trxTime = trx.trxTime;
-    const refId = trx.sourceTrx.toString() + "-" + trx.orderId.toString();
+    const refId = trx.orderId.toString() + "-" + trx.sourceTrx.toString();
     var remark = "";
     const user = trx.userId;
     var totalAmount = 0;

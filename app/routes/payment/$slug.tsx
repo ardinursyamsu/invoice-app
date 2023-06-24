@@ -5,15 +5,19 @@ import CashControl from "assets/components/cash-control";
 import {
   ACC_TYPE_ASSET,
   ACC_TYPE_EQUITY,
+  ACC_TYPE_EXPENSE,
   ACC_TYPE_LIABILITY,
   ACT_CASH,
+  ACT_RETAINED_EARNINGS,
   SUB_CASH,
+  SUB_RETAINED_EARNINGS,
   TRX_CREDIT,
   TRX_DEBIT,
-  TRX_SOURCE_RECEIPT,
+  TRX_SOURCE_PAYMENT,
 } from "assets/helper/constants";
 import { getCurrentDate, getDate } from "assets/helper/helper";
 import Body from "assets/layouts/body";
+import PaymentNavbar from "assets/layouts/customnavbar/payment-navbar";
 import ReceiptNavbar from "assets/layouts/customnavbar/receipt-navbar";
 import { useEffect, useState } from "react";
 import invariant from "tiny-invariant";
@@ -26,7 +30,7 @@ import {
 } from "~/models/transaction.server";
 import { getUserById, getUsers } from "~/models/user.server";
 
-const trxSource = TRX_SOURCE_RECEIPT;
+const trxSource = TRX_SOURCE_PAYMENT;
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
@@ -60,7 +64,7 @@ export const action = async ({ request }: ActionArgs) => {
 
     switch (accountType.toLowerCase()) {
       case ACC_TYPE_ASSET:
-        // credit the asset
+        // debit the asset
         createTransaction({
           trxTime: trxTime,
           orderId: parseInt(orderId),
@@ -71,10 +75,10 @@ export const action = async ({ request }: ActionArgs) => {
           unitPrice: new Decimal(amount),
           quantity: 1,
           amount: new Decimal(amount),
-          type: TRX_CREDIT,
+          type: TRX_DEBIT,
           userId: userId,
         });
-        // debit the cash
+        // credit the cash
         createTransaction({
           trxTime: trxTime,
           orderId: parseInt(orderId),
@@ -85,13 +89,13 @@ export const action = async ({ request }: ActionArgs) => {
           unitPrice: new Decimal(amount),
           quantity: 1,
           amount: new Decimal(amount),
-          type: TRX_DEBIT,
+          type: TRX_CREDIT,
           userId: userId,
         });
         break;
 
       case ACC_TYPE_LIABILITY:
-        // credit the liabilities
+        // debit the liabilities
         createTransaction({
           trxTime: trxTime,
           orderId: parseInt(orderId),
@@ -99,30 +103,30 @@ export const action = async ({ request }: ActionArgs) => {
           controlTrx: id,
           accountId: account,
           subAccountId: subAccount,
-          unitPrice: new Decimal(amount),
-          quantity: 1,
-          amount: new Decimal(amount),
-          type: TRX_CREDIT,
-          userId: userId,
-        });
-        // debit the cash
-        createTransaction({
-          trxTime: trxTime,
-          orderId: parseInt(orderId),
-          sourceTrx: trxSource,
-          controlTrx: id,
-          accountId: ACT_CASH,
-          subAccountId: SUB_CASH,
           unitPrice: new Decimal(amount),
           quantity: 1,
           amount: new Decimal(amount),
           type: TRX_DEBIT,
           userId: userId,
         });
+        // credit the cash
+        createTransaction({
+          trxTime: trxTime,
+          orderId: parseInt(orderId),
+          sourceTrx: trxSource,
+          controlTrx: id,
+          accountId: ACT_CASH,
+          subAccountId: SUB_CASH,
+          unitPrice: new Decimal(amount),
+          quantity: 1,
+          amount: new Decimal(amount),
+          type: TRX_CREDIT,
+          userId: userId,
+        });
         break;
 
       case ACC_TYPE_EQUITY:
-        // credit the equitiies
+        // debit the equitiies
         createTransaction({
           trxTime: trxTime,
           orderId: parseInt(orderId),
@@ -133,10 +137,10 @@ export const action = async ({ request }: ActionArgs) => {
           unitPrice: new Decimal(amount),
           quantity: 1,
           amount: new Decimal(amount),
-          type: TRX_CREDIT,
+          type: TRX_DEBIT,
           userId: userId,
         });
-        // debit the cash
+        // credit the cash
         createTransaction({
           trxTime: trxTime,
           orderId: parseInt(orderId),
@@ -144,6 +148,51 @@ export const action = async ({ request }: ActionArgs) => {
           controlTrx: id,
           accountId: ACT_CASH,
           subAccountId: SUB_CASH,
+          unitPrice: new Decimal(amount),
+          quantity: 1,
+          amount: new Decimal(amount),
+          type: TRX_CREDIT,
+          userId: userId,
+        });
+        break;
+
+      case ACC_TYPE_EXPENSE:
+        // debit the equitiies
+        createTransaction({
+          trxTime: trxTime,
+          orderId: parseInt(orderId),
+          sourceTrx: trxSource,
+          controlTrx: id,
+          accountId: account,
+          subAccountId: subAccount,
+          unitPrice: new Decimal(amount),
+          quantity: 1,
+          amount: new Decimal(amount),
+          type: TRX_DEBIT,
+          userId: userId,
+        });
+        // credit the cash
+        createTransaction({
+          trxTime: trxTime,
+          orderId: parseInt(orderId),
+          sourceTrx: trxSource,
+          controlTrx: id,
+          accountId: ACT_CASH,
+          subAccountId: SUB_CASH,
+          unitPrice: new Decimal(amount),
+          quantity: 1,
+          amount: new Decimal(amount),
+          type: TRX_CREDIT,
+          userId: userId,
+        });
+        // debit the retained earnings
+        createTransaction({
+          trxTime: trxTime,
+          orderId: parseInt(orderId),
+          sourceTrx: trxSource,
+          controlTrx: id,
+          accountId: ACT_RETAINED_EARNINGS,
+          subAccountId: SUB_RETAINED_EARNINGS,
           unitPrice: new Decimal(amount),
           quantity: 1,
           amount: new Decimal(amount),
@@ -154,7 +203,7 @@ export const action = async ({ request }: ActionArgs) => {
     }
   });
 
-  return redirect("/receipt");
+  return redirect("/payment");
 };
 
 export const loader = async ({ params }: LoaderArgs) => {
@@ -270,7 +319,7 @@ export default function EditReceipt() {
   };
 
   const [userList, setUserList] = useState(
-    users.filter((user: any) => originUser?.type)
+    users.filter((user: any) => user.type == originUser?.type)
   );
 
   const [inputCount, setInputCount] = useState(theData.length);
@@ -323,11 +372,11 @@ export default function EditReceipt() {
 
   return (
     <Body>
-      <ReceiptNavbar />
+      <PaymentNavbar />
       <div className="container">
         <div className="col">
           <div className="row text-center mb-4 bg-warning rounded-2 p-2">
-            <h4 className="text-dark">Edit Receipt</h4>
+            <h4 className="text-dark">Edit Payment</h4>
           </div>
           <div className="row mb-2">
             <label className="col-sm-2 col-form-label">Transaction Time</label>
