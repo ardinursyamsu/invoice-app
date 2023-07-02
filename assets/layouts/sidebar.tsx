@@ -75,7 +75,15 @@ export default function Sidebar(props: any) {
                   <span className="ms-1 d-none d-sm-inline">Inventory</span>
                 </a>
               </li>
-
+              <li>
+                <a
+                  href="/fixed-asset"
+                  className="nav-link px-0 align-middle text-white"
+                >
+                  <i className="fs-4 bi-grid"></i>{" "}
+                  <span className="ms-1 d-none d-sm-inline">Fixed Asset</span>
+                </a>
+              </li>
               <li>
                 <a
                   href="/user"
