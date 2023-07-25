@@ -1,7 +1,7 @@
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import Body from "assets/layouts/body";
-import UserNavbar from "assets/layouts/customnavbar/user-navbar";
+import FixedAssetNavbar from "assets/layouts/customnavbar/fixed-asset-navbar";
 import { getUsers } from "~/models/user.server";
 
 export const loader = async () => {
@@ -16,7 +16,7 @@ export default function FixedAsset() {
 
   return (
     <Body>
-      <UserNavbar />
+      <FixedAssetNavbar />
       <div className="d-flex justify-content-center">
         <div className="self-align-center col-10">
           <table className="table table-bordered">
