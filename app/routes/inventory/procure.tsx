@@ -206,7 +206,7 @@ export default function ProcureInventory() {
         </div>
         <div className="row mb-2">
           <label className="col-sm-2 col-form-label">Transaction Time</label>
-          <div className="col-sm-3">
+          <div className="col-sm-10">
             <input
               className="form-control"
               name="trxTime"

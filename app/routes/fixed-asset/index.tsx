@@ -1,18 +1,20 @@
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
+import { ACT_FIXED_ASSET } from "assets/helper/constants";
+import { displayCapitalFirst, formatter } from "assets/helper/helper";
 import Body from "assets/layouts/body";
 import FixedAssetNavbar from "assets/layouts/customnavbar/fixed-asset-navbar";
-import { getUsers } from "~/models/user.server";
+import { getSubAccountsByAccount } from "~/models/subaccount.server";
 
 export const loader = async () => {
   // Get user
-  var users = await getUsers();
+  var fixedAsset = await getSubAccountsByAccount(ACT_FIXED_ASSET);
 
-  return json({ users });
+  return json({ fixedAsset });
 };
 
 export default function FixedAsset() {
-  const { users } = useLoaderData<typeof loader>();
+  const { fixedAsset } = useLoaderData<typeof loader>();
 
   return (
     <Body>
@@ -35,15 +37,25 @@ export default function FixedAsset() {
               </tr>
             </thead>
             <tbody>
-              {users.map((user: any, idx: any) => (
+              {fixedAsset.map((fixedAsset: any, idx: any) => (
                 <tr key={idx + 1}>
                   <th className="text-center align-middle" scope="row">
                     {idx + 1}
                   </th>
-                  <td className="text-start align-middle">{user.name}</td>
-                  <td className="text-center align-middle">{user.type}</td>
+                  <td className="text-start align-middle">
+                    {displayCapitalFirst(fixedAsset.name)}
+                  </td>
                   <td className="text-center align-middle">
-                    <Link to={user.id}><button className="btn btn-primary m-1">Edit</button></Link>
+                    {formatter.format(
+                      !!fixedAsset.acquisitionCost
+                        ? fixedAsset.acquisitionCost
+                        : 0.0
+                    )}
+                  </td>
+                  <td className="text-center align-middle">
+                    <Link to={fixedAsset.id}>
+                      <button className="btn btn-primary m-1">Edit</button>
+                    </Link>
                     <button className="btn btn-danger m-1">Delete</button>
                   </td>
                 </tr>

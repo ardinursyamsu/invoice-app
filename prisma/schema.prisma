@@ -42,6 +42,7 @@ model SubAccount {
   account      Account       @relation(fields: [accountId], references: [id])
   accountId    String
   transactions Transaction[]
+  fixedAssets  FixedAsset[]
 }
 
 model User {
@@ -49,4 +50,15 @@ model User {
   name        String
   type        String // (customer, supplier, other)
   transaction Transaction[]
+}
+
+model FixedAsset {
+  id               String     @id
+  name             String
+  subAccount       SubAccount @relation(fields: [subAccountId], references: [id])
+  subAccountId     String
+  acquisitionDate  DateTime
+  description      String
+  acquisitionCost  Decimal
+  depreciationRate Decimal // in percent (max: 100)
 }
