@@ -53,12 +53,15 @@ model User {
 }
 
 model FixedAsset {
-  id               String     @id
-  name             String
-  subAccount       SubAccount @relation(fields: [subAccountId], references: [id])
-  subAccountId     String
-  acquisitionDate  DateTime
-  description      String
-  acquisitionCost  Decimal
-  depreciationRate Decimal // in percent (max: 100)
+  id                      String     @id
+  name                    String
+  subAccount              SubAccount @relation(fields: [subAccountId], references: [id])
+  subAccountId            String
+  acquisitionDate         DateTime
+  description             String
+  acquisitionCost         Decimal
+  depreciationType        Int // 1 for straight, 2 for accelerated
+  depreciationRate        Decimal? // in percent (max: 100)
+  depreciationValue       Decimal?
+  accumulatedDepreciation Decimal?
 }

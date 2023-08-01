@@ -38,3 +38,6 @@ export const ACC_TYPE_LIABILITY             = "liability";
 export const ACC_TYPE_EQUITY                = "equity";
 export const ACC_TYPE_INCOME                = "income";
 export const ACC_TYPE_EXPENSE               = "expense";
+
+export const STRAIGHT_DEPRECIATION          = 1;
+export const ACCELERATED_DEPRECIATION       = 2;

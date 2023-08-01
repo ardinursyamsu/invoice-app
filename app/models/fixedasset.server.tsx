@@ -13,13 +13,16 @@ export async function createFixedAsset(
     | "acquisitionDate"
     | "description"
     | "acquisitionCost"
+    | "depreciationType"
     | "depreciationRate"
+    | "depreciationValue"
   >
 ) {
   // depreciation rate shouldn't be more than 100% or less than 0%
-  if (fixedAsset.depreciationRate > new Decimal(100)) {
+  const depreciationRate = !! fixedAsset.depreciationRate ? fixedAsset.depreciationRate : 0.0;
+  if (depreciationRate > new Decimal(100)) {
     fixedAsset.depreciationRate = new Decimal(100);
-  } else if (fixedAsset.depreciationRate < new Decimal(0)) {
+  } else if (depreciationRate < new Decimal(0)) {
     fixedAsset.depreciationRate = new Decimal(0);
   }
   const { id, name } = fixedAsset;

@@ -1,37 +1,41 @@
 import { ActionArgs, redirect } from "@remix-run/node";
-import { ACT_FIXED_ASSET } from "assets/helper/constants";
+import {
+  ACCELERATED_DEPRECIATION,
+  ACT_FIXED_ASSET,
+  STRAIGHT_DEPRECIATION,
+} from "assets/helper/constants";
 import { formatter, getCurrentDate } from "assets/helper/helper";
 import Body from "assets/layouts/body";
 import FixedAssetNavbar from "assets/layouts/customnavbar/fixed-asset-navbar";
 import { useState } from "react";
-import invariant from "tiny-invariant";
-import { createSubAccount } from "~/models/subaccount.server";
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
-  const fixedAsset = formData.get("fixed-asset");
-  const fixedAssetId = formData.get("fixed-asset-id");
-  const depreciationRate = formData.get("depreciation-rate");
+  const fixed_asset = formData.get("fixed-asset");
+  const fixed_asset_id = formData.get("fixed-asset-id");
+  const depreciation_rate = formData.get("depreciation-rate");
+  const acquisition_cost = formData.get("acquisition-cost");
+  const acquisition_date = formData.get("acquisition-date");
+  const description = formData.get("description");
 
-  invariant(typeof fixedAsset === "string", "This should be a string");
-  invariant(typeof fixedAssetId === "string", "This should be a string");
-  invariant(typeof depreciationRate === "string", "This should be a string");
-
-  console.log("Fixed Asset Name", fixedAsset);
-  console.log("Fixed Asset Id", fixedAssetId);
-  console.log("Depreciation Rate", depreciationRate);
-
-  createSubAccount({
-    id: fixedAssetId,
-    name: fixedAsset,
-    accountId: ACT_FIXED_ASSET,
-  });
+  console.log("Fixed Asset Name", fixed_asset);
+  console.log("Fixed Asset Id", fixed_asset_id);
+  console.log("Depreciation Rate", depreciation_rate);
+  console.log("Acquisition Cost", acquisition_cost);
+  console.log("Acquisition Date", acquisition_date);
+  console.log("Description", description);
   return redirect("/fixed-asset");
 };
 
 export default function CreateFixedAsset() {
   const [fixedAssetId, setFixedAssetId] = useState("");
   const [depreciationRate, setDepreciationRate] = useState(0.0);
+  const [acquisitionCost, setAcquisitionCost] = useState(0.0);
+  const [checkBoxValue, setCheckBoxValue] = useState(true);
+  const [depreciationType, setDepreciationType] = useState(
+    STRAIGHT_DEPRECIATION
+  );
+
   const handleFixedAssetId = (e: any) => {
     const fixedAssetString = e.target.value;
     setFixedAssetId(fixedAssetString.replaceAll(" ", "-").toLowerCase());
@@ -47,9 +51,33 @@ export default function CreateFixedAsset() {
     const parsedDepreciationRate = parseInt(
       depreciationRateAsString.replace(/[^\d.-]/g, "")
     );
-    setDepreciationRate(
-      (!!parsedDepreciationRate && parsedDepreciationRate) || 0
+
+    var depreciationRate =
+      (!!parsedDepreciationRate && parsedDepreciationRate) || 0;
+    if (depreciationRate > 100) {
+      depreciationRate = 100;
+    } else if (depreciationRate < 0) {
+      depreciationRate = 0;
+    }
+    setDepreciationRate(depreciationRate);
+  };
+
+  const handleAcquisitionCostChange = (e: any) => {
+    const acquisitionCostAsString: string = e.target.value;
+    const parsedAcquisitionCost = parseInt(
+      acquisitionCostAsString.replace(/[^\d.-]/g, "")
     );
+    setAcquisitionCost((!!parsedAcquisitionCost && parsedAcquisitionCost) || 0);
+  };
+
+  const handleDepreciationTypeChange = (e: any) => {
+    const isCheckBoxChecked = e.target.checked;
+    setCheckBoxValue(isCheckBoxChecked);
+    if (isCheckBoxChecked) {
+      setDepreciationType(STRAIGHT_DEPRECIATION);
+    } else {
+      setDepreciationType(ACCELERATED_DEPRECIATION);
+    }
   };
 
   return (
@@ -62,6 +90,24 @@ export default function CreateFixedAsset() {
               <h4>Create Fixed Asset</h4>
             </div>
             <div className="p-4">
+              <div className="row mb-3 text-end">
+                <div className="custom-control custom-switch">
+                  <input
+                    type="checkbox"
+                    className="custom-control-input"
+                    id="customSwitch1"
+                    defaultChecked
+                    onChange={handleDepreciationTypeChange}
+                  />
+                  <label
+                    className="custom-control-label"
+                    htmlFor="customSwitch1"
+                  >
+                    {(checkBoxValue && "Straight Line") || "Accelerated"}
+                  </label>
+                </div>
+              </div>
+
               <div className="row mb-3">
                 <label className="col-sm-2 col-form-label text-start">
                   Fixed Asset
@@ -102,6 +148,8 @@ export default function CreateFixedAsset() {
                         className="form-control text-end mb-2"
                         type="text"
                         name="acquisition-cost"
+                        value={formatter.format(acquisitionCost)}
+                        onChange={handleAcquisitionCostChange}
                       />
                     </div>
                   </div>
@@ -114,7 +162,7 @@ export default function CreateFixedAsset() {
                     <div className="col-sm-8">
                       <input
                         className="form-control"
-                        name="trxTime"
+                        name="acquisition-date"
                         type="datetime-local"
                         defaultValue={date}
                       />
@@ -123,20 +171,37 @@ export default function CreateFixedAsset() {
                 </div>
               </div>
 
-              <div className="row mb-3">
-                <label className="col-sm-2 col-form-label text-start">
-                  Depreciation Rate
-                </label>
-                <div className="col-sm-10">
-                  <input
-                    className="form-control text-end mb-2"
-                    type="text"
-                    name="depreciation-rate"
-                    value={formatter.format(depreciationRate) + "%"}
-                    onChange={handleDepreciationRateChange}
-                  />
+              {checkBoxValue ? (
+                <div className="row mb-3">
+                  <label className="col-sm-2 col-form-label text-start">
+                    Depreciation Value
+                  </label>
+                  <div className="col-sm-10">
+                    <input
+                      className="form-control text-end mb-2"
+                      type="text"
+                      name="depreciation-value"
+                      value={formatter.format(depreciationRate)}
+                      onChange={handleDepreciationRateChange}
+                    />
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="row mb-3">
+                  <label className="col-sm-2 col-form-label text-start">
+                    Depreciation Rate
+                  </label>
+                  <div className="col-sm-10">
+                    <input
+                      className="form-control text-end mb-2"
+                      type="text"
+                      name="depreciation-rate"
+                      value={formatter.format(depreciationRate) + "%"}
+                      onChange={handleDepreciationRateChange}
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="row mb-3">
                 <label className="col-sm-2 col-form-label text-start">
@@ -146,10 +211,17 @@ export default function CreateFixedAsset() {
                   <textarea
                     className="form-control"
                     id="exampleFormControlTextarea1"
+                    name="description"
                     rows={3}
                   ></textarea>
                 </div>
               </div>
+
+              <input
+                type="hidden"
+                value={depreciationType}
+                name="depreciation-type"
+              />
 
               <div>
                 <input

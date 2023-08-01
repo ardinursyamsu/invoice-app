@@ -5,7 +5,7 @@ export default function CashControl(props: any) {
   const { accounts, subAccounts } = props.data;
 
   const [selectedSubAccounts, setSelectedSubAccounts] = useState(
-    subAccounts.filter((sub: any) => sub.accountId === props.defaultData.data.account)
+    subAccounts.filter((sub: any) => sub.accountId === !!props.defaultData? props.defaultData.data.account : accounts[0])
   );
   const [account, setAccount] = useState(!!props.defaultData? props.defaultData.data.account : accounts[0].id);
   const [subAccount, setSubAccount] = useState(!!props.defaultData? props.defaultData.data.subAccount : selectedSubAccounts[0].id);
