@@ -13,14 +13,16 @@ export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
   const fixed_asset = formData.get("fixed-asset");
   const fixed_asset_id = formData.get("fixed-asset-id");
-  const depreciation_rate = formData.get("depreciation-rate");
+  const depreciation_type = formData.get("depreciation-type");
+  const depreciation = formData.get("depreciation");
   const acquisition_cost = formData.get("acquisition-cost");
   const acquisition_date = formData.get("acquisition-date");
   const description = formData.get("description");
 
   console.log("Fixed Asset Name", fixed_asset);
   console.log("Fixed Asset Id", fixed_asset_id);
-  console.log("Depreciation Rate", depreciation_rate);
+  console.log("Depreciation Type", depreciation_type);
+  console.log("Depreciation", depreciation);
   console.log("Acquisition Cost", acquisition_cost);
   console.log("Acquisition Date", acquisition_date);
   console.log("Description", description);
@@ -29,7 +31,7 @@ export const action = async ({ request }: ActionArgs) => {
 
 export default function CreateFixedAsset() {
   const [fixedAssetId, setFixedAssetId] = useState("");
-  const [depreciationRate, setDepreciationRate] = useState(0.0);
+  const [depreciation, setDepreciation] = useState(0.0);
   const [acquisitionCost, setAcquisitionCost] = useState(0.0);
   const [checkBoxValue, setCheckBoxValue] = useState(true);
   const [depreciationType, setDepreciationType] = useState(
@@ -46,7 +48,7 @@ export default function CreateFixedAsset() {
 
   const date = getCurrentDate();
 
-  const handleDepreciationRateChange = (e: any) => {
+  const handleDepreciationChange = (e: any) => {
     const depreciationRateAsString: string = e.target.value;
     const parsedDepreciationRate = parseInt(
       depreciationRateAsString.replace(/[^\d.-]/g, "")
@@ -54,12 +56,15 @@ export default function CreateFixedAsset() {
 
     var depreciationRate =
       (!!parsedDepreciationRate && parsedDepreciationRate) || 0;
-    if (depreciationRate > 100) {
-      depreciationRate = 100;
-    } else if (depreciationRate < 0) {
-      depreciationRate = 0;
+    if (!checkBoxValue) {
+      if (depreciationRate > 100) {
+        depreciationRate = 100;
+      } else if (depreciationRate < 0) {
+        depreciationRate = 0;
+      }
     }
-    setDepreciationRate(depreciationRate);
+
+    setDepreciation(depreciationRate);
   };
 
   const handleAcquisitionCostChange = (e: any) => {
@@ -75,8 +80,10 @@ export default function CreateFixedAsset() {
     setCheckBoxValue(isCheckBoxChecked);
     if (isCheckBoxChecked) {
       setDepreciationType(STRAIGHT_DEPRECIATION);
+      setDepreciation(0);
     } else {
       setDepreciationType(ACCELERATED_DEPRECIATION);
+      setDepreciation(0);
     }
   };
 
@@ -171,37 +178,23 @@ export default function CreateFixedAsset() {
                 </div>
               </div>
 
-              {checkBoxValue ? (
-                <div className="row mb-3">
-                  <label className="col-sm-2 col-form-label text-start">
-                    Depreciation Value
-                  </label>
-                  <div className="col-sm-10">
-                    <input
-                      className="form-control text-end mb-2"
-                      type="text"
-                      name="depreciation-value"
-                      value={formatter.format(depreciationRate)}
-                      onChange={handleDepreciationRateChange}
-                    />
-                  </div>
+              <div className="row mb-3">
+                <label className="col-sm-2 col-form-label text-start">
+                  {checkBoxValue ? "Depreciation Value" : "Depreciation Rate"}
+                </label>
+                <div className="col-sm-10">
+                  <input
+                    className="form-control text-end mb-2"
+                    type="text"
+                    name="depreciation"
+                    value={
+                      formatter.format(depreciation) +
+                      (checkBoxValue ? "" : "%")
+                    }
+                    onChange={handleDepreciationChange}
+                  />
                 </div>
-              ) : (
-                <div className="row mb-3">
-                  <label className="col-sm-2 col-form-label text-start">
-                    Depreciation Rate
-                  </label>
-                  <div className="col-sm-10">
-                    <input
-                      className="form-control text-end mb-2"
-                      type="text"
-                      name="depreciation-rate"
-                      value={formatter.format(depreciationRate) + "%"}
-                      onChange={handleDepreciationRateChange}
-                    />
-                  </div>
-                </div>
-              )}
+              </div>
 
               <div className="row mb-3">
                 <label className="col-sm-2 col-form-label text-start">

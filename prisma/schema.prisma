@@ -61,7 +61,6 @@ model FixedAsset {
   description             String
   acquisitionCost         Decimal
   depreciationType        Int // 1 for straight, 2 for accelerated
-  depreciationRate        Decimal? // in percent (max: 100)
-  depreciationValue       Decimal?
+  depreciation            Decimal?
   accumulatedDepreciation Decimal?
 }
