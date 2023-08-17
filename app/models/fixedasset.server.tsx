@@ -23,6 +23,20 @@ export async function createFixedAsset(
     | "depreciation"
   >
 ) {
+  // Sanitize
+  fixedAsset.acquisitionCost = !!fixedAsset.acquisitionCost
+    ? new Decimal(fixedAsset.acquisitionCost.replaceAll(",", ""))
+    : new Decimal(0);
+  fixedAsset.depreciation = !!fixedAsset.depreciation
+    ? new Decimal(fixedAsset.depreciation.replaceAll(",", ""))
+    : new Decimal(0);
+  fixedAsset.depreciationType = !!fixedAsset.depreciation
+    ? parseInt(fixedAsset.depreciation)
+    : -1;
+  fixedAsset.acquisitionDate = !!fixedAsset.acquisitionDate
+    ? new Date(fixedAsset.acquisitionDate)
+    : new Date();
+
   // depreciation rate shouldn't be more than 100% or less than  0%
   if (fixedAsset.depreciationType == ACCELERATED_DEPRECIATION) {
     const depreciation = !!fixedAsset.depreciation
@@ -52,21 +66,26 @@ export async function createFixedAsset(
     orderId = orderId;
   }
   const transactionData = {
-    trxTime: fixedAsset.acquisitionDate,
+    trxTime: new Date(fixedAsset.acquisitionDate),
     orderId: orderId,
     sourceTrx: TRX_SOURCE_PAYMENT,
     controlTrx: 1,
     accountId: ACT_FIXED_ASSET,
+    subAccountId: id,
     type: TRX_DEBIT,
     unitPrice: fixedAsset.acquisitionCost,
     quantity: 1,
     amount: fixedAsset.acquisitionCost,
-    subAccountId: id,
     userId: "system",
   };
 
+  await createSubAccount({ id, name, accountId: ACT_FIXED_ASSET });
+
   await createTransaction(transactionData);
 
-  await createSubAccount({ id, name, accountId: ACT_FIXED_ASSET });
   return prisma.fixedAsset.create({ data: fixedAsset });
+}
+
+export async function getAllFixedAsset() {
+  return prisma.fixedAsset.findMany();
 }

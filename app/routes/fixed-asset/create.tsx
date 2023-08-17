@@ -1,13 +1,14 @@
 import { ActionArgs, redirect } from "@remix-run/node";
 import {
   ACCELERATED_DEPRECIATION,
-  ACT_FIXED_ASSET,
   STRAIGHT_DEPRECIATION,
+  SUB_FIXED_ASSET,
 } from "assets/helper/constants";
 import { formatter, getCurrentDate } from "assets/helper/helper";
 import Body from "assets/layouts/body";
 import FixedAssetNavbar from "assets/layouts/customnavbar/fixed-asset-navbar";
 import { useState } from "react";
+import { createFixedAsset } from "~/models/fixedasset.server";
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
@@ -19,13 +20,26 @@ export const action = async ({ request }: ActionArgs) => {
   const acquisition_date = formData.get("acquisition-date");
   const description = formData.get("description");
 
-  console.log("Fixed Asset Name", fixed_asset);
-  console.log("Fixed Asset Id", fixed_asset_id);
-  console.log("Depreciation Type", depreciation_type);
-  console.log("Depreciation", depreciation);
-  console.log("Acquisition Cost", acquisition_cost);
-  console.log("Acquisition Date", acquisition_date);
-  console.log("Description", description);
+  // console.log("Fixed Asset Name", fixed_asset);
+  // console.log("Fixed Asset Id", fixed_asset_id);
+  // console.log("Depreciation Type", depreciation_type);
+  // console.log("Depreciation", depreciation);
+  // console.log("Acquisition Cost", acquisition_cost);
+  // console.log("Acquisition Date", acquisition_date);
+  // console.log("Description", description);
+
+  const fixedAsset = {
+    id: fixed_asset_id,
+    name: fixed_asset,
+    subAccountId: SUB_FIXED_ASSET,
+    acquisitionDate: acquisition_date,
+    description: description,
+    acquisitionCost: acquisition_cost,
+    depreciationType: depreciation_type,
+    depreciation: depreciation,
+  };
+  createFixedAsset(fixedAsset);
+
   return redirect("/fixed-asset");
 };
 
@@ -97,18 +111,20 @@ export default function CreateFixedAsset() {
               <h4>Create Fixed Asset</h4>
             </div>
             <div className="p-4">
-              <div className="row mb-3 text-end">
-                <div className="custom-control custom-switch">
+              <div className="row mb-3 text-start">
+                <div className="col-9"></div>
+                <div className="col-3 form-check form-switch">
                   <input
                     type="checkbox"
-                    className="custom-control-input"
+                    className="form-check-input "
+                    role="switch"
                     id="customSwitch1"
                     defaultChecked
                     onChange={handleDepreciationTypeChange}
                   />
                   <label
-                    className="custom-control-label"
-                    htmlFor="customSwitch1"
+                    className="form-check-label"
+                    htmlFor="flexSwitchCheckDefault"
                   >
                     {(checkBoxValue && "Straight Line") || "Accelerated"}
                   </label>

@@ -4,11 +4,12 @@ import { ACT_FIXED_ASSET } from "assets/helper/constants";
 import { displayCapitalFirst, formatter } from "assets/helper/helper";
 import Body from "assets/layouts/body";
 import FixedAssetNavbar from "assets/layouts/customnavbar/fixed-asset-navbar";
+import { getAllFixedAsset } from "~/models/fixedasset.server";
 import { getSubAccountsByAccount } from "~/models/subaccount.server";
 
 export const loader = async () => {
   // Get user
-  var fixedAsset = await getSubAccountsByAccount(ACT_FIXED_ASSET);
+  var fixedAsset = await getAllFixedAsset();
 
   return json({ fixedAsset });
 };

@@ -2,31 +2,31 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-const ACT_INVENTORY                 = "inventory";
-const ACT_CASH                      = "cash";
-const ACT_ACCOUNT_RECEIVABLE        = "account-receivable";
-const ACT_FIXED_ASSET               = "fixed-asset";
-const ACT_ACCOUNT_PAYABLE           = "account-payable";
-const ACT_LOAN                      = "loan";
-const ACT_PAID_IN_CAPITAL           = "paid-in-capital";
-const ACT_RETAINED_EARNINGS         = "retained-earnings";
-const ACT_SALES                     = "sales";
-const ACT_COGS                      = "cost-of-good-sold";
-const ACT_OTHER_EXPENSES            = "other-expenses";
+const ACT_INVENTORY = "inventory";
+const ACT_CASH = "cash";
+const ACT_ACCOUNT_RECEIVABLE = "account-receivable";
+const ACT_FIXED_ASSET = "fixed-asset";
+const ACT_ACCOUNT_PAYABLE = "account-payable";
+const ACT_LOAN = "loan";
+const ACT_PAID_IN_CAPITAL = "paid-in-capital";
+const ACT_RETAINED_EARNINGS = "retained-earnings";
+const ACT_SALES = "sales";
+const ACT_COGS = "cost-of-good-sold";
+const ACT_OTHER_EXPENSES = "other-expenses";
 
-const SUB_INVENTORY                 = "inventory-default";
-const SUB_CASH                      = "cash-default";
-const SUB_ACCOUNT_RECEIVABLE        = "account-receivable-default";
-const SUB_FIXED_ASSET               = "fixed-asset-default";
-const SUB_ACCOUNT_PAYABLE           = "account-payable-default";
-const SUB_LOAN                      = "loan-default";
-const SUB_PAID_IN_CAPITAL           = "paid-in-capital-default";
-const SUB_RETAINED_EARNINGS         = "retained-earnings-default";
-const SUB_SALES                     = "sales-default";
-const SUB_COGS                      = "cost-of-good-sold-default";
-const SUB_OTHER_EXPENSES            = "other-expenses-default";
+const SUB_INVENTORY = "inventory-default";
+const SUB_CASH = "cash-default";
+const SUB_ACCOUNT_RECEIVABLE = "account-receivable-default";
+const SUB_FIXED_ASSET = "fixed-asset-default";
+const SUB_ACCOUNT_PAYABLE = "account-payable-default";
+const SUB_LOAN = "loan-default";
+const SUB_PAID_IN_CAPITAL = "paid-in-capital-default";
+const SUB_RETAINED_EARNINGS = "retained-earnings-default";
+const SUB_SALES = "sales-default";
+const SUB_COGS = "cost-of-good-sold-default";
+const SUB_OTHER_EXPENSES = "other-expenses-default";
 
-const SUB_NAME_DEFAULT              = "default";
+const SUB_NAME_DEFAULT = "default";
 
 async function seed() {
   const accounts = [
@@ -84,6 +84,10 @@ async function seed() {
   for (const subAccount of subAccountsDefault) {
     await prisma.subAccount.create({ data: subAccount });
   }
+
+  await prisma.user.create({
+    data: { id: "system", name: "SYSTEM", type: "other" },
+  });
 }
 
 seed()
