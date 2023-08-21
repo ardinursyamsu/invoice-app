@@ -1,9 +1,15 @@
+import { Decimal } from "@prisma/client/runtime";
 import { ActionArgs, redirect } from "@remix-run/node";
 import {
   ACCELERATED_DEPRECIATION,
   STRAIGHT_DEPRECIATION,
   SUB_FIXED_ASSET,
 } from "assets/helper/constants";
+import {
+  frmDataToFloat,
+  frmDataToInt,
+  frmDataToString,
+} from "assets/helper/form-data-converter";
 import { formatter, getCurrentDate } from "assets/helper/helper";
 import Body from "assets/layouts/body";
 import FixedAssetNavbar from "assets/layouts/customnavbar/fixed-asset-navbar";
@@ -12,13 +18,19 @@ import { createFixedAsset } from "~/models/fixedasset.server";
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
-  const fixed_asset = formData.get("fixed-asset");
-  const fixed_asset_id = formData.get("fixed-asset-id");
-  const depreciation_type = formData.get("depreciation-type");
-  const depreciation = formData.get("depreciation");
-  const acquisition_cost = formData.get("acquisition-cost");
-  const acquisition_date = formData.get("acquisition-date");
-  const description = formData.get("description");
+  const fixedAssetName = frmDataToString(formData.get("fixed-asset"));
+  const fixedAssetId = frmDataToString(formData.get("fixed-asset-id"));
+  const depreciationType = frmDataToInt(formData.get("depreciation-type"));
+  const depreciation = new Decimal(
+    frmDataToFloat(formData.get("depreciation"))
+  );
+  const acquisitionCost = new Decimal(
+    frmDataToFloat(formData.get("acquisition-cost"))
+  );
+  const acquisitionDate = new Date(
+    frmDataToString(formData.get("acquisition-date"))
+  );
+  const description = frmDataToString(formData.get("description"));
 
   // console.log("Fixed Asset Name", fixed_asset);
   // console.log("Fixed Asset Id", fixed_asset_id);
@@ -28,17 +40,17 @@ export const action = async ({ request }: ActionArgs) => {
   // console.log("Acquisition Date", acquisition_date);
   // console.log("Description", description);
 
-  const fixedAsset = {
-    id: fixed_asset_id,
-    name: fixed_asset,
+  const fixedAssetData = {
+    id: fixedAssetId,
+    name: fixedAssetName,
     subAccountId: SUB_FIXED_ASSET,
-    acquisitionDate: acquisition_date,
+    acquisitionDate: acquisitionDate,
     description: description,
-    acquisitionCost: acquisition_cost,
-    depreciationType: depreciation_type,
+    acquisitionCost: acquisitionCost,
+    depreciationType: depreciationType,
     depreciation: depreciation,
   };
-  createFixedAsset(fixedAsset);
+  createFixedAsset(fixedAssetData);
 
   return redirect("/fixed-asset");
 };

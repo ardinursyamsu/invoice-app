@@ -23,19 +23,6 @@ export async function createFixedAsset(
     | "depreciation"
   >
 ) {
-  // Sanitize
-  fixedAsset.acquisitionCost = !!fixedAsset.acquisitionCost
-    ? new Decimal(fixedAsset.acquisitionCost.replaceAll(",", ""))
-    : new Decimal(0);
-  fixedAsset.depreciation = !!fixedAsset.depreciation
-    ? new Decimal(fixedAsset.depreciation.replaceAll(",", ""))
-    : new Decimal(0);
-  fixedAsset.depreciationType = !!fixedAsset.depreciation
-    ? parseInt(fixedAsset.depreciation)
-    : -1;
-  fixedAsset.acquisitionDate = !!fixedAsset.acquisitionDate
-    ? new Date(fixedAsset.acquisitionDate)
-    : new Date();
 
   // depreciation rate shouldn't be more than 100% or less than  0%
   if (fixedAsset.depreciationType == ACCELERATED_DEPRECIATION) {
