@@ -71,11 +71,11 @@ export default function Inventory() {
               {inventoryData.map((inventory: any, idx: any) => (
                 <tr key={idx + 1}>
                   <th scope="row">{idx + 1}</th>
-                  <td className="text-start"><Link to={inventory.id}>{inventory.name}</Link></td>
-                  <td className="text-center">{inventory.quantity}</td>
-                  <td className="text-end">
-                    {formatter.format(inventory.price)}
+                  <td className="text-start">
+                    <Link to={inventory.id}>{inventory.name}</Link>
                   </td>
+                  <td className="text-center">{inventory.quantity}</td>
+                  <td className="text-end">{formatter.format(inventory.price)}</td>
                 </tr>
               ))}
             </tbody>

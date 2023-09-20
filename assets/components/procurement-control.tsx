@@ -31,9 +31,9 @@ export default function ProcurementControl(props: any) {
   const handleQtyChange = (e: any) => {
     var currentQty = parseInt(e.target.value);
     //console.log(currentQty);
-    if (currentQty < 0){
+    if (currentQty < 0) {
       currentQty = 0;
-      console.log(currentQty)
+      console.log(currentQty);
     }
     setQuantity(!!currentQty ? currentQty : 0);
     setTotal(currentQty * price);
@@ -59,11 +59,7 @@ export default function ProcurementControl(props: any) {
   return (
     <div className="row border rounded-2 mb-2">
       <div className="col-3 my-2">
-        <select
-          className="form-select"
-          name="account"
-          onChange={handleInventoryChange}
-        >
+        <select className="form-select" name="account" onChange={handleInventoryChange}>
           {inventories.map((inventory: typeof inventories) => (
             <option key={inventory.id} value={inventory.id}>
               {inventory.name}
@@ -72,36 +68,16 @@ export default function ProcurementControl(props: any) {
         </select>
       </div>
       <div className="col-2 my-2">
-        <input
-          type="number"
-          className="form-control text-end"
-          onChange={handleQtyChange}
-          value={quantity}
-        />
+        <input type="number" className="form-control text-end" onChange={handleQtyChange} value={quantity} />
       </div>
       <div className="col-3 my-2">
-        <input
-          className="form-control text-end"
-          name="price"
-          onChange={handlePriceChange}
-          value={formatter.format(price)}
-          type="text"
-        />
+        <input className="form-control text-end" name="price" onChange={handlePriceChange} value={formatter.format(price)} type="text" />
       </div>
       <div className="col-3 my-2">
-        <input
-          type="text"
-          className="form-control text-end"
-          value={formatter.format(total)}
-          readOnly
-        />
+        <input type="text" className="form-control text-end" value={formatter.format(total)} readOnly />
       </div>
       <div className="col-1 my-2">
-        <button
-          className="btn btn-outline-secondary d-none d-sm-none d-md-none d-lg-block"
-          id={props.id}
-          onClick={props.onDelete}
-        >
+        <button className="btn btn-outline-secondary d-none d-sm-none d-md-none d-lg-block" id={props.id} onClick={props.onDelete}>
           <i className="bi bi-x-lg"></i>
         </button>
       </div>

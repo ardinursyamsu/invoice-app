@@ -4,17 +4,7 @@ import { prisma } from "~/db.server";
 export async function createTransaction(
   transaction: Pick<
     Transaction,
-    | "trxTime"
-    | "orderId"
-    | "sourceTrx"
-    | "controlTrx"
-    | "accountId"
-    | "subAccountId"
-    | "type"
-    | "unitPrice"
-    | "quantity"
-    | "amount"
-    | "userId"
+    "trxTime" | "orderId" | "sourceTrx" | "controlTrx" | "accountId" | "subAccountId" | "type" | "unitPrice" | "quantity" | "amount" | "userId"
   >
 ) {
   return prisma.transaction.create({ data: transaction });
@@ -173,10 +163,7 @@ export async function getAllTransactionBySource(sourceTrx: string) {
   });
 }
 
-export async function getTransactionsByOrderIdAndTransactionSource(
-  sourceTrx: string,
-  orderId: number
-) {
+export async function getTransactionsByOrderIdAndTransactionSource(sourceTrx: string, orderId: number) {
   return await prisma.transaction.findMany({
     where: { orderId: orderId, sourceTrx: sourceTrx },
   });
@@ -189,10 +176,7 @@ export async function getInventoryTransactionList(inventoryId: string) {
   });
 }
 
-export async function deleteTransactionsByOrderIdAndTransactionSource(
-  trxSource: string,
-  orderId: number
-) {
+export async function deleteTransactionsByOrderIdAndTransactionSource(trxSource: string, orderId: number) {
   return await prisma.transaction.deleteMany({
     where: { orderId: orderId, sourceTrx: trxSource },
   });

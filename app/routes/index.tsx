@@ -63,15 +63,10 @@ export const loader = async () => {
 };
 
 export default function Index() {
-  const { assets, liabilities, income, expenses, equities, transactions } =
-    useLoaderData<typeof loader>();
+  const { assets, liabilities, income, expenses, equities, transactions } = useLoaderData<typeof loader>();
 
-  const netIncome =
-    totalAccount(transactions, income) - totalAccount(transactions, expenses); // definitely need to know why expense turns to be negative
-  const suspense =
-    totalAccount(transactions, assets) -
-    (totalAccount(transactions, liabilities) +
-      totalAccount(transactions, equities)); // Net Income is part of retained earnings calculation
+  const netIncome = totalAccount(transactions, income) - totalAccount(transactions, expenses); // definitely need to know why expense turns to be negative
+  const suspense = totalAccount(transactions, assets) - (totalAccount(transactions, liabilities) + totalAccount(transactions, equities)); // Net Income is part of retained earnings calculation
 
   //console.log("equities", equities);
   return (
@@ -84,18 +79,14 @@ export default function Index() {
               <div className="card-header bg-dark text-white">
                 <div className="row">
                   <div className="col">Assets</div>
-                  <div className="col text-end mx-1">
-                    {formatter.format(totalAccount(transactions, assets))}
-                  </div>
+                  <div className="col text-end mx-1">{formatter.format(totalAccount(transactions, assets))}</div>
                 </div>
               </div>
               {/* get all account under assets */}
               {assets.map((asset: any) => (
                 <div key={asset.id} className="row mx-2 my-1">
                   <div className="col">{asset.name}</div>
-                  <div className="col text-end">
-                    {formatter.format(displaySummary(transactions, asset.id))}
-                  </div>
+                  <div className="col text-end">{formatter.format(displaySummary(transactions, asset.id))}</div>
                 </div>
               ))}
             </div>
@@ -104,20 +95,14 @@ export default function Index() {
               <div className="card-header bg-dark text-white">
                 <div className="row">
                   <div className="col">Liabilities </div>
-                  <div className="col text-end mx-1">
-                    {formatter.format(totalAccount(transactions, liabilities))}
-                  </div>
+                  <div className="col text-end mx-1">{formatter.format(totalAccount(transactions, liabilities))}</div>
                 </div>
               </div>
               {/* get all account under liabilities */}
               {liabilities.map((liability: any) => (
                 <div key={liability.id} className="row mx-2 my-1">
                   <div className="col">{liability.name}</div>
-                  <div className="col text-end">
-                    {formatter.format(
-                      displaySummary(transactions, liability.id)
-                    )}
-                  </div>
+                  <div className="col text-end">{formatter.format(displaySummary(transactions, liability.id))}</div>
                 </div>
               ))}
             </div>
@@ -128,9 +113,7 @@ export default function Index() {
                   <div className="col">Equities</div>
                   <div className="col text-end mx-1">
                     {formatter.format(
-                      totalAccount(transactions, equities) +
-                        suspense +
-                        netIncome /* Net income is part of retained-earnings calculation */
+                      totalAccount(transactions, equities) + suspense + netIncome /* Net income is part of retained-earnings calculation */
                     )}
                   </div>
                 </div>
@@ -141,12 +124,8 @@ export default function Index() {
                   <div className="col">{equity.name}</div>
                   <div className="col text-end">
                     {equity.id == "retained-earnings"
-                      ? formatter.format(
-                          displaySummary(transactions, equity.id)
-                        )
-                      : formatter.format(
-                          displaySummary(transactions, equity.id)
-                        )}
+                      ? formatter.format(displaySummary(transactions, equity.id))
+                      : formatter.format(displaySummary(transactions, equity.id))}
                   </div>
                 </div>
               ))}
@@ -171,18 +150,14 @@ export default function Index() {
               <div className="card-header bg-dark text-white">
                 <div className="row">
                   <div className="col">Income</div>
-                  <div className="col text-end mx-1">
-                    {formatter.format(totalAccount(transactions, income))}
-                  </div>
+                  <div className="col text-end mx-1">{formatter.format(totalAccount(transactions, income))}</div>
                 </div>
               </div>
               {/* Every sales & expense goes here */}
               {income.map((earning: any) => (
                 <div key={earning.id} className="row mx-2 my-1">
                   <div className="col">{earning.name}</div>
-                  <div className="col text-end">
-                    {formatter.format(displaySummary(transactions, earning.id))}
-                  </div>
+                  <div className="col text-end">{formatter.format(displaySummary(transactions, earning.id))}</div>
                 </div>
               ))}
             </div>
@@ -191,18 +166,14 @@ export default function Index() {
               <div className="card-header bg-dark text-white">
                 <div className="row">
                   <div className="col">Expenses</div>
-                  <div className="col text-end mx-1">
-                    {formatter.format(totalAccount(transactions, expenses))}
-                  </div>
+                  <div className="col text-end mx-1">{formatter.format(totalAccount(transactions, expenses))}</div>
                 </div>
               </div>
               {/* Calculated Gross profit */}
               {expenses.map((expense: any) => (
                 <div key={expense.id} className="row mx-2 my-1">
                   <div className="col">{expense.name}</div>
-                  <div className="col text-end">
-                    {formatter.format(displaySummary(transactions, expense.id))}
-                  </div>
+                  <div className="col text-end">{formatter.format(displaySummary(transactions, expense.id))}</div>
                 </div>
               ))}
             </div>

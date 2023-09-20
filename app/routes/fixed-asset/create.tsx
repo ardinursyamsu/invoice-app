@@ -1,15 +1,7 @@
 import { Decimal } from "@prisma/client/runtime";
 import { ActionArgs, redirect } from "@remix-run/node";
-import {
-  ACCELERATED_DEPRECIATION,
-  STRAIGHT_DEPRECIATION,
-  SUB_FIXED_ASSET,
-} from "assets/helper/constants";
-import {
-  frmDataToFloat,
-  frmDataToInt,
-  frmDataToString,
-} from "assets/helper/form-data-converter";
+import { ACCELERATED_DEPRECIATION, STRAIGHT_DEPRECIATION, SUB_FIXED_ASSET } from "assets/helper/constants";
+import { frmDataToFloat, frmDataToInt, frmDataToString } from "assets/helper/form-data-converter";
 import { formatter, getCurrentDate } from "assets/helper/helper";
 import Body from "assets/layouts/body";
 import FixedAssetNavbar from "assets/layouts/customnavbar/fixed-asset-navbar";
@@ -21,15 +13,9 @@ export const action = async ({ request }: ActionArgs) => {
   const fixedAssetName = frmDataToString(formData.get("fixed-asset"));
   const fixedAssetId = frmDataToString(formData.get("fixed-asset-id"));
   const depreciationType = frmDataToInt(formData.get("depreciation-type"));
-  const depreciation = new Decimal(
-    frmDataToFloat(formData.get("depreciation"))
-  );
-  const acquisitionCost = new Decimal(
-    frmDataToFloat(formData.get("acquisition-cost"))
-  );
-  const acquisitionDate = new Date(
-    frmDataToString(formData.get("acquisition-date"))
-  );
+  const depreciation = new Decimal(frmDataToFloat(formData.get("depreciation")));
+  const acquisitionCost = new Decimal(frmDataToFloat(formData.get("acquisition-cost")));
+  const acquisitionDate = new Date(frmDataToString(formData.get("acquisition-date")));
   const description = frmDataToString(formData.get("description"));
 
   // console.log("Fixed Asset Name", fixed_asset);
@@ -60,9 +46,7 @@ export default function CreateFixedAsset() {
   const [depreciation, setDepreciation] = useState(0.0);
   const [acquisitionCost, setAcquisitionCost] = useState(0.0);
   const [checkBoxValue, setCheckBoxValue] = useState(true);
-  const [depreciationType, setDepreciationType] = useState(
-    STRAIGHT_DEPRECIATION
-  );
+  const [depreciationType, setDepreciationType] = useState(STRAIGHT_DEPRECIATION);
 
   const handleFixedAssetId = (e: any) => {
     const fixedAssetString = e.target.value;
@@ -76,12 +60,9 @@ export default function CreateFixedAsset() {
 
   const handleDepreciationChange = (e: any) => {
     const depreciationRateAsString: string = e.target.value;
-    const parsedDepreciationRate = parseInt(
-      depreciationRateAsString.replace(/[^\d.-]/g, "")
-    );
+    const parsedDepreciationRate = parseInt(depreciationRateAsString.replace(/[^\d.-]/g, ""));
 
-    var depreciationRate =
-      (!!parsedDepreciationRate && parsedDepreciationRate) || 0;
+    var depreciationRate = (!!parsedDepreciationRate && parsedDepreciationRate) || 0;
     if (!checkBoxValue) {
       if (depreciationRate > 100) {
         depreciationRate = 100;
@@ -95,9 +76,7 @@ export default function CreateFixedAsset() {
 
   const handleAcquisitionCostChange = (e: any) => {
     const acquisitionCostAsString: string = e.target.value;
-    const parsedAcquisitionCost = parseInt(
-      acquisitionCostAsString.replace(/[^\d.-]/g, "")
-    );
+    const parsedAcquisitionCost = parseInt(acquisitionCostAsString.replace(/[^\d.-]/g, ""));
     setAcquisitionCost((!!parsedAcquisitionCost && parsedAcquisitionCost) || 0);
   };
 
@@ -134,50 +113,30 @@ export default function CreateFixedAsset() {
                     defaultChecked
                     onChange={handleDepreciationTypeChange}
                   />
-                  <label
-                    className="form-check-label"
-                    htmlFor="flexSwitchCheckDefault"
-                  >
+                  <label className="form-check-label" htmlFor="flexSwitchCheckDefault">
                     {(checkBoxValue && "Straight Line") || "Accelerated"}
                   </label>
                 </div>
               </div>
 
               <div className="row mb-3">
-                <label className="col-sm-2 col-form-label text-start">
-                  Fixed Asset
-                </label>
+                <label className="col-sm-2 col-form-label text-start">Fixed Asset</label>
                 <div className="col-sm-10">
-                  <input
-                    className="form-control mb-2"
-                    type="text"
-                    name="fixed-asset"
-                    onChange={handleFixedAssetId}
-                  />
+                  <input className="form-control mb-2" type="text" name="fixed-asset" onChange={handleFixedAssetId} />
                 </div>
               </div>
 
               <div className="row mb-3">
-                <label className="col-sm-2 col-form-label text-start">
-                  Fixed Asset ID
-                </label>
+                <label className="col-sm-2 col-form-label text-start">Fixed Asset ID</label>
                 <div className="col-sm-10">
-                  <input
-                    className="form-control mb-2"
-                    type="text"
-                    name="fixed-asset-id"
-                    value={fixedAssetId}
-                    onChange={onFixedAssetIdChange}
-                  />
+                  <input className="form-control mb-2" type="text" name="fixed-asset-id" value={fixedAssetId} onChange={onFixedAssetIdChange} />
                 </div>
               </div>
 
               <div className="row mb-3">
                 <div className="col-6">
                   <div className="row align-items-center">
-                    <label className="col-sm-4 col-form-label text-start">
-                      Acquisition Cost
-                    </label>
+                    <label className="col-sm-4 col-form-label text-start">Acquisition Cost</label>
                     <div className="col-sm-8">
                       <input
                         className="form-control text-end mb-2"
@@ -191,65 +150,38 @@ export default function CreateFixedAsset() {
                 </div>
                 <div className="col-6">
                   <div className="row align-items-center">
-                    <label className="col-sm-4 col-form-label text-start">
-                      Acquisition Date
-                    </label>
+                    <label className="col-sm-4 col-form-label text-start">Acquisition Date</label>
                     <div className="col-sm-8">
-                      <input
-                        className="form-control"
-                        name="acquisition-date"
-                        type="datetime-local"
-                        defaultValue={date}
-                      />
+                      <input className="form-control" name="acquisition-date" type="datetime-local" defaultValue={date} />
                     </div>
                   </div>
                 </div>
               </div>
 
               <div className="row mb-3">
-                <label className="col-sm-2 col-form-label text-start">
-                  {checkBoxValue ? "Depreciation Value" : "Depreciation Rate"}
-                </label>
+                <label className="col-sm-2 col-form-label text-start">{checkBoxValue ? "Depreciation Value" : "Depreciation Rate"}</label>
                 <div className="col-sm-10">
                   <input
                     className="form-control text-end mb-2"
                     type="text"
                     name="depreciation"
-                    value={
-                      formatter.format(depreciation) +
-                      (checkBoxValue ? "" : "%")
-                    }
+                    value={formatter.format(depreciation) + (checkBoxValue ? "" : "%")}
                     onChange={handleDepreciationChange}
                   />
                 </div>
               </div>
 
               <div className="row mb-3">
-                <label className="col-sm-2 col-form-label text-start">
-                  Description
-                </label>
+                <label className="col-sm-2 col-form-label text-start">Description</label>
                 <div className="col-sm-10">
-                  <textarea
-                    className="form-control"
-                    id="exampleFormControlTextarea1"
-                    name="description"
-                    rows={3}
-                  ></textarea>
+                  <textarea className="form-control" id="exampleFormControlTextarea1" name="description" rows={3}></textarea>
                 </div>
               </div>
 
-              <input
-                type="hidden"
-                value={depreciationType}
-                name="depreciation-type"
-              />
+              <input type="hidden" value={depreciationType} name="depreciation-type" />
 
               <div>
-                <input
-                  className="btn btn-primary float-end"
-                  type="submit"
-                  value="Create"
-                />
+                <input className="btn btn-primary float-end" type="submit" value="Create" />
               </div>
             </div>
           </form>

@@ -10,7 +10,7 @@ export const loader = async ({ params }: LoaderArgs) => {
   const userData = await getUserById((!!userId && userId) || "");
 
   const defaultUser = { id: "nothing", name: "nothing", type: "other" };
-  const user = !!userData && userData || defaultUser;
+  const user = (!!userData && userData) || defaultUser;
   return json({ user });
 };
 
@@ -27,37 +27,21 @@ export default function DisplayUser() {
             </div>
             <div className="p-4">
               <div className="row mb-3">
-                <label className="col-sm-2 col-form-label text-start">
-                  User Name
-                </label>
+                <label className="col-sm-2 col-form-label text-start">User Name</label>
                 <div className="col-sm-10">
-                  <input
-                    className="form-control mb-2"
-                    type="text"
-                    name="name"
-                    value={user.name}
-                  />
+                  <input className="form-control mb-2" type="text" name="name" value={user.name} />
                 </div>
               </div>
 
               <div className="row mb-3">
-                <label className="col-sm-2 col-form-label text-start">
-                  User ID
-                </label>
+                <label className="col-sm-2 col-form-label text-start">User ID</label>
                 <div className="col-sm-10">
-                  <input
-                    className="form-control mb-2"
-                    type="text"
-                    name="id"
-                    value={user.id}
-                  />
+                  <input className="form-control mb-2" type="text" name="id" value={user.id} />
                 </div>
               </div>
 
               <div className="row mb-3">
-                <label className="col-sm-2 col-form-label text-start">
-                  User Type
-                </label>
+                <label className="col-sm-2 col-form-label text-start">User Type</label>
                 <div className="col-sm-10">
                   <select className="form-select mb-2" name="type" id="type" defaultValue={user.type}>
                     <option value="Customer">Customer</option>
@@ -67,11 +51,7 @@ export default function DisplayUser() {
                 </div>
               </div>
               <div>
-                <input
-                  className="btn btn-primary float-end"
-                  type="submit"
-                  value="Create"
-                />
+                <input className="btn btn-primary float-end" type="submit" value="Create" />
               </div>
             </div>
           </form>

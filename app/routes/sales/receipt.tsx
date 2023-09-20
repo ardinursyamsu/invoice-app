@@ -3,40 +3,26 @@ import { json, redirect } from "@remix-run/node";
 import type { LoaderArgs, ActionArgs } from "@remix-run/node";
 import { Form, useLoaderData } from "@remix-run/react";
 import { ACT_ACCOUNT_RECEIVABLE, ACT_CASH, ACT_INVENTORY, ACT_SALES, TRX_DEBIT, TRX_SOURCE_SALES } from "assets/helper/constants";
-import {
-  displayCapitalFirst,
-  formatter,
-  getCurrentDate,
-} from "assets/helper/helper";
+import { displayCapitalFirst, formatter, getCurrentDate } from "assets/helper/helper";
 import Body from "assets/layouts/body";
 import SalesNavbar from "assets/layouts/customnavbar/sales-navbar";
 import { useState } from "react";
 import invariant from "tiny-invariant";
 import { getSubAccountsByAccount } from "~/models/subaccount.server";
-import {
-  createTransaction,
-  getTransactionsByOrderIdAndTransactionSource,
-} from "~/models/transaction.server";
+import { createTransaction, getTransactionsByOrderIdAndTransactionSource } from "~/models/transaction.server";
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
   const totalReceipt = formData.get("totalReceipt")?.toString();
-  var amount = parseInt(
-    !!totalReceipt ? totalReceipt.replace(/[^\d.-]/g, "") : ""
-  );
+  var amount = parseInt(!!totalReceipt ? totalReceipt.replace(/[^\d.-]/g, "") : "");
   const order = formData.get("orderId")?.toString().split("-");
   const orderId = !!order ? parseInt(order[0]) : 0;
   const trxSource = !!order ? order[1] : "";
-  const relatedTrx = await getTransactionsByOrderIdAndTransactionSource(
-    trxSource,
-    orderId
-  );
+  const relatedTrx = await getTransactionsByOrderIdAndTransactionSource(trxSource, orderId);
   const lastNumControlId = relatedTrx[relatedTrx.length - 1]?.controlTrx;
   const userId = relatedTrx[relatedTrx.length - 1]?.userId;
 
-  const trxTime = !!formData.get("trxTime")
-    ? formData.get("trxTime")
-    : getCurrentDate();
+  const trxTime = !!formData.get("trxTime") ? formData.get("trxTime") : getCurrentDate();
   invariant(typeof trxTime == "string", "trxTime must be String");
 
   const controlTrx = lastNumControlId + 1;
@@ -79,22 +65,15 @@ export async function loader({ request }: LoaderArgs) {
   const ref = splitSlug?.at(0);
   const transaction = splitSlug?.at(1)?.toLowerCase();
 
-  const salesTransaction = await getTransactionsByOrderIdAndTransactionSource(
-    transaction ? transaction : "",
-    Number(ref ? ref : 0)
-  );
+  const salesTransaction = await getTransactionsByOrderIdAndTransactionSource(transaction ? transaction : "", Number(ref ? ref : 0));
 
   const inventoryItems = await getSubAccountsByAccount(ACT_INVENTORY);
 
   // group based control id
-  const totalInventoryControl = salesTransaction.filter(
-    (trx) => trx.accountId == "inventory"
-  ).length;
-  const totalCashControl = salesTransaction.filter(
-    (trx) => trx.accountId == "cash"
-  ).length;
+  const totalInventoryControl = salesTransaction.filter((trx) => trx.accountId == "inventory").length;
+  const totalCashControl = salesTransaction.filter((trx) => trx.accountId == "cash").length;
   const totalNumControl = totalInventoryControl + totalCashControl;
-  
+
   var arrPerControl = [];
   for (var i = 1; i <= totalNumControl; i++) {
     arrPerControl.push(salesTransaction.filter((trx) => trx.controlTrx == i));
@@ -112,9 +91,7 @@ export async function loader({ request }: LoaderArgs) {
     var total = 0;
     for (const trx of control) {
       if (trx.accountId === ACT_INVENTORY) {
-        const inventoryName = inventoryItems.find(
-          (inventory) => inventory.id == trx.subAccountId
-        )?.name;
+        const inventoryName = inventoryItems.find((inventory) => inventory.id == trx.subAccountId)?.name;
         name = !!inventoryName ? inventoryName : "";
         quantity = Number(trx.quantity);
       } else if (trx.accountId === ACT_SALES) {
@@ -140,8 +117,7 @@ export async function loader({ request }: LoaderArgs) {
 
 /* render in client */
 export default function DisplaySales() {
-  const { slug, inventories, totalSales, totalAR, totalPaid } =
-    useLoaderData<typeof loader>();
+  const { slug, inventories, totalSales, totalAR, totalPaid } = useLoaderData<typeof loader>();
 
   const [totalReceipt, setTotalReceipt] = useState(totalAR);
   const handleCashReceiptChange = (e: any) => {
@@ -171,13 +147,7 @@ export default function DisplaySales() {
           <div className="col-2">Date</div>
           <div className="col-10">
             <div className="col-sm-4">
-              <input
-                className="form-control"
-                name="trxTime"
-                type="datetime-local"
-                value={date}
-                onChange={handleDateChange}
-              />
+              <input className="form-control" name="trxTime" type="datetime-local" value={date} onChange={handleDateChange} />
             </div>
           </div>
         </div>
@@ -209,16 +179,10 @@ export default function DisplaySales() {
                     <th scope="col" className="text-center">
                       {idx + 1}
                     </th>
-                    <td>
-                      {displayCapitalFirst(inventory.name.replaceAll("-", " "))}
-                    </td>
-                    <td className="text-end">
-                      {formatter.format(inventory.price)}
-                    </td>
+                    <td>{displayCapitalFirst(inventory.name.replaceAll("-", " "))}</td>
+                    <td className="text-end">{formatter.format(inventory.price)}</td>
                     <td className="text-center">{inventory.quantity}</td>
-                    <td className="text-end">
-                      {formatter.format(inventory.total)}
-                    </td>
+                    <td className="text-end">{formatter.format(inventory.total)}</td>
                   </tr>
                 ) : (
                   "" /* if not don't display */

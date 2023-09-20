@@ -1,17 +1,10 @@
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import { ACT_CASH, TRX_SOURCE_RECEIPT } from "assets/helper/constants";
-import {
-  displayCapitalFirst,
-  displayDate,
-  formatter,
-} from "assets/helper/helper";
+import { displayCapitalFirst, displayDate, formatter } from "assets/helper/helper";
 import Body from "assets/layouts/body";
 import ReceiptNavbar from "assets/layouts/customnavbar/receipt-navbar";
-import {
-  getAllTransactionBySource,
-  getTransactionsByOrderIdAndTransactionSource,
-} from "~/models/transaction.server";
+import { getAllTransactionBySource, getTransactionsByOrderIdAndTransactionSource } from "~/models/transaction.server";
 
 export const loader = async () => {
   const data = await getAllTransactionBySource(TRX_SOURCE_RECEIPT);
@@ -19,11 +12,7 @@ export const loader = async () => {
   var receiptTrxData = [];
 
   for (const trx of data) {
-    const receiptPerOrderID =
-      await getTransactionsByOrderIdAndTransactionSource(
-        TRX_SOURCE_RECEIPT,
-        trx.orderId
-      );
+    const receiptPerOrderID = await getTransactionsByOrderIdAndTransactionSource(TRX_SOURCE_RECEIPT, trx.orderId);
 
     const trxTime = trx.trxTime;
     const refId = trx.orderId.toString() + "-" + trx.sourceTrx.toString();
@@ -81,23 +70,13 @@ export default function ReceiptIndex() {
                   <th className="text-center" scope="row">
                     {idx + 1}
                   </th>
+                  <td className="text-center">{displayDate(receipt.trxTime)}</td>
                   <td className="text-center">
-                    {displayDate(receipt.trxTime)}
+                    <Link to={receipt.refId}>{receipt.refId.toUpperCase()}</Link>
                   </td>
-                  <td className="text-center">
-                    <Link to={receipt.refId}>
-                      {receipt.refId.toUpperCase()}
-                    </Link>
-                  </td>
-                  <td className="text-start">
-                    {displayCapitalFirst(receipt.remark).replaceAll("-", " ")}
-                  </td>
-                  <td className="text-end">
-                    {displayCapitalFirst(receipt.user)}
-                  </td>
-                  <td className="text-end">
-                    {formatter.format(receipt.totalAmount)}
-                  </td>
+                  <td className="text-start">{displayCapitalFirst(receipt.remark).replaceAll("-", " ")}</td>
+                  <td className="text-end">{displayCapitalFirst(receipt.user)}</td>
+                  <td className="text-end">{formatter.format(receipt.totalAmount)}</td>
                 </tr>
               ))}
             </tbody>

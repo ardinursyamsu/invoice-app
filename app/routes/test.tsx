@@ -2,11 +2,7 @@ import { Decimal } from "@prisma/client/runtime";
 import { json } from "@remix-run/node";
 import type { LoaderArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import {
-  displayCapitalFirst,
-  formatter,
-  getCurrentDate,
-} from "assets/helper/helper";
+import { displayCapitalFirst, formatter, getCurrentDate } from "assets/helper/helper";
 import Body from "assets/layouts/body";
 import SalesNavbar from "assets/layouts/customnavbar/sales-navbar";
 import { getTransactionsByOrderIdAndTransactionSource } from "~/models/transaction.server";
@@ -18,10 +14,7 @@ export async function loader({ params }: LoaderArgs) {
   const transaction = splitSlug?.at(1)?.toLowerCase();
   Number(0);
 
-  const salesTransaction = await getTransactionsByOrderIdAndTransactionSource(
-    transaction ? transaction : "",
-    Number(ref ? ref : 0)
-  );
+  const salesTransaction = await getTransactionsByOrderIdAndTransactionSource(transaction ? transaction : "", Number(ref ? ref : 0));
 
   const newSales = salesTransaction.reduce((pv: any, cv: any) => {
     if (pv[cv.subAccountId]) {
@@ -48,8 +41,7 @@ export async function loader({ params }: LoaderArgs) {
   }, []);
 
   var transactions = newTransactions.filter(
-    (arr: any, index: any, self: any) =>
-      index === self.findIndex((t: any) => t.subAccountId === arr.subAccountId)
+    (arr: any, index: any, self: any) => index === self.findIndex((t: any) => t.subAccountId === arr.subAccountId)
   );
 
   return json({ slug, newSales, salesTransaction, transactions });
@@ -96,14 +88,10 @@ export default function DisplaySales() {
                 <th scope="col" className="text-center">
                   {idx + 1}
                 </th>
-                <td>
-                  {displayCapitalFirst(trx.subAccountId.replaceAll("-", " "))}
-                </td>
+                <td>{displayCapitalFirst(trx.subAccountId.replaceAll("-", " "))}</td>
                 <td className="text-end">{formatter.format(trx.amount)}</td>
                 <td className="text-center">{newSales[trx.subAccountId]}</td>
-                <td className="text-end">
-                  {formatter.format(trx.amount * newSales[trx.subAccountId])}
-                </td>
+                <td className="text-end">{formatter.format(trx.amount * newSales[trx.subAccountId])}</td>
               </tr>
             ))}
           </tbody>

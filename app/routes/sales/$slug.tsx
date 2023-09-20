@@ -1,18 +1,8 @@
 import { json } from "@remix-run/node";
 import type { LoaderArgs } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
-import {
-  ACT_ACCOUNT_RECEIVABLE,
-  ACT_CASH,
-  ACT_INVENTORY,
-  ACT_SALES,
-  TRX_DEBIT,
-} from "assets/helper/constants";
-import {
-  displayCapitalFirst,
-  formatter,
-  getCurrentDate,
-} from "assets/helper/helper";
+import { ACT_ACCOUNT_RECEIVABLE, ACT_CASH, ACT_INVENTORY, ACT_SALES, TRX_DEBIT } from "assets/helper/constants";
+import { displayCapitalFirst, formatter, getCurrentDate } from "assets/helper/helper";
 import Body from "assets/layouts/body";
 import SalesNavbar from "assets/layouts/customnavbar/sales-navbar";
 import { getSubAccountsByAccount } from "~/models/subaccount.server";
@@ -24,20 +14,13 @@ export async function loader({ params }: LoaderArgs) {
   const ref = splitSlug?.at(0);
   const transaction = splitSlug?.at(1)?.toLowerCase();
 
-  const salesTransaction = await getTransactionsByOrderIdAndTransactionSource(
-    transaction ? transaction : "",
-    Number(ref ? ref : 0)
-  );
+  const salesTransaction = await getTransactionsByOrderIdAndTransactionSource(transaction ? transaction : "", Number(ref ? ref : 0));
 
   const inventoryItems = await getSubAccountsByAccount(ACT_INVENTORY);
 
   // group based control id
-  const totalInventoryControl = salesTransaction.filter(
-    (trx) => trx.accountId == "inventory"
-  ).length;
-  const totalCashControl = salesTransaction.filter(
-    (trx) => trx.accountId == "cash"
-  ).length;
+  const totalInventoryControl = salesTransaction.filter((trx) => trx.accountId == "inventory").length;
+  const totalCashControl = salesTransaction.filter((trx) => trx.accountId == "cash").length;
   const totalNumControl = totalInventoryControl + totalCashControl;
 
   var arrPerControl = [];
@@ -57,9 +40,7 @@ export async function loader({ params }: LoaderArgs) {
     var total = 0;
     for (const trx of control) {
       if (trx.accountId === ACT_INVENTORY) {
-        const inventoryName = inventoryItems.find(
-          (inventory) => inventory.id == trx.subAccountId
-        )?.name;
+        const inventoryName = inventoryItems.find((inventory) => inventory.id == trx.subAccountId)?.name;
         name = !!inventoryName ? inventoryName : "";
         quantity = Number(trx.quantity);
       } else if (trx.accountId === ACT_SALES) {
@@ -83,8 +64,7 @@ export async function loader({ params }: LoaderArgs) {
 }
 
 export default function DisplaySales() {
-  const { slug, inventories, totalSales, totalAR, totalPaid } =
-    useLoaderData<typeof loader>();
+  const { slug, inventories, totalSales, totalAR, totalPaid } = useLoaderData<typeof loader>();
 
   return (
     <Body>
@@ -126,16 +106,10 @@ export default function DisplaySales() {
                     <th scope="col" className="text-center">
                       {idx + 1}
                     </th>
-                    <td>
-                      {displayCapitalFirst(inventory.name.replaceAll("-", " "))}
-                    </td>
-                    <td className="text-end">
-                      {formatter.format(inventory.price)}
-                    </td>
+                    <td>{displayCapitalFirst(inventory.name.replaceAll("-", " "))}</td>
+                    <td className="text-end">{formatter.format(inventory.price)}</td>
                     <td className="text-center">{inventory.quantity}</td>
-                    <td className="text-end">
-                      {formatter.format(inventory.total)}
-                    </td>
+                    <td className="text-end">{formatter.format(inventory.total)}</td>
                   </tr>
                 ) : (
                   "" /* if not don't display */

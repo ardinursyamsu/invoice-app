@@ -5,11 +5,11 @@ export default function CashControl(props: any) {
   const { accounts, subAccounts } = props.data;
 
   const [selectedSubAccounts, setSelectedSubAccounts] = useState(
-    subAccounts.filter((sub: any) => sub.accountId === !!props.defaultData? props.defaultData.data.account : accounts[0])
+    subAccounts.filter((sub: any) => (sub.accountId === !!props.defaultData ? props.defaultData.data.account : accounts[0]))
   );
-  const [account, setAccount] = useState(!!props.defaultData? props.defaultData.data.account : accounts[0].id);
-  const [subAccount, setSubAccount] = useState(!!props.defaultData? props.defaultData.data.subAccount : selectedSubAccounts[0].id);
-  const [amount, setAmount] = useState(!!props.defaultData? props.defaultData.data.amount : 0);
+  const [account, setAccount] = useState(!!props.defaultData ? props.defaultData.data.account : accounts[0].id);
+  const [subAccount, setSubAccount] = useState(!!props.defaultData ? props.defaultData.data.subAccount : selectedSubAccounts[0].id);
+  const [amount, setAmount] = useState(!!props.defaultData ? props.defaultData.data.amount : 0);
 
   const [data, setData] = useState({
     account: account,
@@ -19,9 +19,7 @@ export default function CashControl(props: any) {
 
   // handle if user change the account options drop down
   const handleAccountChange = (e: any) => {
-    const subaccounts = subAccounts.filter(
-      (sub: any) => sub.accountId === e.target.value
-    );
+    const subaccounts = subAccounts.filter((sub: any) => sub.accountId === e.target.value);
     setSelectedSubAccounts(subaccounts);
     setAccount(e.target.value);
     setData((prevData) => ({
@@ -41,7 +39,7 @@ export default function CashControl(props: any) {
 
   useEffect(() => {
     //console.log("useEffect-", props.id , data);
-    props.callback(props.id, data)
+    props.callback(props.id, data);
   }, [data]);
 
   return (
@@ -63,19 +61,10 @@ export default function CashControl(props: any) {
         </select>
       </div>
       <div className="col-3">
-        <input
-          className="form-control text-end"
-          type="text"
-          value={formatter.format(amount)}
-          onChange={handleAmountChange}
-        />
+        <input className="form-control text-end" type="text" value={formatter.format(amount)} onChange={handleAmountChange} />
       </div>
       <div className="col-1">
-        <button
-          id={props.id}
-          onClick={props.onDelete}
-          className="btn btn-outline-secondary d-none d-sm-none d-md-none d-lg-block"
-        >
+        <button id={props.id} onClick={props.onDelete} className="btn btn-outline-secondary d-none d-sm-none d-md-none d-lg-block">
           <i className="bi bi-x-lg"></i>
         </button>
       </div>

@@ -17,8 +17,7 @@ export const loader = async ({ params }: LoaderArgs) => {
 };
 
 export default function DisplayInventoryTransactions() {
-  const { inventoryTransactionList, inventoryList } =
-    useLoaderData<typeof loader>();
+  const { inventoryTransactionList, inventoryList } = useLoaderData<typeof loader>();
   return (
     <Body>
       <InventoryNavbar />
@@ -50,16 +49,8 @@ export default function DisplayInventoryTransactions() {
                   {idx + 1}
                 </th>
                 <td>{getDate(inventory.trxTime).replace("T", " ")}</td>
-                <td className="text-center">
-                  {decodeTransactionSource(inventory.sourceTrx)}
-                </td>
-                <td>
-                  {
-                    inventoryList.find(
-                      (item) => item.id == inventory.subAccountId
-                    )?.name
-                  }
-                </td>
+                <td className="text-center">{decodeTransactionSource(inventory.sourceTrx)}</td>
+                <td>{inventoryList.find((item) => item.id == inventory.subAccountId)?.name}</td>
                 <td className="text-center">
                   {inventory.type == "db" ? "+" : "-"}
                   {inventory.quantity}

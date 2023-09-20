@@ -175,15 +175,12 @@ export const loader = async () => {
 
 /* -- Render in Client --*/
 export default function Receipt() {
-  const { accounts, subAccounts, users, refId } =
-    useLoaderData<typeof loader>();
+  const { accounts, subAccounts, users, refId } = useLoaderData<typeof loader>();
 
   const date = getCurrentDate();
   const defaultData = {
     account: accounts[0],
-    subAccounts: subAccounts.find(
-      (subAccount: any) => subAccount.accountId == accounts[0].id
-    ),
+    subAccounts: subAccounts.find((subAccount: any) => subAccount.accountId == accounts[0].id),
     amount: 0,
   };
 
@@ -192,9 +189,7 @@ export default function Receipt() {
 
   // callback function to update transaction control data if there any change
   const callback = (prevData: any, newData: any) => {
-    const retData = prevData.map((prev: any) =>
-      prev.id == newData.id ? newData : prev
-    );
+    const retData = prevData.map((prev: any) => (prev.id == newData.id ? newData : prev));
     return retData;
   };
 
@@ -204,9 +199,7 @@ export default function Receipt() {
     setData((prevData) => callback(prevData, newData));
   };
 
-  const [userList, setUserList] = useState(
-    users.filter((user: any) => user.type == "Customer")
-  );
+  const [userList, setUserList] = useState(users.filter((user: any) => user.type == "Customer"));
 
   const [inputCount, setInputCount] = useState(1);
   const [inputId, setInputId] = useState([1]);
@@ -222,7 +215,7 @@ export default function Receipt() {
 
   useEffect(() => {
     //console.log("test effect: ", data);
-    setUserId(userList[0].id)
+    setUserId(userList[0].id);
   }, [data, inputId, userList]);
 
   // do something if category (customer/supplier) change
@@ -241,9 +234,7 @@ export default function Receipt() {
   // handle if btn delete (X) is clicked
   const handleDelete = (e: any) => {
     const id = e.currentTarget.id;
-    setInputId((prevInputId) =>
-      prevInputId.filter((inputId) => inputId != parseInt(id))
-    );
+    setInputId((prevInputId) => prevInputId.filter((inputId) => inputId != parseInt(id)));
   };
 
   // handle user dropdown change
@@ -262,23 +253,13 @@ export default function Receipt() {
           <div className="row mb-2">
             <label className="col-sm-2 col-form-label">Transaction Time</label>
             <div className="col-sm-3">
-              <input
-                className="form-control"
-                name="trxTime"
-                type="datetime-local"
-                defaultValue={date}
-              />
+              <input className="form-control" name="trxTime" type="datetime-local" defaultValue={date} />
             </div>
           </div>
           <div className="row mb-2">
             <label className="col-sm-2 col-form-label">Ref Number</label>
             <div className="col-sm-3">
-              <input
-                className="form-control"
-                name="ref"
-                type="text"
-                defaultValue={refId}
-              />
+              <input className="form-control" name="ref" type="text" defaultValue={refId} />
             </div>
           </div>
           <div className="row mb-4">
@@ -305,22 +286,12 @@ export default function Receipt() {
               <div className="col-3">Amount</div>
             </div>
             {inputId.map((id) => (
-              <CashControl
-                key={id}
-                id={id}
-                data={{ accounts, subAccounts }}
-                callback={handleComponentDataChange}
-                onDelete={handleDelete}
-              />
+              <CashControl key={id} id={id} data={{ accounts, subAccounts }} callback={handleComponentDataChange} onDelete={handleDelete} />
             ))}
 
             <div className="row text-end">
               <div>
-                <button
-                  type="button"
-                  onClick={handleAddRow}
-                  className="btn btn-warning"
-                >
+                <button type="button" onClick={handleAddRow} className="btn btn-warning">
                   Add Row
                 </button>
               </div>
@@ -332,11 +303,7 @@ export default function Receipt() {
           <input type="hidden" name="ref" value={refId.toString()} />
           <input type="hidden" name="user" value={userId} />
           <input type="hidden" name="data" value={JSON.stringify({ data })} />
-          <input
-            className="btn btn-primary"
-            type="submit"
-            value="Add Transactions"
-          />
+          <input className="btn btn-primary" type="submit" value="Add Transactions" />
         </form>
       </div>
     </Body>

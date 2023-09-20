@@ -1,18 +1,5 @@
 export const getCurrentDate = () => {
-  const months = [
-    "01",
-    "02",
-    "03",
-    "04",
-    "05",
-    "06",
-    "07",
-    "08",
-    "09",
-    "10",
-    "11",
-    "12",
-  ];
+  const months = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
   const now = new Date();
 
   const year = now.getFullYear().toString();
@@ -40,13 +27,12 @@ export const formatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
-
 export const displayDate = (inputDate: string) => {
   const dateObj = new Date(inputDate);
   const date = dateObj.getDate().toString();
   const month = dateObj.getMonth();
   var monthString;
-  switch(month){
+  switch (month) {
     case 1:
       monthString = "Jan";
       break;
@@ -88,25 +74,11 @@ export const displayDate = (inputDate: string) => {
   return date + "-" + monthString + "-" + year;
 };
 
-
 export const getDate = (dateFromDatabase: string) => {
   const now = new Date(dateFromDatabase);
 
-  const months = [
-    "01",
-    "02",
-    "03",
-    "04",
-    "05",
-    "06",
-    "07",
-    "08",
-    "09",
-    "10",
-    "11",
-    "12",
-  ];
-  
+  const months = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
+
   const year = now.getFullYear().toString();
   const month = months[now.getMonth()];
   var day = now.getDate().toString();
@@ -133,15 +105,19 @@ export const displayCapitalFirst = (sourceStr: string) => {
   return firstLetter + theRest;
 };
 
-export const decodeTransactionSource = (trxSourceCode: string) => {
-  switch(trxSourceCode){
+/**
+ * Translate transaction source 'code' into text to be displayed to end-user
+ *
+ * @param {string} trxSourceCode transaction source 'code' (e.g. invt, sale, etc..).
+ * @return {string} string to be displayed to end user corresponding to transaction source 'code' (Inventory, Sales, etc..).
+ */
+export const decodeTransactionSource = (trxSourceCode: string): string => {
+  switch (trxSourceCode) {
     case "invt":
       return "Inventory";
-      break;
     case "sale":
       return "Sales";
-      break;
     default:
       return "";
   }
-}
+};

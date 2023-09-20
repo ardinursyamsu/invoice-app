@@ -1,9 +1,7 @@
 import { SubAccount } from "@prisma/client";
 import { prisma } from "~/db.server";
 
-export async function createSubAccount(
-  subaccount: Pick<SubAccount, "id" | "name" | "accountId">
-) {
+export async function createSubAccount(subaccount: Pick<SubAccount, "id" | "name" | "accountId">) {
   return prisma.subAccount.create({ data: subaccount });
 }
 

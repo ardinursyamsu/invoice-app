@@ -2,33 +2,18 @@ import { FixedAsset } from "@prisma/client";
 import { Decimal } from "@prisma/client/runtime/library";
 import { prisma } from "~/db.server";
 import { createSubAccount } from "./subaccount.server";
-import {
-  ACCELERATED_DEPRECIATION,
-  ACT_FIXED_ASSET,
-  TRX_DEBIT,
-  TRX_SOURCE_PAYMENT,
-} from "assets/helper/constants";
+import { ACCELERATED_DEPRECIATION, ACT_FIXED_ASSET, TRX_DEBIT, TRX_SOURCE_PAYMENT } from "assets/helper/constants";
 import { createTransaction, getLastOrderId } from "./transaction.server";
 
 export async function createFixedAsset(
   fixedAsset: Pick<
     FixedAsset,
-    | "id"
-    | "name"
-    | "subAccountId"
-    | "acquisitionDate"
-    | "description"
-    | "acquisitionCost"
-    | "depreciationType"
-    | "depreciation"
+    "id" | "name" | "subAccountId" | "acquisitionDate" | "description" | "acquisitionCost" | "depreciationType" | "depreciation"
   >
 ) {
-
   // depreciation rate shouldn't be more than 100% or less than  0%
   if (fixedAsset.depreciationType == ACCELERATED_DEPRECIATION) {
-    const depreciation = !!fixedAsset.depreciation
-      ? fixedAsset.depreciation
-      : 0.0;
+    const depreciation = !!fixedAsset.depreciation ? fixedAsset.depreciation : 0.0;
     if (depreciation > new Decimal(100)) {
       fixedAsset.depreciation = new Decimal(100);
     } else if (depreciation < new Decimal(0)) {
@@ -36,9 +21,7 @@ export async function createFixedAsset(
     }
   } else {
     // for straight line depreciation
-    const depreciation = !!fixedAsset.depreciation
-      ? fixedAsset.depreciation
-      : 0.0;
+    const depreciation = !!fixedAsset.depreciation ? fixedAsset.depreciation : 0.0;
     // if depreciation is bigger than acquisitioncost, use acquisition cost as depreciation
     if (depreciation > fixedAsset.acquisitionCost) {
       fixedAsset.depreciation = fixedAsset.acquisitionCost;

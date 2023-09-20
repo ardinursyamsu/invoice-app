@@ -3,11 +3,7 @@ import { useLoaderData } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import { getAccounts } from "~/models/account.server";
 import { getSubAccounts } from "~/models/subaccount.server";
-import {
-  deleteTransactionsByOrderIdAndTransactionSource,
-  getLastOrderId,
-  getTransactionsByOrderIdAndTransactionSource,
-} from "~/models/transaction.server";
+import { deleteTransactionsByOrderIdAndTransactionSource, getTransactionsByOrderIdAndTransactionSource } from "~/models/transaction.server";
 import { getUsers } from "~/models/user.server";
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { TransactionControl } from "assets/components/transaction-control";
@@ -18,8 +14,6 @@ import { getCurrentDate, getDate } from "assets/helper/helper";
 import TransactionNavbar from "assets/layouts/customnavbar/transaction-navbar";
 import { TRX_CREDIT, TRX_DEBIT, TRX_SOURCE_TRANSACTION } from "assets/helper/constants";
 import { Decimal } from "@prisma/client/runtime/library";
-
-
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
@@ -60,7 +54,7 @@ export const action = async ({ request }: ActionArgs) => {
       amount = credit;
     }
     const unitPrice = new Decimal(amount); // default for transaction price are amount
-    
+
     await createTransaction({
       trxTime,
       orderId,
@@ -96,10 +90,7 @@ export const loader = async ({ params }: LoaderArgs) => {
     return redirect("/transaction");
   }
 
-  const transactions = await getTransactionsByOrderIdAndTransactionSource(
-    transaction,
-    ref
-  );
+  const transactions = await getTransactionsByOrderIdAndTransactionSource(transaction, ref);
 
   const theData = transactions.map((transaction: any, idx: number) => ({
     id: idx,
@@ -138,15 +129,12 @@ export const loader = async ({ params }: LoaderArgs) => {
 
 /* -- Render in Client -- */
 export default function Transaction() {
-  const { accounts, subAccounts, users, refId, date, theData } =
-    useLoaderData<typeof loader>();
+  const { accounts, subAccounts, users, refId, date, theData } = useLoaderData<typeof loader>();
 
   // Default data so that every input-group doesn't send empty data
   const defaultData = {
     account: accounts[0],
-    subAccount: subAccounts.find(
-      (subAccount: any) => subAccount.accountId == accounts[0].id
-    ),
+    subAccount: subAccounts.find((subAccount: any) => subAccount.accountId == accounts[0].id),
     debit: 0,
     credit: 0,
     user: users[0],
@@ -158,9 +146,7 @@ export default function Transaction() {
   // callback function to update transaction control data if there any change.
   // is called by handleComponentDataChange
   const callback = (prevData: any, newData: any) => {
-    const retData = prevData.map((prev: any) =>
-      prev.id == newData.id ? newData : prev
-    );
+    const retData = prevData.map((prev: any) => (prev.id == newData.id ? newData : prev));
     return retData;
   };
 
@@ -171,9 +157,7 @@ export default function Transaction() {
   };
 
   const [inputCount, setInputCount] = useState(theData.length);
-  const [inputId, setInputId] = useState(
-    Array.from(Array(theData.length).keys())
-  );
+  const [inputId, setInputId] = useState(Array.from(Array(theData.length).keys()));
 
   // update for every change in data state
   useEffect(() => {
@@ -191,9 +175,7 @@ export default function Transaction() {
   const handleDelete = (e: any) => {
     const id = e.currentTarget.id;
     setData((prevData: any) => prevData.filter((data: any) => data.id != parseInt(id)));
-    setInputId((prevInputId) =>
-      prevInputId.filter((inputId) => inputId != parseInt(id))
-    );
+    setInputId((prevInputId) => prevInputId.filter((inputId) => inputId != parseInt(id)));
   };
 
   return (
@@ -206,23 +188,13 @@ export default function Transaction() {
         <div className="row mb-2">
           <label className="col-sm-2 col-form-label">Transaction Time</label>
           <div className="col-sm-3">
-            <input
-              className="form-control"
-              name="trxTime"
-              type="datetime-local"
-              defaultValue={date}
-            />
+            <input className="form-control" name="trxTime" type="datetime-local" defaultValue={date} />
           </div>
         </div>
         <div className="row mb-4">
           <label className="col-sm-2 col-form-label">Ref Number</label>
           <div className="col-sm-3">
-            <input
-              className="form-control"
-              name="ref"
-              type="text"
-              defaultValue={refId.toString()}
-            />
+            <input className="form-control" name="ref" type="text" defaultValue={refId.toString()} />
           </div>
         </div>
 
@@ -243,18 +215,14 @@ export default function Transaction() {
               key={id}
               id={id}
               data={{ accounts, subAccounts, users }}
-              defaultData = {theData.at(id)}
+              defaultData={theData.at(id)}
               callback={handleComponentDataChange}
               onDelete={handleDelete}
             />
           ))}
           <div className="row align-self-end">
             <div>
-              <button
-                type="button"
-                className="btn btn-warning"
-                onClick={handleAddRow}
-              >
+              <button type="button" className="btn btn-warning" onClick={handleAddRow}>
                 Add Row
               </button>
             </div>

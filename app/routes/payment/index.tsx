@@ -1,17 +1,10 @@
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import { ACT_CASH, TRX_SOURCE_PAYMENT, TRX_SOURCE_RECEIPT } from "assets/helper/constants";
-import {
-  displayCapitalFirst,
-  displayDate,
-  formatter,
-} from "assets/helper/helper";
+import { displayCapitalFirst, displayDate, formatter } from "assets/helper/helper";
 import Body from "assets/layouts/body";
 import PaymentNavbar from "assets/layouts/customnavbar/payment-navbar";
-import {
-  getAllTransactionBySource,
-  getTransactionsByOrderIdAndTransactionSource,
-} from "~/models/transaction.server";
+import { getAllTransactionBySource, getTransactionsByOrderIdAndTransactionSource } from "~/models/transaction.server";
 
 export const loader = async () => {
   const data = await getAllTransactionBySource(TRX_SOURCE_PAYMENT);
@@ -19,11 +12,7 @@ export const loader = async () => {
   var paymentTrxData = [];
 
   for (const trx of data) {
-    const paymentPerOrderID =
-      await getTransactionsByOrderIdAndTransactionSource(
-        TRX_SOURCE_PAYMENT,
-        trx.orderId
-      );
+    const paymentPerOrderID = await getTransactionsByOrderIdAndTransactionSource(TRX_SOURCE_PAYMENT, trx.orderId);
 
     const trxTime = trx.trxTime;
     const refId = trx.orderId.toString() + "-" + trx.sourceTrx.toString();
@@ -81,23 +70,13 @@ export default function ReceiptIndex() {
                   <th className="text-center" scope="row">
                     {idx + 1}
                   </th>
+                  <td className="text-center">{displayDate(payment.trxTime)}</td>
                   <td className="text-center">
-                    {displayDate(payment.trxTime)}
+                    <Link to={payment.refId}>{payment.refId.toUpperCase()}</Link>
                   </td>
-                  <td className="text-center">
-                    <Link to={payment.refId}>
-                      {payment.refId.toUpperCase()}
-                    </Link>
-                  </td>
-                  <td className="text-start">
-                    {displayCapitalFirst(payment.remark).replaceAll("-", " ")}
-                  </td>
-                  <td className="text-end">
-                    {displayCapitalFirst(payment.user)}
-                  </td>
-                  <td className="text-end">
-                    {formatter.format(payment.totalAmount)}
-                  </td>
+                  <td className="text-start">{displayCapitalFirst(payment.remark).replaceAll("-", " ")}</td>
+                  <td className="text-end">{displayCapitalFirst(payment.user)}</td>
+                  <td className="text-end">{formatter.format(payment.totalAmount)}</td>
                 </tr>
               ))}
             </tbody>

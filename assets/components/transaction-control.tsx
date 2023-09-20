@@ -15,14 +15,12 @@ const formatter = new Intl.NumberFormat("en-US", { style: "decimal" });
 export function TransactionControl(props: any) {
   const { accounts, subAccounts, users } = props.data;
 
-  const [selectedSubAccounts, setSelectedSubAccounts] = useState(
-    subAccounts.filter((sub: any) => sub.accountId === accounts[0].id)
-  );
-  const [account, setAccount] = useState(!!props.defaultData? props.defaultData.data.account : accounts[0].id);
-  const [subAccount, setSubAccount] = useState(!!props.defaultData? props.defaultData.data.subAccount : selectedSubAccounts[0].id);
-  const [debit, setDebit] = useState(!!props.defaultData? props.defaultData.data.debit : 0);
-  const [credit, setCredit] = useState(!!props.defaultData? props.defaultData.data.credit : 0);
-  const [user, setUser] = useState(!!props.defaultData? props.defaultData.data.user : users[0].id);
+  const [selectedSubAccounts, setSelectedSubAccounts] = useState(subAccounts.filter((sub: any) => sub.accountId === accounts[0].id));
+  const [account, setAccount] = useState(!!props.defaultData ? props.defaultData.data.account : accounts[0].id);
+  const [subAccount, setSubAccount] = useState(!!props.defaultData ? props.defaultData.data.subAccount : selectedSubAccounts[0].id);
+  const [debit, setDebit] = useState(!!props.defaultData ? props.defaultData.data.debit : 0);
+  const [credit, setCredit] = useState(!!props.defaultData ? props.defaultData.data.credit : 0);
+  const [user, setUser] = useState(!!props.defaultData ? props.defaultData.data.user : users[0].id);
 
   const [data, setData] = useState({
     account: account,
@@ -40,9 +38,7 @@ export function TransactionControl(props: any) {
   }, [data]);
 
   const handleAccountChange = (e: any) => {
-    const subaccounts = subAccounts.filter(
-      (sub: any) => sub.accountId === e.target.value
-    );
+    const subaccounts = subAccounts.filter((sub: any) => sub.accountId === e.target.value);
     setSelectedSubAccounts(subaccounts);
     setAccount(e.target.value);
     setData((prevData) => ({
@@ -61,7 +57,7 @@ export function TransactionControl(props: any) {
     const debitValueAsString: string = e.target.value;
     const parsedDebit = parseInt(debitValueAsString.replace(/[^\d.-]/g, ""));
 
-    setDebit(!!parsedDebit && parsedDebit || 0);
+    setDebit((!!parsedDebit && parsedDebit) || 0);
     setCredit(0);
     setData({ ...data, credit: 0, debit: parsedDebit });
   };
@@ -70,7 +66,7 @@ export function TransactionControl(props: any) {
     const creditValueAsString: string = e.target.value;
     const parsedCredit = parseInt(creditValueAsString.replace(/[^\d.-]/g, ""));
 
-    setCredit(!!parsedCredit && parsedCredit || 0);
+    setCredit((!!parsedCredit && parsedCredit) || 0);
     setDebit(0);
     setData({ ...data, credit: parsedCredit, debit: 0 });
   };
@@ -83,12 +79,7 @@ export function TransactionControl(props: any) {
   return (
     <div className="row border rounded-2 mb-2">
       <div className="col-3 my-2">
-        <select
-          className="form-select"
-          name="account"
-          defaultValue={account}
-          onChange={(e) => handleAccountChange(e)}
-        >
+        <select className="form-select" name="account" defaultValue={account} onChange={(e) => handleAccountChange(e)}>
           {accounts.map((account: any) => (
             <option key={account.id} value={account.id}>
               {account.name}
@@ -97,12 +88,7 @@ export function TransactionControl(props: any) {
         </select>
       </div>
       <div className="col-2 my-2">
-        <select
-          className="form-select"
-          name="sub-account"
-          defaultValue={subAccount}
-          onChange={(e) => handleSubAccountChange(e)}
-        >
+        <select className="form-select" name="sub-account" defaultValue={subAccount} onChange={(e) => handleSubAccountChange(e)}>
           {selectedSubAccounts.map((subAccount: any) => (
             <option key={subAccount.id} value={subAccount.id}>
               {subAccount.name}
@@ -111,30 +97,13 @@ export function TransactionControl(props: any) {
         </select>
       </div>
       <div className="col-2 my-2">
-        <input
-          className="form-control text-end"
-          name="debit"
-          type="text"
-          value={formatter.format(debit)}
-          onChange={(e) => handleDebitChange(e)}
-        />
+        <input className="form-control text-end" name="debit" type="text" value={formatter.format(debit)} onChange={(e) => handleDebitChange(e)} />
       </div>
       <div className="col-2 my-2">
-        <input
-          className="form-control text-end"
-          name="credit"
-          type="text"
-          value={formatter.format(credit)}
-          onChange={(e) => handleCreditChange(e)}
-        />
+        <input className="form-control text-end" name="credit" type="text" value={formatter.format(credit)} onChange={(e) => handleCreditChange(e)} />
       </div>
       <div className="col-2 my-2">
-        <select
-          className="form-select"
-          name="user"
-          onChange={(e) => handleUserChange(e)}
-          defaultValue={user}
-        >
+        <select className="form-select" name="user" onChange={(e) => handleUserChange(e)} defaultValue={user}>
           {users.map((user: any) => (
             <option key={user.id} value={user.id}>
               {user.name} - {user.type}
@@ -143,11 +112,7 @@ export function TransactionControl(props: any) {
         </select>
       </div>
       <div className="col-1 my-2">
-        <button
-          className="btn btn-outline-secondary d-none d-sm-none d-md-none d-lg-block"
-          id={props.id}
-          onClick={(e) => props.onDelete(e)}
-        >
+        <button className="btn btn-outline-secondary d-none d-sm-none d-md-none d-lg-block" id={props.id} onClick={(e) => props.onDelete(e)}>
           <i className="bi bi-x-lg"></i>
         </button>
       </div>

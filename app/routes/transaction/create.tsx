@@ -94,17 +94,14 @@ export const loader = async () => {
 
 /* -- Render in Client -- */
 export default function CreateTransaction() {
-  const { accounts, subAccounts, users, orderId } =
-    useLoaderData<typeof loader>();
+  const { accounts, subAccounts, users, orderId } = useLoaderData<typeof loader>();
 
   const date = getCurrentDate();
 
   // Default data so that every input-group doesn't send empty data
   const defaultData = {
     account: accounts[0],
-    subAccount: subAccounts.find(
-      (subAccount) => subAccount.accountId == accounts[0].id
-    ),
+    subAccount: subAccounts.find((subAccount) => subAccount.accountId == accounts[0].id),
     debit: 0,
     credit: 0,
     user: users[0],
@@ -116,9 +113,7 @@ export default function CreateTransaction() {
   // callback function to update transaction control data if there any change.
   // is called by handleComponentDataChange
   const callback = (prevData: any, newData: any) => {
-    const retData = prevData.map((prev: any) =>
-      prev.id == newData.id ? newData : prev
-    );
+    const retData = prevData.map((prev: any) => (prev.id == newData.id ? newData : prev));
     return retData;
   };
 
@@ -146,11 +141,9 @@ export default function CreateTransaction() {
   // handle if btn delete (X) is clicked
   const handleDelete = (e: any) => {
     const id = e.currentTarget.id;
-    
+
     setData((prevData) => prevData.filter((data) => data.id != parseInt(id)));
-    setInputId((prevInputId) =>
-      prevInputId.filter((inputId) => inputId != parseInt(id))
-    );
+    setInputId((prevInputId) => prevInputId.filter((inputId) => inputId != parseInt(id)));
   };
 
   return (
@@ -163,23 +156,13 @@ export default function CreateTransaction() {
         <div className="row mb-2">
           <label className="col-sm-2 col-form-label">Transaction Time</label>
           <div className="col-sm-3">
-            <input
-              className="form-control"
-              name="trxTime"
-              type="datetime-local"
-              defaultValue={date}
-            />
+            <input className="form-control" name="trxTime" type="datetime-local" defaultValue={date} />
           </div>
         </div>
         <div className="row mb-4">
           <label className="col-sm-2 col-form-label">Ref Number</label>
           <div className="col-sm-3">
-            <input
-              className="form-control"
-              name="ref"
-              type="text"
-              defaultValue={orderId.toString()}
-            />
+            <input className="form-control" name="ref" type="text" defaultValue={orderId.toString()} />
           </div>
         </div>
 
@@ -206,11 +189,7 @@ export default function CreateTransaction() {
           ))}
           <div className="row align-self-end">
             <div>
-              <button
-                type="button"
-                className="btn btn-warning"
-                onClick={handleAddRow}
-              >
+              <button type="button" className="btn btn-warning" onClick={handleAddRow}>
                 Add Row
               </button>
             </div>

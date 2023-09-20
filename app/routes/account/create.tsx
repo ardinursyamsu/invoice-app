@@ -44,49 +44,26 @@ export default function Account() {
             </div>
             <div className="p-4">
               <div className="row mb-3">
-                <label
-                  className="col-sm-3 col-form-label text-start"
-                  htmlFor="account-name"
-                >
+                <label className="col-sm-3 col-form-label text-start" htmlFor="account-name">
                   Account Name
                 </label>
                 <div className="col-sm-9">
-                  <input
-                    className="form-control mb-2"
-                    name="account-name"
-                    type="text"
-                    onChange={(e) => handleAccountChange(e)}
-                  />
+                  <input className="form-control mb-2" name="account-name" type="text" onChange={(e) => handleAccountChange(e)} />
                 </div>
               </div>
               <div className="row mb-3">
-                <label
-                  className="col-sm-3 col-form-label text-start"
-                  htmlFor="account-id"
-                >
+                <label className="col-sm-3 col-form-label text-start" htmlFor="account-id">
                   Account Id
                 </label>
                 <div className="col-sm-9">
-                  <input
-                    className="form-control mb-2"
-                    name="account-id"
-                    type="text"
-                    value={accountId}
-                    onChange={onAccountIdChange}
-                  />
+                  <input className="form-control mb-2" name="account-id" type="text" value={accountId} onChange={onAccountIdChange} />
                 </div>
               </div>
 
               <div className="row mb-3">
-                <label className="col-sm-3 col-form-label text-start">
-                  Account Type
-                </label>
+                <label className="col-sm-3 col-form-label text-start">Account Type</label>
                 <div className="col-sm-9">
-                  <select
-                    className="form-select mb-2"
-                    name="account-type"
-                    id="account-type"
-                  >
+                  <select className="form-select mb-2" name="account-type" id="account-type">
                     <option value="asset">Asset</option>
                     <option value="liability">Liability</option>
                     <option value="equity">Equity</option>
@@ -96,11 +73,7 @@ export default function Account() {
                 </div>
               </div>
               <div>
-                <input
-                  className="btn btn-primary float-end"
-                  type="submit"
-                  value="Create"
-                />
+                <input className="btn btn-primary float-end" type="submit" value="Create" />
               </div>
             </div>
           </form>

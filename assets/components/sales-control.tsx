@@ -4,12 +4,10 @@ import { useEffect, useState } from "react";
 export default function SalesControl(props: any) {
   const { inventories } = props.data;
 
-  
-
-  const [inventory, setInventory] = useState(!!props.defaultData? props.defaultData.data.inventoryId : inventories[0].id);
-  const [avgPrice, setAvgPrice] = useState(!!props.defaultData? props.defaultData.data.avgPrice : inventories[0].avg);
-  const [quantity, setQuantity] = useState(!!props.defaultData? props.defaultData.data.quantity : 0);
-  const [price, setPrice] = useState(!!props.defaultData? props.defaultData.data.price : 0);
+  const [inventory, setInventory] = useState(!!props.defaultData ? props.defaultData.data.inventoryId : inventories[0].id);
+  const [avgPrice, setAvgPrice] = useState(!!props.defaultData ? props.defaultData.data.avgPrice : inventories[0].avg);
+  const [quantity, setQuantity] = useState(!!props.defaultData ? props.defaultData.data.quantity : 0);
+  const [price, setPrice] = useState(!!props.defaultData ? props.defaultData.data.price : 0);
   const [total, setTotal] = useState(price * quantity);
 
   const [data, setData] = useState({
@@ -27,10 +25,8 @@ export default function SalesControl(props: any) {
   }, [data]);
 
   const getAvgInventoryPrice = (inventoryId: string) => {
-    const foundInventory = inventories.find(
-      (inventory: any) => inventory.id === inventoryId
-    );
-    
+    const foundInventory = inventories.find((inventory: any) => inventory.id === inventoryId);
+
     return foundInventory.avg;
   };
 
@@ -75,38 +71,16 @@ export default function SalesControl(props: any) {
       </div>
 
       <div className="col-2">
-        <input
-          name="quantity"
-          className="form-control text-end"
-          type="number"
-          value={formatter.format(quantity)}
-          onChange={handleQtyChange}
-        />
+        <input name="quantity" className="form-control text-end" type="number" value={formatter.format(quantity)} onChange={handleQtyChange} />
       </div>
       <div className="col-3">
-        <input
-          name="price"
-          className="form-control text-end"
-          type="text"
-          value={formatter.format(price)}
-          onChange={handlePriceChange}
-        />
+        <input name="price" className="form-control text-end" type="text" value={formatter.format(price)} onChange={handlePriceChange} />
       </div>
       <div className="col-3">
-        <input
-          name="total"
-          className="form-control text-end"
-          type="text"
-          value={formatter.format(total)}
-          readOnly
-        />
+        <input name="total" className="form-control text-end" type="text" value={formatter.format(total)} readOnly />
       </div>
       <div className="col-1">
-        <button
-          id={props.id}
-          onClick={props.onDelete}
-          className="btn btn-outline-secondary d-none d-sm-none d-md-none d-lg-block"
-        >
+        <button id={props.id} onClick={props.onDelete} className="btn btn-outline-secondary d-none d-sm-none d-md-none d-lg-block">
           <i className="bi bi-x-lg"></i>
         </button>
       </div>

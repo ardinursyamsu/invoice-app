@@ -105,9 +105,7 @@ export const loader = async () => {
 
   // Getsub-account type inventory
   var inventories = await getSubAccountsByAccount("inventory");
-  inventories = inventories.filter(
-    (inventory) => inventory.name !== SUB_NAME_DEFAULT
-  ); // remove the default subaccount
+  inventories = inventories.filter((inventory) => inventory.name !== SUB_NAME_DEFAULT); // remove the default subaccount
 
   const inventoryStatus = !!inventories[0]; // check if inventory already exists in database
   if (!inventoryStatus) {
@@ -137,9 +135,7 @@ export default function ProcureInventory() {
   // callback function to update transaction control data if there any change.
   // is called by handleComponentDataChange
   const callback = (prevData: any, newData: any) => {
-    const retData = prevData.map((prev: any) =>
-      prev.id == newData.id ? newData : prev
-    );
+    const retData = prevData.map((prev: any) => (prev.id == newData.id ? newData : prev));
     return retData;
   };
 
@@ -192,9 +188,7 @@ export default function ProcureInventory() {
   const handleDelete = (e: any) => {
     const id = e.currentTarget.id;
     setData((prevData) => prevData.filter((data) => data.id != parseInt(id)));
-    setInputId((prevInputId) =>
-      prevInputId.filter((inputId) => inputId != parseInt(id))
-    );
+    setInputId((prevInputId) => prevInputId.filter((inputId) => inputId != parseInt(id)));
   };
 
   return (
@@ -207,20 +201,11 @@ export default function ProcureInventory() {
         <div className="row mb-2">
           <label className="col-sm-2 col-form-label">Transaction Time</label>
           <div className="col-sm-10">
-            <input
-              className="form-control"
-              name="trxTime"
-              type="datetime-local"
-              defaultValue={date}
-            />
+            <input className="form-control" name="trxTime" type="datetime-local" defaultValue={date} />
           </div>
           <label className="col-sm-2 col-form-label">User</label>
           <div className="col-sm-3">
-            <select
-              name="user"
-              className="form-select"
-              onChange={handleUserChange}
-            >
+            <select name="user" className="form-select" onChange={handleUserChange}>
               {users.map((user) => (
                 <option key={user.id} value={user.id}>
                   {user.name + " - " + user.type}
@@ -232,21 +217,11 @@ export default function ProcureInventory() {
         <div className="row mb-2">
           <label className="col-sm-2 col-form-label">Ref Number</label>
           <div className="col-sm-3">
-            <input
-              className="form-control"
-              name="orderId"
-              type="text"
-              value={orderId}
-              onChange={handleRefIdChange}
-            />
+            <input className="form-control" name="orderId" type="text" value={orderId} onChange={handleRefIdChange} />
           </div>
           <label className="col-sm-2 col-form-label">Payment Type</label>
           <div className="col-sm-3">
-            <select
-              name="payment"
-              className="form-select"
-              onChange={handlePaymentChange}
-            >
+            <select name="payment" className="form-select" onChange={handlePaymentChange}>
               <option value="cash">Cash</option>
               <option value="credit">Credit</option>
             </select>
@@ -261,22 +236,12 @@ export default function ProcureInventory() {
             <label className="col-3">Total</label>
           </div>
           {inputId.map((id) => (
-            <ProcurementControl
-              key={id}
-              id={id}
-              data={{ inventories }}
-              onDelete={handleDelete}
-              callback={handleComponentDataChange}
-            />
+            <ProcurementControl key={id} id={id} data={{ inventories }} onDelete={handleDelete} callback={handleComponentDataChange} />
           ))}
 
           <div className="row align-self-end">
             <div>
-              <button
-                type="button"
-                className="btn btn-warning"
-                onClick={handleAddRow}
-              >
+              <button type="button" className="btn btn-warning" onClick={handleAddRow}>
                 Add Row
               </button>
             </div>

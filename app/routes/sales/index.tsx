@@ -2,10 +2,7 @@ import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import { displayCapitalFirst, formatter } from "assets/helper/helper";
 import Body from "assets/layouts/body";
-import {
-  getAllTransactionBySource,
-  getTransactionsByOrderIdAndTransactionSource,
-} from "~/models/transaction.server";
+import { getAllTransactionBySource, getTransactionsByOrderIdAndTransactionSource } from "~/models/transaction.server";
 import SalesNavbar from "assets/layouts/customnavbar/sales-navbar";
 import { ACT_ACCOUNT_RECEIVABLE, ACT_CASH, ACT_SALES, TRX_DEBIT, TRX_SOURCE_SALES } from "assets/helper/constants";
 
@@ -16,10 +13,7 @@ export const loader = async () => {
 
   // iterate for every orderId
   for (const sales of allTrxSales) {
-    const trxSales = await getTransactionsByOrderIdAndTransactionSource(
-      sales.sourceTrx,
-      sales.orderId
-    );
+    const trxSales = await getTransactionsByOrderIdAndTransactionSource(sales.sourceTrx, sales.orderId);
 
     // iterate for every transaction per order id
     var amount = 0.0;
@@ -106,17 +100,11 @@ export default function Sales() {
                     {idx + 1}
                   </th>
                   <td className="text-center">
-                    <Link to={sales.orderId + "-" + sales.sourceTrx}>
-                      {sales.orderId + "-" + sales.sourceTrx.toUpperCase()}
-                    </Link>
+                    <Link to={sales.orderId + "-" + sales.sourceTrx}>{sales.orderId + "-" + sales.sourceTrx.toUpperCase()}</Link>
                   </td>
-                  <td className="text-center">
-                    {displayCapitalFirst(sales.userId)}
-                  </td>
+                  <td className="text-center">{displayCapitalFirst(sales.userId)}</td>
                   <td className="text-end">{formatter.format(sales.amount)}</td>
-                  <td className="text-end">
-                    {formatter.format(Math.abs(sales.amountPaid))}
-                  </td>
+                  <td className="text-end">{formatter.format(Math.abs(sales.amountPaid))}</td>
                   <td className="text-start">{sales.status}</td>
                 </tr>
               ))}

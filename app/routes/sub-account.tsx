@@ -45,50 +45,27 @@ export default function SubAccount() {
             </div>
             <div className="p-4">
               <div className="row mb-3">
-                <label
-                  className="col-sm-4 col-form-label text-start"
-                  htmlFor="subaccount-name"
-                >
+                <label className="col-sm-4 col-form-label text-start" htmlFor="subaccount-name">
                   Sub-Account Name
                 </label>
                 <div className="col-sm-8">
-                  <input
-                    className="form-control mb-2"
-                    name="subaccount-name"
-                    type="text"
-                    onChange={handleSubAccountChange}
-                  />
+                  <input className="form-control mb-2" name="subaccount-name" type="text" onChange={handleSubAccountChange} />
                 </div>
               </div>
 
               <div className="row mb-3">
-                <label
-                  className="col-sm-4 col-form-label text-start"
-                  htmlFor="subaccount-id"
-                >
+                <label className="col-sm-4 col-form-label text-start" htmlFor="subaccount-id">
                   Sub-Account Id
                 </label>
                 <div className="col-sm-8">
-                  <input
-                    className="form-control mb-2"
-                    name="subaccount-id"
-                    type="text"
-                    value={subAccountId}
-                    onChange={onSubAccountIdChange}
-                  />
+                  <input className="form-control mb-2" name="subaccount-id" type="text" value={subAccountId} onChange={onSubAccountIdChange} />
                 </div>
               </div>
 
               <div className="row mb-3">
-                <label className="col-sm-4 col-form-label text-start">
-                  Account Type
-                </label>
+                <label className="col-sm-4 col-form-label text-start">Account Type</label>
                 <div className="col-sm-8">
-                  <select
-                    className="form-select mb-2"
-                    name="subaccount-type"
-                    id="subaccount-type"
-                  >
+                  <select className="form-select mb-2" name="subaccount-type" id="subaccount-type">
                     {accounts.map((account) => (
                       <option key={account.id} value={account.id}>
                         {account.name}
@@ -98,11 +75,7 @@ export default function SubAccount() {
                 </div>
               </div>
               <div>
-                <input
-                  className="btn btn-primary float-end"
-                  type="submit"
-                  value="Create"
-                />
+                <input className="btn btn-primary float-end" type="submit" value="Create" />
               </div>
             </div>
           </form>

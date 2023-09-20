@@ -1,12 +1,5 @@
 import type { MetaFunction } from "@remix-run/node";
-import {
-  Links,
-  LiveReload,
-  Meta,
-  Outlet,
-  Scripts,
-  ScrollRestoration,
-} from "@remix-run/react";
+import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
 import bootstrapCSS from "bootstrap/dist/css/bootstrap.min.css";
 
 import bootstrapIcons from "bootstrap-icons/font/bootstrap-icons.css";
@@ -21,7 +14,6 @@ export const meta: MetaFunction = () => ({
   title: "Invoice-App",
   viewport: "width=device-width,initial-scale=1",
 });
-
 
 export default function App() {
   return (

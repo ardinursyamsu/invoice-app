@@ -6,10 +6,7 @@ import Body from "assets/layouts/body";
 import SalesNavbar from "assets/layouts/customnavbar/sales-navbar";
 import { useEffect, useState } from "react";
 import invariant from "tiny-invariant";
-import {
-  getSubAccounts,
-  getSubAccountsByAccount,
-} from "~/models/subaccount.server";
+import { getSubAccountsByAccount } from "~/models/subaccount.server";
 import {
   createTransaction,
   deleteTransactionsByOrderIdAndTransactionSource,
@@ -59,12 +56,9 @@ export const action = async ({ request }: ActionArgs) => {
   invariant(typeof userId === "string", "Data must be string");
 
   // get the old transaction
-  const oldSalesTransaction =
-    await getTransactionsByOrderIdAndTransactionSource(TRX_SOURCE_SALES, ref);
+  const oldSalesTransaction = await getTransactionsByOrderIdAndTransactionSource(TRX_SOURCE_SALES, ref);
   // get the payment only transaction
-  const receiptTransaction = oldSalesTransaction.filter(
-    (trx) => trx.subAccountId === SUB_CASH
-  );
+  const receiptTransaction = oldSalesTransaction.filter((trx) => trx.subAccountId === SUB_CASH);
 
   // delete the old transaction
   await deleteTransactionsByOrderIdAndTransactionSource(TRX_SOURCE_SALES, ref);
@@ -203,15 +197,10 @@ export const loader = async ({ request }: LoaderArgs) => {
   const customers = await getUserByType("Customer");
 
   // get the transaction related to the orderID
-  const salesTransaction = await getTransactionsByOrderIdAndTransactionSource(
-    transaction ? transaction : "",
-    Number(ref ? ref : 0)
-  );
+  const salesTransaction = await getTransactionsByOrderIdAndTransactionSource(transaction ? transaction : "", Number(ref ? ref : 0));
 
   // group based control id
-  const totalNumControl = salesTransaction.filter(
-    (trx) => trx.accountId == ACT_INVENTORY
-  ).length;
+  const totalNumControl = salesTransaction.filter((trx) => trx.accountId == ACT_INVENTORY).length;
 
   var arrPerControl = [];
   for (var i = 1; i <= totalNumControl; i++) {
@@ -275,9 +264,7 @@ export const loader = async ({ request }: LoaderArgs) => {
     return redirect("/inventory/create");
   }
 
-  const inventoriesWithoutDefaultSubAccount = fullInventories.filter(
-    (inventory) => inventory.name !== SUB_NAME_DEFAULT
-  ); // remove the default subaccount from list
+  const inventoriesWithoutDefaultSubAccount = fullInventories.filter((inventory) => inventory.name !== SUB_NAME_DEFAULT); // remove the default subaccount from list
 
   const inventories: any[] = [];
   for (const inventory of inventoriesWithoutDefaultSubAccount) {
@@ -295,8 +282,7 @@ export const loader = async ({ request }: LoaderArgs) => {
 };
 
 export default function EditSales() {
-  const { customers, order, inventories, date, theData } =
-    useLoaderData<typeof loader>();
+  const { customers, order, inventories, date, theData } = useLoaderData<typeof loader>();
 
   const defaultData = {
     inventoryId: inventories[0].id,
@@ -311,9 +297,7 @@ export default function EditSales() {
   // callback function to update transaction control data if there any change.
   // is called by handleComponentDataChange
   const callback = (prevData: any, newData: any) => {
-    const retData = prevData.map((prev: any) =>
-      prev.id == newData.id ? newData : prev
-    );
+    const retData = prevData.map((prev: any) => (prev.id == newData.id ? newData : prev));
     return retData;
   };
 
@@ -324,9 +308,7 @@ export default function EditSales() {
   };
 
   const [inputCount, setInputCount] = useState(theData.length);
-  const [inputId, setInputId] = useState(
-    Array.from(theData.map((data: any) => data.id))
-  );
+  const [inputId, setInputId] = useState(Array.from(theData.map((data: any) => data.id)));
 
   const [customer, setCustomer] = useState(customers[0].id);
   const [orderId, setOrderId] = useState(order);
@@ -356,21 +338,14 @@ export default function EditSales() {
   const handleAddRow = () => {
     setInputCount((prev: any) => (prev += 1));
     setInputId((prev) => [...prev, inputCount + 1]);
-    setData((prev: any) => [
-      ...prev,
-      { id: inputCount + 1, data: defaultData },
-    ]);
+    setData((prev: any) => [...prev, { id: inputCount + 1, data: defaultData }]);
   };
 
   // handle if btn delete(X) is clicked
   const handleDelete = (e: any) => {
     const id = e.currentTarget.id;
-    setData((prevData: any) =>
-      prevData.filter((data: any) => data.id != parseInt(id))
-    );
-    setInputId((prevInputId) =>
-      prevInputId.filter((inputId) => inputId != parseInt(id))
-    );
+    setData((prevData: any) => prevData.filter((data: any) => data.id != parseInt(id)));
+    setInputId((prevInputId) => prevInputId.filter((inputId) => inputId != parseInt(id)));
   };
 
   return (
@@ -384,24 +359,13 @@ export default function EditSales() {
           <div className="row mb-2">
             <label className="col-sm-3 col-form-label">Transaction Time</label>
             <div className="col-sm-3">
-              <input
-                className="form-control"
-                name="trxTime"
-                type="datetime-local"
-                defaultValue={date}
-              />
+              <input className="form-control" name="trxTime" type="datetime-local" defaultValue={date} />
             </div>
           </div>
           <div className="row mb-2">
             <label className="col-sm-3 col-form-label">Ref Number</label>
             <div className="col-sm-3">
-              <input
-                className="form-control"
-                name="ref"
-                type="text"
-                value={orderId}
-                onChange={handleRefIdChange}
-              />
+              <input className="form-control" name="ref" type="text" value={orderId} onChange={handleRefIdChange} />
             </div>
           </div>
           <div className="row mb-4">
@@ -435,11 +399,7 @@ export default function EditSales() {
 
           <div className="row align-self-end">
             <div>
-              <button
-                type="button"
-                className="btn btn-warning"
-                onClick={handleAddRow}
-              >
+              <button type="button" className="btn btn-warning" onClick={handleAddRow}>
                 Add Row
               </button>
             </div>

@@ -29,23 +29,12 @@ export default function Footer() {
               </a>
             </li>
             <li className="nav-item">
-              <a
-                className="nav-link disabled"
-                href="#"
-                tabIndex={-1}
-                aria-disabled="true"
-              >
+              <a className="nav-link disabled" href="#" tabIndex={-1} aria-disabled="true">
                 Disabled
               </a>
             </li>
             <li className="nav-item dropup">
-              <a
-                className="nav-link dropdown-toggle"
-                href="#"
-                id="dropdown10"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
+              <a className="nav-link dropdown-toggle" href="#" id="dropdown10" data-bs-toggle="dropdown" aria-expanded="false">
                 Dropup
               </a>
               <ul className="dropdown-menu" aria-labelledby="dropdown10">

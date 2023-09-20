@@ -1,11 +1,9 @@
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
-import { ACT_FIXED_ASSET } from "assets/helper/constants";
 import { displayCapitalFirst, formatter } from "assets/helper/helper";
 import Body from "assets/layouts/body";
 import FixedAssetNavbar from "assets/layouts/customnavbar/fixed-asset-navbar";
 import { getAllFixedAsset } from "~/models/fixedasset.server";
-import { getSubAccountsByAccount } from "~/models/subaccount.server";
 
 export const loader = async () => {
   // Get user
@@ -43,16 +41,8 @@ export default function FixedAsset() {
                   <th className="text-center align-middle" scope="row">
                     {idx + 1}
                   </th>
-                  <td className="text-start align-middle">
-                    {displayCapitalFirst(fixedAsset.name)}
-                  </td>
-                  <td className="text-center align-middle">
-                    {formatter.format(
-                      !!fixedAsset.acquisitionCost
-                        ? fixedAsset.acquisitionCost
-                        : 0.0
-                    )}
-                  </td>
+                  <td className="text-start align-middle">{displayCapitalFirst(fixedAsset.name)}</td>
+                  <td className="text-center align-middle">{formatter.format(!!fixedAsset.acquisitionCost ? fixedAsset.acquisitionCost : 0.0)}</td>
                   <td className="text-center align-middle">
                     <Link to={fixedAsset.id}>
                       <button className="btn btn-primary m-1">Edit</button>

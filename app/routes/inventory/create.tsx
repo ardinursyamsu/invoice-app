@@ -43,39 +43,20 @@ export default function CreateInventory() {
             </div>
             <div className="p-4">
               <div className="row mb-3">
-                <label className="col-sm-3 col-form-label text-start">
-                  Inventory Name
-                </label>
+                <label className="col-sm-3 col-form-label text-start">Inventory Name</label>
                 <div className="col-sm-9">
-                  <input
-                    className="form-control mb-2"
-                    type="text"
-                    name="name"
-                    onChange={handleInventoryChange}
-                  />
+                  <input className="form-control mb-2" type="text" name="name" onChange={handleInventoryChange} />
                 </div>
               </div>
 
               <div className="row mb-3">
-                <label className="col-sm-3 col-form-label text-start">
-                  Inventory ID
-                </label>
+                <label className="col-sm-3 col-form-label text-start">Inventory ID</label>
                 <div className="col-sm-9">
-                  <input
-                    className="form-control mb-2"
-                    type="text"
-                    name="id"
-                    value={inventoryId}
-                    onChange={onInventoryIdChange}
-                  />
+                  <input className="form-control mb-2" type="text" name="id" value={inventoryId} onChange={onInventoryIdChange} />
                 </div>
               </div>
               <div>
-                <input
-                  className="btn btn-primary float-end"
-                  type="submit"
-                  value="Create"
-                />
+                <input className="btn btn-primary float-end" type="submit" value="Create" />
               </div>
             </div>
           </Form>

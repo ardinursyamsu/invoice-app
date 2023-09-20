@@ -7,15 +7,25 @@ import SalesNavbar from "assets/layouts/customnavbar/sales-navbar";
 import { useEffect, useState } from "react";
 import invariant from "tiny-invariant";
 import { getSubAccountsByAccount } from "~/models/subaccount.server";
-import {
-  createTransaction,
-  getLastOrderId,
-  getQuantityInventoryItem,
-} from "~/models/transaction.server";
+import { createTransaction, getLastOrderId, getQuantityInventoryItem } from "~/models/transaction.server";
 import { getUserByType } from "~/models/user.server";
 import type { ActionArgs } from "@remix-run/node";
 import { Decimal } from "@prisma/client/runtime/library";
-import { ACT_ACCOUNT_RECEIVABLE, ACT_COGS, ACT_INVENTORY, ACT_RETAINED_EARNINGS, ACT_SALES, SUB_ACCOUNT_RECEIVABLE, SUB_COGS, SUB_NAME_DEFAULT, SUB_RETAINED_EARNINGS, SUB_SALES, TRX_CREDIT, TRX_DEBIT, TRX_SOURCE_SALES } from "assets/helper/constants";
+import {
+  ACT_ACCOUNT_RECEIVABLE,
+  ACT_COGS,
+  ACT_INVENTORY,
+  ACT_RETAINED_EARNINGS,
+  ACT_SALES,
+  SUB_ACCOUNT_RECEIVABLE,
+  SUB_COGS,
+  SUB_NAME_DEFAULT,
+  SUB_RETAINED_EARNINGS,
+  SUB_SALES,
+  TRX_CREDIT,
+  TRX_DEBIT,
+  TRX_SOURCE_SALES,
+} from "assets/helper/constants";
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
@@ -143,9 +153,7 @@ export const loader = async () => {
     return redirect("/inventory/create");
   }
 
-  const inventoriesWithoutDefaultSubAccount = fullInventories.filter(
-    (inventory) => inventory.name !== SUB_NAME_DEFAULT
-  ); // remove the default subaccount from list
+  const inventoriesWithoutDefaultSubAccount = fullInventories.filter((inventory) => inventory.name !== SUB_NAME_DEFAULT); // remove the default subaccount from list
 
   const inventories: any[] = [];
   for (const inventory of inventoriesWithoutDefaultSubAccount) {
@@ -180,9 +188,7 @@ export default function CreateSales() {
   // callback function to update transaction control data if there any change.
   // is called by handleComponentDataChange
   const callback = (prevData: any, newData: any) => {
-    const retData = prevData.map((prev: any) =>
-      prev.id == newData.id ? newData : prev
-    );
+    const retData = prevData.map((prev: any) => (prev.id == newData.id ? newData : prev));
     return retData;
   };
 
@@ -229,9 +235,7 @@ export default function CreateSales() {
   const handleDelete = (e: any) => {
     const id = e.currentTarget.id;
     setData((prevData) => prevData.filter((data) => data.id != parseInt(id)));
-    setInputId((prevInputId) =>
-      prevInputId.filter((inputId) => inputId != parseInt(id))
-    );
+    setInputId((prevInputId) => prevInputId.filter((inputId) => inputId != parseInt(id)));
   };
 
   return (
@@ -245,24 +249,13 @@ export default function CreateSales() {
           <div className="row mb-2">
             <label className="col-sm-3 col-form-label">Transaction Time</label>
             <div className="col-sm-3">
-              <input
-                className="form-control"
-                name="trxTime"
-                type="datetime-local"
-                defaultValue={date}
-              />
+              <input className="form-control" name="trxTime" type="datetime-local" defaultValue={date} />
             </div>
           </div>
           <div className="row mb-2">
             <label className="col-sm-3 col-form-label">Ref Number</label>
             <div className="col-sm-3">
-              <input
-                className="form-control"
-                name="ref"
-                type="text"
-                value={orderId}
-                onChange={handleRefIdChange}
-              />
+              <input className="form-control" name="ref" type="text" value={orderId} onChange={handleRefIdChange} />
             </div>
           </div>
           <div className="row mb-4">
@@ -284,22 +277,12 @@ export default function CreateSales() {
             <div className="col-4">Total</div>
           </div>
           {inputId.map((id) => (
-            <SalesControl
-              key={id}
-              id={id}
-              data={{ inventories }}
-              onDelete={handleDelete}
-              callback={handleComponentDataChange}
-            />
+            <SalesControl key={id} id={id} data={{ inventories }} onDelete={handleDelete} callback={handleComponentDataChange} />
           ))}
 
           <div className="row align-self-end">
             <div>
-              <button
-                type="button"
-                className="btn btn-warning"
-                onClick={handleAddRow}
-              >
+              <button type="button" className="btn btn-warning" onClick={handleAddRow}>
                 Add Row
               </button>
             </div>
