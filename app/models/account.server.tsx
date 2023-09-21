@@ -1,6 +1,5 @@
 import { Account } from "@prisma/client";
 import { prisma } from "~/db.server";
-import SubAccount from "~/routes/sub-account";
 
 export async function createAccount(
   account: Pick<Account, "id" | "name" | "type">

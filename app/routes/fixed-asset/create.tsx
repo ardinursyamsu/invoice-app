@@ -1,4 +1,4 @@
-import { Decimal } from "@prisma/client/runtime";
+import { Decimal } from "@prisma/client/runtime/library";
 import { ActionArgs, redirect } from "@remix-run/node";
 import { ACCELERATED_DEPRECIATION, STRAIGHT_DEPRECIATION, SUB_FIXED_ASSET } from "assets/helper/constants";
 import { frmDataToFloat, frmDataToInt, frmDataToString } from "assets/helper/form-data-converter";
