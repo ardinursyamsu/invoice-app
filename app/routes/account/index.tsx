@@ -3,18 +3,13 @@ import { Link, useLoaderData } from "@remix-run/react";
 import Body from "assets/layouts/body";
 import { getAccounts } from "~/models/account.server";
 import AccountNavbar from "assets/layouts/customnavbar/account-navbar";
+import { displayCapitalFirst } from "assets/helper/helper";
 
 export const loader = async () => {
   // Get sub-account type inventory
   var accounts = await getAccounts();
 
   return json({ accounts });
-};
-
-const toUpper = (input: string) => {
-  const firstLetter = input.charAt(0).toUpperCase();
-  const theRest = input.slice(1, input.length);
-  return firstLetter + theRest;
 };
 
 export default function Inventory() {
@@ -48,7 +43,7 @@ export default function Inventory() {
                   <td className="text-start">
                     <Link to={account.id}>{account.name}</Link>
                   </td>
-                  <td className="text-center">{toUpper(account.type)}</td>
+                  <td className="text-center">{displayCapitalFirst(account.type)}</td>
                 </tr>
               ))}
             </tbody>

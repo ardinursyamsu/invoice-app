@@ -7,6 +7,27 @@ import InventoryNavbar from "assets/layouts/customnavbar/inventory-navbar";
 import { getSubAccountsByAccount } from "~/models/subaccount.server";
 import { getQuantityInventoryItem } from "~/models/transaction.server";
 
+/**
+ * Generate inventory items data from subaccount data retrieved from database
+ * @param subAccountInventories
+ * @returns array of data contain dictionary of {id, name, quantity, and price}
+ */
+const generateInventoryItemsData = async (subAccountInventories: any) => {
+  var inventoryItemsData = [];
+  for (let i = 0; i < subAccountInventories.length; i++) {
+    const inventoryId = subAccountInventories[i].id;
+    const inventoryName = subAccountInventories[i].name;
+    const inventory = await getQuantityInventoryItem(inventoryId);
+    inventoryItemsData.push({
+      id: inventoryId,
+      name: inventoryName,
+      quantity: inventory.quantity,
+      price: inventory.avgPrice,
+    });
+  }
+
+  return inventoryItemsData;
+};
 export const loader = async () => {
   /*
    * id & name is obtained from sub-account with "inventory" account-type
@@ -17,20 +38,7 @@ export const loader = async () => {
   // Get sub-account type inventory
   var inventories = await getSubAccountsByAccount(ACT_INVENTORY);
   inventories = inventories.filter((inventory) => inventory.name !== "default"); // remove the default subaccount
-  var inventoryData: any = [];
-
-  // Getting the inventory data (id, name, quantity, average price)
-  for (let i = 0; i < inventories.length; i++) {
-    const inventoryId = inventories[i].id;
-    const inventoryName = inventories[i].name;
-    const inventory = await getQuantityInventoryItem(inventoryId);
-    inventoryData.push({
-      id: inventoryId,
-      name: inventoryName,
-      quantity: inventory.quantity,
-      price: inventory.avgPrice,
-    });
-  }
+  var inventoryData: any = await generateInventoryItemsData(inventories);
 
   /* example data to display in jsx
   const inventoryData = [

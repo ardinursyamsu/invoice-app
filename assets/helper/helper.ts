@@ -1,4 +1,9 @@
-export const getCurrentDate = () => {
+/**
+ * Get current date in format yyyy-mm-ddThh:mm
+ *
+ * @return {string} date in format yyyy-mm-ddThh:mm
+ */
+export const getCurrentDate = (): string => {
   const months = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
   const now = new Date();
 
@@ -27,7 +32,13 @@ export const formatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
-export const displayDate = (inputDate: string) => {
+/**
+ * Convert date returned from database (in this case from prisma datetime)
+ *
+ * @param {string} inputDate String from database
+ * @return {string} date in format dd-Mmm-yyyy so it's easy for user to interpret
+ */
+export const displayDate = (inputDate: string): string => {
   const dateObj = new Date(inputDate);
   const date = dateObj.getDate().toString();
   const month = dateObj.getMonth();
@@ -74,7 +85,13 @@ export const displayDate = (inputDate: string) => {
   return date + "-" + monthString + "-" + year;
 };
 
-export const getDate = (dateFromDatabase: string) => {
+/**
+ * Convert date returned from database (in this case from prisma datetime)
+ *
+ * @param {string} dateFromDatabase String from database
+ * @return {string} date in format yyyy-mm-ddThh:mm
+ */
+export const getDate = (dateFromDatabase: string): string => {
   const now = new Date(dateFromDatabase);
 
   const months = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
@@ -98,6 +115,12 @@ export const getDate = (dateFromDatabase: string) => {
   return date;
 };
 
+/**
+ * Change first letter of string (word/sentence) into capital letter
+ *
+ * @param {string} sourceStr string to be changed
+ * @return {string} result in capitalized first character of string (hero -> Hero)
+ */
 export const displayCapitalFirst = (sourceStr: string) => {
   const firstLetter = sourceStr.charAt(0).toUpperCase();
   const theRest = sourceStr.slice(1, sourceStr.length);

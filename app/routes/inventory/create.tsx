@@ -1,19 +1,17 @@
 import { ActionArgs, redirect } from "@remix-run/node";
 import { Form } from "@remix-run/react";
 import { ACT_INVENTORY } from "assets/helper/constants";
+import { frmDataToString } from "assets/helper/form-data-converter";
 import Body from "assets/layouts/body";
 import InventoryNavbar from "assets/layouts/customnavbar/inventory-navbar";
 import { useState } from "react";
-import invariant from "tiny-invariant";
 import { createSubAccount } from "~/models/subaccount.server";
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
-  const id = formData.get("id");
-  const name = formData.get("name");
+  const id = frmDataToString(formData.get("id"));
+  const name = frmDataToString(formData.get("name"));
 
-  invariant(typeof id === "string", "This should be a string");
-  invariant(typeof name === "string", "This should be a string");
   const accountId = ACT_INVENTORY;
 
   await createSubAccount({ id, name, accountId });

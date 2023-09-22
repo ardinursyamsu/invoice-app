@@ -22,24 +22,21 @@ import {
   TRX_DEBIT,
   TRX_SOURCE_INVENTORY,
 } from "assets/helper/constants";
+import { frmDataToInt, frmDataToString } from "assets/helper/form-data-converter";
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
 
-  const rawdata = formData.get("data");
-  invariant(typeof rawdata === "string", "rawdata must be string");
+  const rawdata = frmDataToString(formData.get("data"));
   const jsonData = JSON.parse(rawdata);
   const { data } = jsonData;
 
-  const order = formData.get("orderId");
-  invariant(typeof order === "string", "order mut be string");
-  const orderId = parseInt(order);
+  const orderId = frmDataToInt(formData.get("orderId"));
 
-  const date = formData.get("trx-time");
-  invariant(typeof date === "string", "date must be string");
+  const date = frmDataToString(formData.get("trx-time"));
   const trxTime = new Date(date);
 
-  const userId = formData.get("user");
+  const userId = frmDataToString(formData.get("user"));
   invariant(typeof userId === "string", "Data must be string");
 
   const paymentType = formData.get("payment");

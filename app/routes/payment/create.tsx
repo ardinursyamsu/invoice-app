@@ -15,6 +15,7 @@ import {
   TRX_DEBIT,
   TRX_SOURCE_PAYMENT,
 } from "assets/helper/constants";
+import { frmDataToInt, frmDataToString } from "assets/helper/form-data-converter";
 import { getCurrentDate } from "assets/helper/helper";
 import Body from "assets/layouts/body";
 import PaymentNavbar from "assets/layouts/customnavbar/payment-navbar";
@@ -30,19 +31,14 @@ const trxSource = TRX_SOURCE_PAYMENT;
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
 
-  const date = formData.get("trx-time");
-  invariant(typeof date === "string", "Data must be string");
+  const date = frmDataToString(formData.get("trx-time"));
   const trxTime = new Date(date);
 
-  const refId = formData.get("ref");
-  invariant(typeof refId === "string", "Data mut be string");
-  const ref = parseInt(refId);
+  const ref = frmDataToInt(formData.get("ref"));
 
-  const user = formData.get("user");
-  invariant(typeof user === "string", "Data mut be string");
+  const user = frmDataToString(formData.get("user"));
 
-  const rawdata = formData.get("data");
-  invariant(typeof rawdata === "string", "Data must be string");
+  const rawdata = frmDataToString(formData.get("data"));
   const jsonData = JSON.parse(rawdata);
   const { data } = jsonData;
 
@@ -59,7 +55,7 @@ export const action = async ({ request }: ActionArgs) => {
         // debit the asset
         createTransaction({
           trxTime: trxTime,
-          orderId: parseInt(refId),
+          orderId: ref,
           sourceTrx: trxSource,
           controlTrx: id,
           accountId: account,
@@ -73,7 +69,7 @@ export const action = async ({ request }: ActionArgs) => {
         // credit the cash
         createTransaction({
           trxTime: trxTime,
-          orderId: parseInt(refId),
+          orderId: ref,
           sourceTrx: trxSource,
           controlTrx: id,
           accountId: ACT_CASH,
@@ -90,7 +86,7 @@ export const action = async ({ request }: ActionArgs) => {
         // debit the liabilities
         createTransaction({
           trxTime: trxTime,
-          orderId: parseInt(refId),
+          orderId: ref,
           sourceTrx: trxSource,
           controlTrx: id,
           accountId: account,
@@ -104,7 +100,7 @@ export const action = async ({ request }: ActionArgs) => {
         // credit the cash
         createTransaction({
           trxTime: trxTime,
-          orderId: parseInt(refId),
+          orderId: ref,
           sourceTrx: trxSource,
           controlTrx: id,
           accountId: ACT_CASH,
@@ -121,7 +117,7 @@ export const action = async ({ request }: ActionArgs) => {
         // debit the equitiies
         createTransaction({
           trxTime: trxTime,
-          orderId: parseInt(refId),
+          orderId: ref,
           sourceTrx: trxSource,
           controlTrx: id,
           accountId: account,
@@ -135,7 +131,7 @@ export const action = async ({ request }: ActionArgs) => {
         // credit the cash
         createTransaction({
           trxTime: trxTime,
-          orderId: parseInt(refId),
+          orderId: ref,
           sourceTrx: trxSource,
           controlTrx: id,
           accountId: ACT_CASH,
@@ -152,7 +148,7 @@ export const action = async ({ request }: ActionArgs) => {
         // debit the equitiies
         createTransaction({
           trxTime: trxTime,
-          orderId: parseInt(refId),
+          orderId: ref,
           sourceTrx: trxSource,
           controlTrx: id,
           accountId: account,
@@ -166,7 +162,7 @@ export const action = async ({ request }: ActionArgs) => {
         // credit the cash
         createTransaction({
           trxTime: trxTime,
-          orderId: parseInt(refId),
+          orderId: ref,
           sourceTrx: trxSource,
           controlTrx: id,
           accountId: ACT_CASH,
@@ -180,7 +176,7 @@ export const action = async ({ request }: ActionArgs) => {
         // debit the retained earnings
         createTransaction({
           trxTime: trxTime,
-          orderId: parseInt(refId),
+          orderId: ref,
           sourceTrx: trxSource,
           controlTrx: id,
           accountId: ACT_RETAINED_EARNINGS,

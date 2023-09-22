@@ -5,16 +5,13 @@ import { useState } from "react";
 import invariant from "tiny-invariant";
 import { createAccount } from "~/models/account.server";
 import { createSubAccount } from "~/models/subaccount.server";
+import { frmDataToString } from "assets/helper/form-data-converter";
 
 export async function action({ request }: ActionArgs) {
   const formData = await request.formData();
-  const id: any = formData.get("account-id");
-  const name: any = formData.get("account-name");
-  const type: any = formData.get("account-type");
-
-  invariant(typeof id === "string", "Data must be string");
-  invariant(typeof id === "string", "Data must be string");
-  invariant(typeof id === "string", "Data must be string");
+  const id = frmDataToString(formData.get("account-id"));
+  const name = frmDataToString(formData.get("account-name"));
+  const type = frmDataToString(formData.get("account-type"));
 
   const subAccountId = id + "-default";
   await createAccount({ id, name, type });

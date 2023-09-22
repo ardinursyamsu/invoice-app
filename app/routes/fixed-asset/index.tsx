@@ -6,7 +6,6 @@ import FixedAssetNavbar from "assets/layouts/customnavbar/fixed-asset-navbar";
 import { getAllFixedAsset } from "~/models/fixedasset.server";
 
 export const loader = async () => {
-  // Get user
   var fixedAsset = await getAllFixedAsset();
 
   return json({ fixedAsset });

@@ -15,6 +15,7 @@ import {
   TRX_DEBIT,
   TRX_SOURCE_PAYMENT,
 } from "assets/helper/constants";
+import { frmDataToInt, frmDataToString } from "assets/helper/form-data-converter";
 import { getCurrentDate, getDate } from "assets/helper/helper";
 import Body from "assets/layouts/body";
 import PaymentNavbar from "assets/layouts/customnavbar/payment-navbar";
@@ -35,21 +36,16 @@ const trxSource = TRX_SOURCE_PAYMENT;
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
 
-  const rawdata = formData.get("data");
-  invariant(typeof rawdata === "string", "Data must be string");
+  const rawdata = frmDataToString(formData.get("data"));
   const jsonData = JSON.parse(rawdata);
   const { data } = jsonData;
 
-  const orderId = formData.get("orderId");
-  invariant(typeof orderId === "string", "Data mut be string");
-  const ref = parseInt(orderId);
+  const ref = frmDataToInt(formData.get("orderId"));
 
-  const date = formData.get("trx-time");
-  invariant(typeof date === "string", "Data must be string");
+  const date = frmDataToString(formData.get("trx-time"));
   const trxTime = new Date(date);
 
-  const userId = formData.get("user");
-  invariant(typeof userId === "string", "Data must be string");
+  const userId = frmDataToString(formData.get("user"));
 
   // delete the old transaction
   await deleteTransactionsByOrderIdAndTransactionSource(trxSource, ref);
@@ -67,7 +63,7 @@ export const action = async ({ request }: ActionArgs) => {
         // debit the asset
         createTransaction({
           trxTime: trxTime,
-          orderId: parseInt(orderId),
+          orderId: ref,
           sourceTrx: trxSource,
           controlTrx: id,
           accountId: account,
@@ -81,7 +77,7 @@ export const action = async ({ request }: ActionArgs) => {
         // credit the cash
         createTransaction({
           trxTime: trxTime,
-          orderId: parseInt(orderId),
+          orderId: ref,
           sourceTrx: trxSource,
           controlTrx: id,
           accountId: ACT_CASH,
@@ -98,7 +94,7 @@ export const action = async ({ request }: ActionArgs) => {
         // debit the liabilities
         createTransaction({
           trxTime: trxTime,
-          orderId: parseInt(orderId),
+          orderId: ref,
           sourceTrx: trxSource,
           controlTrx: id,
           accountId: account,
@@ -112,7 +108,7 @@ export const action = async ({ request }: ActionArgs) => {
         // credit the cash
         createTransaction({
           trxTime: trxTime,
-          orderId: parseInt(orderId),
+          orderId: ref,
           sourceTrx: trxSource,
           controlTrx: id,
           accountId: ACT_CASH,
@@ -129,7 +125,7 @@ export const action = async ({ request }: ActionArgs) => {
         // debit the equitiies
         createTransaction({
           trxTime: trxTime,
-          orderId: parseInt(orderId),
+          orderId: ref,
           sourceTrx: trxSource,
           controlTrx: id,
           accountId: account,
@@ -143,7 +139,7 @@ export const action = async ({ request }: ActionArgs) => {
         // credit the cash
         createTransaction({
           trxTime: trxTime,
-          orderId: parseInt(orderId),
+          orderId: ref,
           sourceTrx: trxSource,
           controlTrx: id,
           accountId: ACT_CASH,
@@ -160,7 +156,7 @@ export const action = async ({ request }: ActionArgs) => {
         // debit the equitiies
         createTransaction({
           trxTime: trxTime,
-          orderId: parseInt(orderId),
+          orderId: ref,
           sourceTrx: trxSource,
           controlTrx: id,
           accountId: account,
@@ -174,7 +170,7 @@ export const action = async ({ request }: ActionArgs) => {
         // credit the cash
         createTransaction({
           trxTime: trxTime,
-          orderId: parseInt(orderId),
+          orderId: ref,
           sourceTrx: trxSource,
           controlTrx: id,
           accountId: ACT_CASH,
@@ -188,7 +184,7 @@ export const action = async ({ request }: ActionArgs) => {
         // debit the retained earnings
         createTransaction({
           trxTime: trxTime,
-          orderId: parseInt(orderId),
+          orderId: ref,
           sourceTrx: trxSource,
           controlTrx: id,
           accountId: ACT_RETAINED_EARNINGS,
