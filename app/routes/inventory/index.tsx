@@ -28,6 +28,7 @@ const generateInventoryItemsData = async (subAccountInventories: any) => {
 
   return inventoryItemsData;
 };
+
 export const loader = async () => {
   /*
    * id & name is obtained from sub-account with "inventory" account-type
@@ -73,6 +74,9 @@ export default function Inventory() {
                 <th className="text-end" scope="col">
                   Avg. Price
                 </th>
+                <th className="text-center" scope="col">
+                  Action
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -84,6 +88,11 @@ export default function Inventory() {
                   </td>
                   <td className="text-center">{inventory.quantity}</td>
                   <td className="text-end">{formatter.format(inventory.price)}</td>
+                  <td className="text-center">
+                    <a href={"inventory/edit/" + inventory.id}>
+                      <div className="btn btn-primary">Edit</div>
+                    </a>
+                  </td>
                 </tr>
               ))}
             </tbody>

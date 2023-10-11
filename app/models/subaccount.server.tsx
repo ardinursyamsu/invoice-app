@@ -12,3 +12,12 @@ export async function getSubAccounts() {
 export async function getSubAccountsByAccount(account: string) {
   return prisma.subAccount.findMany({ where: { accountId: account } });
 }
+
+export async function getSubAccountById(id: string) {
+  return prisma.subAccount.findUnique({ where: { id: id } });
+}
+
+export async function updateSubAccount(id: string, name: string, accountId: string) {
+  return prisma.subAccount.update({ where: { id: id }, data: { name: name, accountId: accountId } });
+}
+

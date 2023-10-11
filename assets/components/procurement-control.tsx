@@ -1,6 +1,8 @@
 import { formatter } from "assets/helper/helper";
 import { useEffect, useState } from "react";
 
+const ADDITIONAL_EXPENSE_LABEL = "additional-expense";
+
 export default function ProcurementControl(props: any) {
   const { inventories } = props.data;
 
@@ -18,14 +20,23 @@ export default function ProcurementControl(props: any) {
 
   // call the higher state if there's any update in data
   useEffect(() => {
-    //console.log(data);
+    // console.log(data);
     // the final state is in the parent. Use callback in here to update value in the parent
     props.callback(props.id, data);
   }, [data]);
 
   const handleInventoryChange = (e: any) => {
-    setInventory(e.target.value);
-    setData((prevData) => ({ ...prevData, inventoryId: e.target.value }));
+    const inventoryId = e.target.value;
+    // console.log(inventoryId)
+    if (inventoryId == ADDITIONAL_EXPENSE_LABEL) {
+      setInventory(e.target.value);
+      setQuantity(1);
+      setData((prevData) => ({ ...prevData, quantity: 1, inventoryId: e.target.value }));
+      setTotal(1 * price);
+    } else {
+      setInventory(e.target.value);
+      setData((prevData) => ({ ...prevData, inventoryId: e.target.value }));
+    }
   };
 
   const handleQtyChange = (e: any) => {
@@ -33,7 +44,7 @@ export default function ProcurementControl(props: any) {
     //console.log(currentQty);
     if (currentQty < 0) {
       currentQty = 0;
-      console.log(currentQty);
+      // console.log(currentQty);
     }
     setQuantity(!!currentQty ? currentQty : 0);
     setTotal(currentQty * price);
@@ -68,7 +79,13 @@ export default function ProcurementControl(props: any) {
         </select>
       </div>
       <div className="col-2 my-2">
-        <input type="number" className="form-control text-end" onChange={handleQtyChange} value={quantity} />
+        <input
+          type="number"
+          className="form-control text-end"
+          onChange={handleQtyChange}
+          value={quantity}
+          disabled={inventory == ADDITIONAL_EXPENSE_LABEL ? true : false}
+        />
       </div>
       <div className="col-3 my-2">
         <input className="form-control text-end" name="price" onChange={handlePriceChange} value={formatter.format(price)} type="text" />
