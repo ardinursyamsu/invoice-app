@@ -24,28 +24,54 @@ import {
 } from "assets/helper/constants";
 import { frmDataToInt, frmDataToString } from "assets/helper/form-data-converter";
 
+const ADDITIONAL_EXPENSE_LABEL = "additional-expense";
+
+const getExpensePerInventoryItem = (inventoryData: any) => {
+  try {
+    var totalExpense = 0;
+    var totalInventoryItems = 0;
+    for (const subData of inventoryData) {
+      if (subData.data.inventoryId == ADDITIONAL_EXPENSE_LABEL) {
+        totalExpense += subData.data.total;
+      } else {
+        totalInventoryItems += subData.data.quantity;
+      }
+    }
+
+    return totalExpense / totalInventoryItems;
+  } catch (e) {
+    return 0;
+  }
+};
+
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
 
   const rawdata = frmDataToString(formData.get("data"));
   const jsonData = JSON.parse(rawdata);
+
   const { data } = jsonData;
-
   const orderId = frmDataToInt(formData.get("orderId"));
-
   const date = frmDataToString(formData.get("trx-time"));
   const trxTime = new Date(date);
-
   const userId = frmDataToString(formData.get("user"));
-  invariant(typeof userId === "string", "Data must be string");
 
   const paymentType = formData.get("payment");
+
+  const expensePerQtyItem = getExpensePerInventoryItem(data);
+
 
   data.forEach((element: any) => {
     // iterate for each control
     const { id, data } = element;
     const { inventoryId, quantity, price, total } = data;
 
+    if (inventoryId == ADDITIONAL_EXPENSE_LABEL){
+      return; // works like continue statement
+    }
+
+    const priceWithExpense = price + expensePerQtyItem;
+    const totalWithExpense = priceWithExpense * quantity;
     // create transaction for inventory
     createTransaction({
       trxTime: trxTime,
@@ -54,9 +80,9 @@ export const action = async ({ request }: ActionArgs) => {
       controlTrx: id,
       accountId: ACT_INVENTORY,
       subAccountId: inventoryId,
-      unitPrice: new Decimal(price),
+      unitPrice: new Decimal(priceWithExpense),
       quantity: quantity,
-      amount: new Decimal(total),
+      amount: new Decimal(totalWithExpense),
       type: TRX_DEBIT,
       userId: userId,
     });
@@ -82,9 +108,9 @@ export const action = async ({ request }: ActionArgs) => {
       controlTrx: id,
       accountId: account,
       subAccountId: subAccount,
-      unitPrice: new Decimal(total),
+      unitPrice: new Decimal(totalWithExpense),
       quantity: 1,
-      amount: new Decimal(total),
+      amount: new Decimal(totalWithExpense),
       type: TRX_CREDIT,
       userId: userId,
     });
@@ -111,6 +137,9 @@ export const loader = async () => {
   }
 
   const users = await getUsers();
+
+  // add expenses to inventory
+  inventories.push({ id: "additional-expense", name: "Additional Expenses", accountId: "inventory" });
 
   return json({ order, inventories, users });
 };
